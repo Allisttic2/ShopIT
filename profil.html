@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Min Profil - NTI-T Shopp</title>
+  <!-- Font Awesome Ikoner -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <style>
+    /* --- PROFIL HERO --- */
+    .profile-hero {
+      background: linear-gradient(180deg, rgba(13, 21, 34, 0.92) 0%, rgba(9, 14, 23, 0.98) 100%), url('images/hero.png') center/cover no-repeat;
+      border-bottom: 1px solid var(--border-color);
+      padding: 3.5rem 1.5rem 0; /* 0 i botten så statistik-dockan sitter ihop med kanten */
+      position: relative;
+    }
+
+    .profile-hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .profile-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .profile-info-header {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .profile-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(248, 246, 240, 0.15), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: var(--accent-main);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .profile-title h1 {
+      font-size: 1.9rem;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .profile-title p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+    }
+
+    .btn-create-ad {
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.85rem 1.6rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(248, 246, 240, 0.15);
+    }
+
+    .btn-create-ad:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(248, 246, 240, 0.25);
+    }
+
+    /* --- INTEGRERAD DOCKAD STATISTIK (SITTER FAST I KANTEN) --- */
+    .stats-dock {
+      width: 100%;
+      background: rgba(18, 28, 45, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-bottom: none; /* Sitter direkt på herons underkant */
+      border-radius: 16px 16px 0 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: hidden;
+      box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-dock-item {
+      padding: 1.25rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      transition: background 0.2s ease;
+    }
+
+    .stat-dock-item:not(:last-child) {
+      border-right: 1px solid var(--border-color);
+    }
+
+    .stat-dock-item:hover {
+      background: rgba(248, 246, 240, 0.03);
+    }
+
+    .stat-dock-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(248, 246, 240, 0.05);
+      border: 1px solid rgba(248, 246, 240, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      color: var(--accent-main);
+      flex-shrink: 0;
+    }
+
+    .stat-dock-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-dock-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+      letter-spacing: -0.3px;
+    }
+
+    .stat-dock-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-top: 0.25rem;
+    }
+
+    /* --- SEKTIONER --- */
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    .section-wrapper {
+      padding: 3.5rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-wrapper:nth-child(odd) {
+      background-color: var(--bg-main);
+    }
+
+    .section-wrapper:nth-child(even) {
+      background-color: var(--bg-alt);
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.61rem;
+      letter-spacing: -0.2px;
+    }
+
+    /* --- SKICK PILL (FÄRGKODAD 1-10) --- */
+    .condition-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    /* --- FORMULÄR & SKOLINFO --- */
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 2.2rem;
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1rem 0.75rem 2.8rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input.no-icon {
+      padding-left: 1rem;
+    }
+
+    .form-input:focus {
+      border-color: var(--border-hover);
+      box-shadow: 0 0 0 3px rgba(248, 246, 240, 0.05);
+    }
+
+    .btn-save-info {
+      margin-top: 1.8rem;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s ease;
+      font-size: 0.92rem;
+    }
+
+    .btn-save-info:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .save-alert {
+      display: none;
+      margin-top: 1.2rem;
+      padding: 0.85rem 1.2rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* --- MINA ANNONSER GRID --- */
+    .ads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .ad-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .ad-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .ad-status-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: var(--success-color);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+
+    .ad-img-wrap {
+      width: 100%;
+      height: 165px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .ad-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+    }
+
+    .ad-card:hover .ad-img {
+      opacity: 1;
+    }
+
+    .ad-body {
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 0.75rem;
+    }
+
+    .ad-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ad-title {
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+
+    .ad-price {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .ad-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: auto;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-ad-action {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ad-action:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.05);
+    }
+
+    .btn-ad-action.delete:hover {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* --- INVENTARIE TABLE & CONTROLS --- */
+    .inventory-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .inventory-search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .inventory-search-box i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .inventory-search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 1rem 0.65rem 2.6rem;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .inventory-search-input:focus {
+      border-color: var(--border-hover);
+    }
+
+    .table-container {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-elevated);
+      overflow: hidden;
+    }
+
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+      table-layout: auto;
+    }
+
+    .inventory-table th {
+      background: rgba(9, 14, 23, 0.7);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.85rem 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+    }
+
+    .inventory-table td {
+      padding: 0.85rem 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    .inventory-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .inventory-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .inventory-table tbody tr:hover {
+      background-color: rgba(248, 246, 240, 0.02);
+    }
+
+    .serial-code {
+      font-family: monospace;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-in-use {
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-storage {
+      color: var(--warning-color);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-for-sale {
+      color: var(--success-color);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .price-value {
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    /* --- MODALER & BILDUPPLADDNING --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 7, 12, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 1.25rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(248, 246, 240, 0.18);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 640px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      transform: translateY(20px) scale(0.98);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      padding: 1.4rem 1.8rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(9, 14, 23, 0.8);
+    }
+
+    .modal-header h3 {
+      font-size: 1.18rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .close-modal-btn:hover {
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.08);
+    }
+
+    .modal-body {
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+
+    .file-upload-zone {
+      border: 2px dashed rgba(248, 246, 240, 0.22);
+      border-radius: 12px;
+      padding: 1.75rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(9, 14, 23, 0.5);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .file-upload-zone:hover, .file-upload-zone.dragover {
+      border-color: var(--accent-main);
+      background: rgba(248, 246, 240, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .file-upload-icon {
+      font-size: 2rem;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+
+    .file-upload-zone:hover .file-upload-icon {
+      color: var(--accent-main);
+    }
+
+    .file-upload-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .file-upload-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .file-preview-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 160px;
+      border: 1px solid var(--border-hover);
+      background: var(--bg-main);
+    }
+
+    .file-preview-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-remove-img {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(9, 14, 23, 0.85);
+      border: 1px solid var(--border-color);
+      color: #f87171;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-remove-img:hover {
+      background: var(--danger-color);
+      color: #ffffff;
+      border-color: var(--danger-color);
+    }
+
+    .modal-footer {
+      padding: 1.25rem 1.8rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(9, 14, 23, 0.8);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.65rem 1.3rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.05);
+    }
+
+    .btn-primary {
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.88rem;
+      transition: background 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* --- VARUKORG SIDEBAR --- */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .cart-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 201;
+      transition: right 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-overlay.active .cart-drawer {
+      right: 0;
+    }
+
+    .cart-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-main);
+    }
+
+    .cart-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .close-cart-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .close-cart-btn:hover {
+      color: var(--text-main);
+    }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cart-empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cart-item-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--bg-main);
+    }
+
+    .cart-item-details {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .cart-item-price {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .cart-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .qty-btn {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .qty-val {
+      min-width: 18px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .cart-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-main);
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .checkout-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    @media (max-width: 850px) {
+      .inventory-table { font-size: 0.78rem; }
+      .inventory-table th, .inventory-table td { padding: 0.6rem 0.4rem; }
+    }
+
+    @media (max-width: 768px) {
+      .profile-top-bar { flex-direction: column; align-items: flex-start; }
+      .btn-create-ad { width: 100%; justify-content: center; }
+      .stats-dock {
+        grid-template-columns: 1fr;
+        border-radius: 14px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+      }
+      .stat-dock-item:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="NTI-T Shopp Logo" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Produkter</a>
+        <a href="profil.html" class="nav-link active">Profil</a>
+        <a href="help.html" class="nav-link">Hjälp</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="cart-btn" id="openCartBtn" title="Varukorg">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+
+        <button class="settings-btn" title="Inställningar">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROFIL HERO BANNER & INTEGRERAD STATISTIK-DOCKA -->
+  <section class="profile-hero">
+    <div class="profile-hero-inner">
+      <div class="profile-top-bar">
+        <div class="profile-info-header">
+          <div class="profile-avatar">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="profile-title">
+            <h1 id="headerSchoolName">NTI Helsingborg</h1>
+            <p><i class="fa-solid fa-building"></i> Org.nr: <span id="headerOrgNum">8504337328</span></p>
+          </div>
+        </div>
+
+        <!-- KNAPP LÄGG UPP NY ANNONSER -->
+        <button class="btn-create-ad" onclick="openNewAdModal()">
+          <i class="fa-solid fa-plus-circle"></i> Lägg upp ny annons
+        </button>
+      </div>
+
+      <!-- DOCKAD STATISTIK (SITTER IHOP MED UNDERKANTEN AV HERO) -->
+      <div class="stats-dock">
+        <div class="stat-dock-item">
+          <div class="stat-dock-icon">
+            <i class="fa-solid fa-vault"></i>
+          </div>
+          <div class="stat-dock-details">
+            <span class="stat-dock-value" id="statTotalValue">23 150 kr</span>
+            <span class="stat-dock-label">Inventariets Värde</span>
+          </div>
+        </div>
+
+        <div class="stat-dock-item">
+          <div class="stat-dock-icon">
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </div>
+          <div class="stat-dock-details">
+            <span class="stat-dock-value" id="statInventoryCount">5 st</span>
+            <span class="stat-dock-label">Inventarieenheter</span>
+          </div>
+        </div>
+
+        <div class="stat-dock-item">
+          <div class="stat-dock-icon">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div class="stat-dock-details">
+            <span class="stat-dock-value" id="statAdsCount">3 st</span>
+            <span class="stat-dock-label">Aktiva Annonser</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HUVUDINNEHÅLL -->
+  <main class="container">
+
+    <!-- SEKTION 1: MODIFIERBAR SKOL- & KONTAKTINFO -->
+    <div class="section-wrapper">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-sliders"></i> Skol- & Adressuppgifter
+          </h2>
+        </div>
+
+        <div class="info-card">
+          <form id="schoolInfoForm" onsubmit="saveSchoolInfo(event)">
+            <div class="form-grid">
+              
+              <div class="form-group">
+                <label for="inputSchoolName">Skolnamn</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-school"></i>
+                  <input type="text" id="inputSchoolName" class="form-input" value="NTI Helsingborg" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputOrgNum">Organisationsnummer</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-fingerprint"></i>
+                  <input type="text" id="inputOrgNum" class="form-input" value="8504337328" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputSchoolEmail">Kontakt e-post</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-envelope"></i>
+                  <input type="email" id="inputSchoolEmail" class="form-input" value="helsingborg@ntigymnasiet.se" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputSchoolPhone">Telefonnummer</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-phone"></i>
+                  <input type="tel" id="inputSchoolPhone" class="form-input" value="042-12 34 56">
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="inputSchoolAddress">Skoladress (Leveransadress)</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <input type="text" id="inputSchoolAddress" class="form-input" value="Järnvägsgatan 25, 252 24 Helsingborg" required>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="inputInvoiceAddress">Fakturaadress</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-file-invoice-dollar"></i>
+                  <input type="text" id="inputInvoiceAddress" class="form-input" value="NTI Gymnasiet Helsingborg, FE 123, 838 73 Frösön" required>
+                </div>
+              </div>
+
+            </div>
+
+            <button type="submit" class="btn-save-info">
+              <i class="fa-solid fa-floppy-disk"></i> Spara ändringar
+            </button>
+
+            <div class="save-alert" id="saveAlert">
+              <i class="fa-solid fa-circle-check"></i> Uppgifterna har sparats framgångsrikt!
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKTION 2: MINA ANNONSER -->
+    <div class="section-wrapper">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-tags"></i> Mina annonser
+          </h2>
+          <span style="color: var(--text-muted); font-size: 0.9rem;" id="myAdsCount">0 publicerade annonser</span>
+        </div>
+
+        <div class="ads-grid" id="myAdsGrid">
+          <!-- Genereras dynamiskt via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKTION 3: MITT INVENTARIE -->
+    <div class="section-wrapper">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-server"></i> Mitt inventarie
+          </h2>
+          <button class="btn-secondary" onclick="openNewInventoryModal()">
+            <i class="fa-solid fa-plus"></i> Lägg till i inventarie
+          </button>
+        </div>
+
+        <!-- SÖK OCH FILTER FÖR INVENTARIE -->
+        <div class="inventory-controls">
+          <div class="inventory-search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="inventorySearch" class="inventory-search-input" placeholder="Sök i inventarier (namn, serienummer, ID...)" onkeyup="filterInventory()">
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Produkt / Modell</th>
+                <th>Kategori</th>
+                <th>Serienummer</th>
+                <th>Skick</th>
+                <th>Status</th>
+                <th>Värde</th>
+                <th>Placering</th>
+                <th>Åtgärd</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Genereras dynamiskt via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: LÄGG TILL INVENTARIE -->
+  <div class="modal-overlay" id="newInventoryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-boxes-stacked"></i> Lägg till i inventarie</h3>
+        <button class="close-modal-btn" onclick="closeNewInventoryModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="newInventoryForm" onsubmit="handleCreateInventory(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="invTitle">Produktnamn / Modell</label>
+            <input type="text" id="invTitle" class="form-input no-icon" placeholder="t.ex. MacBook Pro 14 M2" required>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="invCategory">Kategori</label>
+              <select id="invCategory" class="form-input no-icon" style="background:var(--bg-main);" required>
+                <option value="Datorer">Datorer & Laptops</option>
+                <option value="Skärmar">Skärmar & Display</option>
+                <option value="Nätverk">Nätverk & Server</option>
+                <option value="Komponenter">Datorkomponenter</option>
+                <option value="VR / Tillbehör">VR & Tillbehör</option>
+                <option value="Ljud">Ljud & Utrustning</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="invStatus">Status</label>
+              <select id="invStatus" class="form-input no-icon" style="background:var(--bg-main);" required>
+                <option value="storage">I lager</option>
+                <option value="in-use">I bruk</option>
+                <option value="for-sale">Annons (Till försäljning)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="invSerial">Serienummer</label>
+              <input type="text" id="invSerial" class="form-input no-icon" placeholder="t.ex. C02DF123MD6R" required>
+            </div>
+
+            <div class="form-group">
+              <label for="invCondition">Skick (1 - 10)</label>
+              <input type="number" id="invCondition" class="form-input no-icon" value="8" min="1" max="10" required>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="invPrice">Värde / Pris (kr)</label>
+              <input type="number" id="invPrice" class="form-input no-icon" placeholder="4500" required>
+            </div>
+
+            <div class="form-group">
+              <label for="invLocation">Placering / Rum</label>
+              <input type="text" id="invLocation" class="form-input no-icon" placeholder="t.ex. Förråd B / Sal 204" required>
+            </div>
+          </div>
+
+          <!-- GALLERILADDNING -->
+          <div class="form-group">
+            <label>Produktbild (Ladda upp från enhet/galleri)</label>
+            <div class="file-upload-zone" id="invDropZone" onclick="document.getElementById('invFileInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
+              <div class="file-upload-text">Klicka för att välja bild från galleriet</div>
+              <div class="file-upload-subtext">Eller dra och släpp en bildfil här (PNG, JPG, WEBP)</div>
+              <input type="file" id="invFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'inv')">
+            </div>
+
+            <div class="file-preview-wrap" id="invPreviewWrap" style="display:none;">
+              <img id="invImagePreview" alt="Förhandsgranskning">
+              <button type="button" class="btn-remove-img" onclick="removeImage('inv')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeNewInventoryModal()">Avbryt</button>
+          <button type="submit" class="btn-primary">Spara i inventarie</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: LÄGG UPP NY ANNONSER -->
+  <div class="modal-overlay" id="newAdModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-plus-circle"></i> Skapa ny annons</h3>
+        <button class="close-modal-btn" onclick="closeNewAdModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="newAdForm" onsubmit="handleCreateAd(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="adTitle">Rubrik / Titel</label>
+            <input type="text" id="adTitle" class="form-input no-icon" placeholder="t.ex. Lenovo ThinkPad L14 Gen 2" required>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="adCategory">Kategori</label>
+              <select id="adCategory" class="form-input no-icon" style="background:var(--bg-main);" required>
+                <option value="datorer">Datorer & Laptops</option>
+                <option value="komponenter">Datorkomponenter</option>
+                <option value="skarmar">Skärmar & Display</option>
+                <option value="mobil">Mobil & Surfplattor</option>
+                <option value="ljud">Ljud & Tillbehör</option>
+                <option value="natverk">Nätverk & Server</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="adPrice">Pris (kr)</label>
+              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" required>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="adStock">Antal i lager</label>
+              <input type="number" id="adStock" class="form-input no-icon" value="1" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="adCondition">Skick (1 - 10)</label>
+              <input type="number" id="adCondition" class="form-input no-icon" value="8" min="1" max="10" required>
+            </div>
+          </div>
+
+          <!-- GALLERILADDNING -->
+          <div class="form-group">
+            <label>Annonsbild (Ladda upp från enhet/galleri)</label>
+            <div class="file-upload-zone" id="adDropZone" onclick="document.getElementById('adFileInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
+              <div class="file-upload-text">Klicka för att välja bild från galleriet</div>
+              <div class="file-upload-subtext">Eller dra och släpp en bildfil här (PNG, JPG, WEBP)</div>
+              <input type="file" id="adFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'ad')">
+            </div>
+
+            <div class="file-preview-wrap" id="adPreviewWrap" style="display:none;">
+              <img id="adImagePreview" alt="Förhandsgranskning">
+              <button type="button" class="btn-remove-img" onclick="removeImage('ad')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="adDescription">Beskrivning</label>
+            <textarea id="adDescription" class="form-input no-icon" rows="3" placeholder="Beskriv hårdvarans skick, specifikationer..." style="resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeNewAdModal()">Avbryt</button>
+          <button type="submit" class="btn-primary">Publicera annons</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- VARUKORG SIDEBAR / MODAL -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3><i class="fa-solid fa-cart-shopping"></i> Din varukorg</h3>
+        <button class="close-cart-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="cart-body" id="cartBody">
+        <!-- Varukorgens innehåll -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span>Totalt:</span>
+          <span id="cartTotal">0 kr</span>
+        </div>
+        <button class="checkout-btn" onclick="goToCheckout()" id="checkoutBtn" disabled>
+          Gå till kassan <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>Om plattformen</h3>
+        <ul>
+          <li><a href="#">Om NTI-T Shopp</a></li>
+          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
+          <li><a href="#">Karriär</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Säkerhet</h3>
+        <ul>
+          <li><a href="#">Verifierade säljare</a></li>
+          <li><a href="#">Köpskydd & Frakt</a></li>
+          <li><a href="#">Kundservice</a></li>
+          <li><a href="#">Villkor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Kategorier</h3>
+        <ul>
+          <li><a href="#">Laptops & Datorer</a></li>
+          <li><a href="#">Grafikkort & Komponenter</a></li>
+          <li><a href="#">Servrar & Nätverk</a></li>
+          <li><a href="#">Mobiler & Surfplattor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
+      <div>
+        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // TESTDATA (MED LOCALSTORAGE)
+    const initialAds = [
+      {
+        id: 201,
+        title: "Cisco Catalyst 2960X Switch 48-Port",
+        price: 3200,
+        stock: 2,
+        condition: 9,
+        status: "Aktiv",
+      },
+      {
+        id: 202,
+        title: "Dell Latitude 5420 i5 16GB RAM",
+        price: 4500,
+        stock: 5,
+        condition: 8,
+        status: "Aktiv",
+      },
+      {
+        id: 203,
+        title: "HP EliteDisplay E243i 24\" Skärmar",
+        price: 850,
+        stock: 10,
+        condition: 7,
+        status: "Aktiv",
+      }
+    ];
+
+    const initialInventory = [
+      { id: "INV-8091", title: "Dell Latitude 5420", category: "Datorer", serial: "CN-0G7101", status: "for-sale", location: "Förråd B", price: 4500, condition: 8 },
+      { id: "INV-8092", title: "Cisco Catalyst 2960X", category: "Nätverk", serial: "FOC2134L09A", status: "for-sale", location: "Serverrum 1", price: 3200, condition: 9 },
+      { id: "INV-7210", title: "Apple iMac 27\" 5K", category: "Datorer", serial: "C02DF123MD6R", status: "in-use", location: "Sal 204", price: 12500, condition: 9 },
+      { id: "INV-6540", title: "Meta Quest 2 256GB", category: "VR / Tillbehör", serial: "1WMHH81001", status: "storage", location: "Teknikförråd", price: 2100, condition: 7 },
+      { id: "INV-5112", title: "HP EliteDisplay E243i", category: "Skärmar", serial: "6CM912108Y", status: "for-sale", location: "Förråd A", price: 850, condition: 8 }
+    ];
+
+    let myAds = (JSON.parse(localStorage.getItem('ntit_my_ads')) || initialAds).map(ad => ({
+      ...ad,
+      image: typeof ad.image === 'string' && ad.image.startsWith('data:image/') ? ad.image : ''
+    }));
+    let inventory = JSON.parse(localStorage.getItem('ntit_inventory')) || initialInventory;
+
+    let invUploadedBase64 = null;
+    let adUploadedBase64 = null;
+
+    function saveToLocalStorage() {
+      localStorage.setItem('ntit_my_ads', JSON.stringify(myAds));
+      localStorage.setItem('ntit_inventory', JSON.stringify(inventory));
+    }
+
+    function handleFileSelect(e, type) {
+      const file = e.target.files ? e.target.files[0] : (e.dataTransfer ? e.dataTransfer.files[0] : null);
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64Url = evt.target.result;
+        if (type === 'inv') {
+          invUploadedBase64 = base64Url;
+          document.getElementById('invImagePreview').src = base64Url;
+          document.getElementById('invDropZone').style.display = 'none';
+          document.getElementById('invPreviewWrap').style.display = 'block';
+        } else {
+          adUploadedBase64 = base64Url;
+          document.getElementById('adImagePreview').src = base64Url;
+          document.getElementById('adDropZone').style.display = 'none';
+          document.getElementById('adPreviewWrap').style.display = 'block';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage(type) {
+      if (type === 'inv') {
+        invUploadedBase64 = null;
+        document.getElementById('invFileInput').value = '';
+        document.getElementById('invImagePreview').removeAttribute('src');
+        document.getElementById('invPreviewWrap').style.display = 'none';
+        document.getElementById('invDropZone').style.display = 'flex';
+      } else {
+        adUploadedBase64 = null;
+        document.getElementById('adFileInput').value = '';
+        document.getElementById('adImagePreview').removeAttribute('src');
+        document.getElementById('adPreviewWrap').style.display = 'none';
+        document.getElementById('adDropZone').style.display = 'flex';
+      }
+    }
+
+    ['invDropZone', 'adDropZone'].forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      
+      el.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        el.classList.add('dragover');
+      });
+
+      el.addEventListener('dragleave', () => {
+        el.classList.remove('dragover');
+      });
+
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        el.classList.remove('dragover');
+        const type = id === 'invDropZone' ? 'inv' : 'ad';
+        handleFileSelect(e, type);
+      });
+    });
+
+    function getConditionPill(score) {
+      let bg = 'rgba(16, 185, 129, 0.15)';
+      let color = '#10b981'; 
+      let border = 'rgba(16, 185, 129, 0.3)';
+
+      if (score <= 3) {
+        bg = 'rgba(239, 68, 68, 0.15)';
+        color = '#ef4444'; 
+        border = 'rgba(239, 68, 68, 0.3)';
+      } else if (score <= 6) {
+        bg = 'rgba(245, 158, 11, 0.15)';
+        color = '#f59e0b'; 
+        border = 'rgba(245, 158, 11, 0.3)';
+      }
+
+      return `<span class="condition-pill" style="background:${bg}; color:${color}; border:1px solid ${border};">
+                <i class="fa-solid fa-gauge"></i> Skick ${score}/10
+              </span>`;
+    }
+
+    function updateStats() {
+      const totalInvValue = inventory.reduce((sum, item) => sum + (parseInt(item.price) || 0), 0);
+      document.getElementById('statTotalValue').textContent = totalInvValue.toLocaleString('sv-SE') + ' kr';
+      document.getElementById('statInventoryCount').textContent = inventory.length + ' st';
+      document.getElementById('statAdsCount').textContent = myAds.length + ' st';
+    }
+
+    function renderMyAds() {
+      const grid = document.getElementById('myAdsGrid');
+      const countLabel = document.getElementById('myAdsCount');
+      grid.innerHTML = '';
+      countLabel.textContent = `${myAds.length} publicerade annonser`;
+
+      if (myAds.length === 0) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga aktiva annonser just nu.</p>';
+        return;
+      }
+
+      myAds.forEach(ad => {
+        const card = document.createElement('div');
+        card.className = 'ad-card';
+        card.innerHTML = `
+          <div class="ad-status-badge">${ad.status}</div>
+          ${ad.image ? `<div class="ad-img-wrap"><img src="${ad.image}" alt="${ad.title}" class="ad-img"></div>` : ''}
+          <div class="ad-body">
+            <div class="ad-meta-row">
+              ${getConditionPill(ad.condition || 8)}
+              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.stock} i lager</span>
+            </div>
+            <div class="ad-title">${ad.title}</div>
+            <div class="ad-price">${parseInt(ad.price).toLocaleString('sv-SE')} kr</div>
+            <div class="ad-actions">
+              <button class="btn-ad-action" onclick="alert('Redigera annons ${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
+              <button class="btn-ad-action delete" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i> Ta bort</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      updateStats();
+    }
+
+    function deleteAd(id) {
+      if (confirm('Är du säker på att du vill ta bort den här annonsen?')) {
+        myAds = myAds.filter(a => a.id !== id);
+        saveToLocalStorage();
+        renderMyAds();
+      }
+    }
+
+    function renderInventory(items = inventory) {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+
+      if(items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:2rem;">Inga inventarier hittades.</td></tr>';
+        return;
+      }
+
+      items.forEach(item => {
+        let statusBadge = '';
+        if (item.status === 'in-use') {
+          statusBadge = '<span class="badge-status badge-in-use"><span class="status-dot"></span>I bruk</span>';
+        } else if (item.status === 'storage') {
+          statusBadge = '<span class="badge-status badge-storage"><span class="status-dot"></span>I lager</span>';
+        } else if (item.status === 'for-sale') {
+          statusBadge = '<span class="badge-status badge-for-sale"><span class="status-dot"></span>Annons</span>';
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.id}</strong></td>
+          <td style="font-weight:600;">${item.title}</td>
+          <td>${item.category}</td>
+          <td class="serial-code">${item.serial}</td>
+          <td>${getConditionPill(item.condition)}</td>
+          <td>${statusBadge}</td>
+          <td class="price-value">${item.price ? parseInt(item.price).toLocaleString('sv-SE') + ' kr' : '-'}</td>
+          <td><i class="fa-solid fa-location-dot" style="font-size:0.75rem; color:var(--text-muted);"></i> ${item.location}</td>
+          <td>
+            <button class="btn-ad-action delete" onclick="deleteInventoryItem('${item.id}')" title="Ta bort inventarie">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateStats();
+    }
+
+    function deleteInventoryItem(id) {
+      if(confirm(`Vill du ta bort inventarie ${id}?`)) {
+        inventory = inventory.filter(i => i.id !== id);
+        saveToLocalStorage();
+        renderInventory();
+      }
+    }
+
+    function filterInventory() {
+      const query = document.getElementById('inventorySearch').value.toLowerCase().trim();
+      const filtered = inventory.filter(item => 
+        item.title.toLowerCase().includes(query) ||
+        item.id.toLowerCase().includes(query) ||
+        item.serial.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query)
+      );
+      renderInventory(filtered);
+    }
+
+    function openNewInventoryModal() {
+      document.getElementById('newInventoryModal').classList.add('active');
+    }
+
+    function closeNewInventoryModal() {
+      document.getElementById('newInventoryModal').classList.remove('active');
+      removeImage('inv');
+    }
+
+    function handleCreateInventory(e) {
+      e.preventDefault();
+      const title = document.getElementById('invTitle').value;
+      const category = document.getElementById('invCategory').value;
+      const status = document.getElementById('invStatus').value;
+      const serial = document.getElementById('invSerial').value;
+      const condition = parseInt(document.getElementById('invCondition').value);
+      const price = parseInt(document.getElementById('invPrice').value);
+      const location = document.getElementById('invLocation').value;
+      const finalImage = invUploadedBase64 || '';
+
+      const newId = "INV-" + Math.floor(1000 + Math.random() * 9000);
+
+      const newItem = {
+        id: newId,
+        title,
+        category,
+        serial,
+        status,
+        location,
+        price,
+        condition,
+        image: finalImage
+      };
+
+      inventory.unshift(newItem);
+
+      if (status === 'for-sale') {
+        const newAd = {
+          id: Date.now(),
+          title: title,
+          price: price,
+          stock: 1,
+          condition: condition,
+          status: "Aktiv",
+          image: finalImage
+        };
+        myAds.unshift(newAd);
+        renderMyAds();
+      }
+
+      saveToLocalStorage();
+      renderInventory();
+      closeNewInventoryModal();
+      document.getElementById('newInventoryForm').reset();
+    }
+
+    function openNewAdModal() {
+      document.getElementById('newAdModal').classList.add('active');
+    }
+
+    function closeNewAdModal() {
+      document.getElementById('newAdModal').classList.remove('active');
+      removeImage('ad');
+    }
+
+    function handleCreateAd(e) {
+      e.preventDefault();
+      const title = document.getElementById('adTitle').value;
+      const price = parseInt(document.getElementById('adPrice').value);
+      const stock = parseInt(document.getElementById('adStock').value);
+      const condition = parseInt(document.getElementById('adCondition').value);
+      const finalImage = adUploadedBase64 || '';
+
+      const newAd = {
+        id: Date.now(),
+        title: title,
+        price: price,
+        stock: stock,
+        condition: condition,
+        status: "Aktiv",
+        image: finalImage
+      };
+
+      myAds.unshift(newAd);
+      saveToLocalStorage();
+      renderMyAds();
+      closeNewAdModal();
+      document.getElementById('newAdForm').reset();
+    }
+
+    function loadSchoolInfo() {
+      const storedInfo = JSON.parse(localStorage.getItem('ntit_school_info'));
+      if (storedInfo) {
+        document.getElementById('inputSchoolName').value = storedInfo.name;
+        document.getElementById('inputOrgNum').value = storedInfo.org;
+        document.getElementById('inputSchoolEmail').value = storedInfo.email;
+        document.getElementById('inputSchoolPhone').value = storedInfo.phone;
+        document.getElementById('inputSchoolAddress').value = storedInfo.address;
+        document.getElementById('inputInvoiceAddress').value = storedInfo.invoice;
+
+        document.getElementById('headerSchoolName').textContent = storedInfo.name;
+        document.getElementById('headerOrgNum').textContent = storedInfo.org;
+      }
+    }
+
+    function saveSchoolInfo(e) {
+      e.preventDefault();
+      const info = {
+        name: document.getElementById('inputSchoolName').value,
+        org: document.getElementById('inputOrgNum').value,
+        email: document.getElementById('inputSchoolEmail').value,
+        phone: document.getElementById('inputSchoolPhone').value,
+        address: document.getElementById('inputSchoolAddress').value,
+        invoice: document.getElementById('inputInvoiceAddress').value
+      };
+
+      localStorage.setItem('ntit_school_info', JSON.stringify(info));
+
+      document.getElementById('headerSchoolName').textContent = info.name;
+      document.getElementById('headerOrgNum').textContent = info.org;
+
+      const alertBox = document.getElementById('saveAlert');
+      alertBox.style.display = 'block';
+      setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+    }
+
+    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
+      ...item,
+      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
+    }));
+    const cartOverlay = document.getElementById('cartOverlay');
+    const openCartBtn = document.getElementById('openCartBtn');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+    const cartBody = document.getElementById('cartBody');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.getElementById('cartBadge');
+
+    function updateCartUI() {
+      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      cartBadge.textContent = totalCount;
+      document.getElementById('checkoutBtn').disabled = cart.length === 0;
+
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      cartTotal.textContent = totalPrice.toLocaleString('sv-SE') + ' kr';
+
+      if(cart.length === 0) {
+        cartBody.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-cart-flatbed" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity:0.5;"></i><br>Din varukorg är tom.</div>';
+        return;
+      }
+
+      cartBody.innerHTML = '';
+      cart.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'cart-item';
+        itemEl.innerHTML = `
+          ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-item-img">` : ''}
+          <div class="cart-item-details">
+            <div class="cart-item-title">${item.title}</div>
+            <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>
+            <div class="cart-qty-controls">
+              <button class="qty-btn" onclick="updateQty(${JSON.stringify(item.id)}, -1)" title="Minska antal">-</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="updateQty(${JSON.stringify(item.id)}, 1)" title="Öka antal">+</button>
+            </div>
+          </div>
+        `;
+        cartBody.appendChild(itemEl);
+      });
+    }
+
+    function updateQty(id, delta) {
+      const item = cart.find(entry => entry.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) removeFromCart(id);
+      else updateCartUI();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(item => item.id !== id);
+      updateCartUI();
+    }
+
+    function goToCheckout() {
+      if (cart.length) window.location.href = 'checkout.html';
+    }
+
+    openCartBtn.addEventListener('click', () => cartOverlay.classList.add('active'));
+    closeCartBtn.addEventListener('click', () => cartOverlay.classList.remove('active'));
+    cartOverlay.addEventListener('click', (e) => {
+      if(e.target === cartOverlay) cartOverlay.classList.remove('active');
+    });
+
+    loadSchoolInfo();
+    renderMyAds();
+    renderInventory();
+    updateCartUI();
+  </script>
+</body>
+</html>

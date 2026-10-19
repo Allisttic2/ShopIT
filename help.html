@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hjälp och guider för NTI-T Shopp: köp, annonser, fakturor och produktskick.">
+  <title>Hjälp & guider - NTI-T Shopp</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="help.css">
+</head>
+<body class="help-page">
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="NTI-T Shopp Logo" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#products.html" class="nav-link">Produkter</a>
+        <a href="profil.html" class="nav-link">Profil</a>
+        <a href="help.html" class="nav-link">Hjälp</a>
+      </nav>
+      <div class="header-actions">
+        <button class="cart-btn" id="openCartBtn" title="Varukorg">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+        <button class="settings-btn" title="Inställningar">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="help-hero">
+    <div class="help-hero-inner">
+      <div>
+        <div class="help-kicker"><i class="fa-solid fa-life-ring"></i> NTI-T Shopp · Hjälpcenter</div>
+        <h1>Hjälp att komma vidare</h1>
+        <p>Hitta svar om köp, annonser och fakturor, eller läs hur skickbedömningen fungerar.</p>
+      </div>
+      <label class="help-search" for="helpSearch">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" id="helpSearch" placeholder="Sök bland frågor och guider" autocomplete="off">
+      </label>
+    </div>
+  </section>
+
+  <main class="help-main">
+    <div class="help-main-inner help-layout">
+      <nav class="help-nav" aria-label="Guider på sidan">
+        <a href="#fragor"><i class="fa-regular fa-circle-question"></i> Vanliga frågor</a>
+        <a href="#kom-igang"><i class="fa-solid fa-arrow-right-to-bracket"></i> Så fungerar det</a>
+        <a href="#annonsera"><i class="fa-solid fa-camera"></i> Lägg upp annons</a>
+        <a href="#skick"><i class="fa-solid fa-gauge-high"></i> Skickguide</a>
+        <a href="#faktura"><i class="fa-solid fa-file-invoice"></i> Checkout & faktura</a>
+      </nav>
+
+      <div class="help-content" id="helpContent">
+        <section class="help-section" id="fragor" data-search-section>
+          <div class="help-section-heading">
+            <div class="help-section-icon"><i class="fa-regular fa-circle-question"></i></div>
+            <div>
+              <h2>Vanliga frågor</h2>
+              <p>Snabba svar på det som brukar undras över.</p>
+            </div>
+          </div>
+          <div class="faq-list">
+            <details class="faq-item" data-search-item>
+              <summary>Hur fungerar NTI-T Shopp?</summary>
+              <div class="faq-answer">
+                <p>NTI-T Shopp är en plats där skolor kan hitta och annonsera begagnad IT-utrustning. Bläddra bland produkterna, öppna en annons för detaljer och lägg varor i varukorgen.</p>
+                <p>För att publicera egna annonser öppnar du <a href="profil.html">Profil</a> och väljer ”Lägg upp ny annons”.</p>
+              </div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Hur hittar jag rätt produkt?</summary>
+              <div class="faq-answer"><p>Använd sökrutan för modell eller specifikation. Du kan också filtrera på kategori, ort och pris, och sortera efter pris. Öppna produktkortet för beskrivning, skick och lagerantal.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Hur köper jag en produkt?</summary>
+              <div class="faq-answer">
+                <ol>
+                  <li>Välj ”Köp” på produktkortet eller ”Lägg i varukorg” på produktsidan.</li>
+                  <li>Öppna varukorgen och justera antal om det behövs.</li>
+                  <li>Välj ”Gå till kassan”, fyll i kund-, faktura- och leveransuppgifter och bekräfta.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Kan jag köpa en annons från min egen profil?</summary>
+              <div class="faq-answer"><p>Nej. Egna annonser i profilen har bara åtgärderna ”Redigera” och ”Ta bort”. Köp görs från produktflödet.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Varför ser jag inte min annons i butiken?</summary>
+              <div class="faq-answer"><p>Kontrollera att annonsen är publicerad och att den inte har tagits bort. Ladda om startsidan och rensa eventuella sökord eller filter. Egna annonser visas i profilens annonslista.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Vad betyder lagerantalet?</summary>
+              <div class="faq-answer"><p>Lagerantalet är antalet som säljaren har angett i annonsen. Kontrollera produktbeskrivningen och kontakta säljaren via era vanliga skolkanaler om ni behöver bekräfta tillgänglighet innan köp.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Kan jag ändra eller ta bort min annons?</summary>
+              <div class="faq-answer"><p>Du kan ta bort annonsen från profilens ”Mina annonser”. Redigeringsknappen finns där, men i den här versionen är den ännu inte kopplad till ett redigeringsformulär.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Var sparas varukorg och profiluppgifter?</summary>
+              <div class="faq-answer"><p>Den här versionen sparar uppgifter lokalt i webbläsaren på enheten du använder. De synkas inte till andra enheter och skickas inte till någon server.</p></div>
+            </details>
+          </div>
+        </section>
+
+        <section class="help-section" id="kom-igang" data-search-section>
+          <div class="help-section-heading">
+            <div class="help-section-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+            <div>
+              <h2>Så fungerar det</h2>
+              <p>Från att hitta en vara till att spara orderunderlaget.</p>
+            </div>
+          </div>
+          <div class="guide-steps">
+            <article class="guide-step" data-search-item>
+              <span class="step-number">1</span>
+              <h3>Hitta en vara</h3>
+              <p>Sök eller filtrera i produktflödet. Läs annonsen och kontrollera skick, ort och angivet lagerantal.</p>
+            </article>
+            <article class="guide-step" data-search-item>
+              <span class="step-number">2</span>
+              <h3>Gå till kassan</h3>
+              <p>Lägg varan i varukorgen, gå till kassan och ange skolans kund-, faktura- och leveransuppgifter.</p>
+            </article>
+            <article class="guide-step" data-search-item>
+              <span class="step-number">3</span>
+              <h3>Spara fakturan</h3>
+              <p>Efter bekräftelsen visas fakturan. Välj ”Skriv ut / spara som PDF” och sedan PDF som skrivare eller mål.</p>
+            </article>
+          </div>
+          <div class="guide-note"><i class="fa-solid fa-circle-info"></i><span>Butiken är en prototyp: beställningar och uppgifter sparas lokalt i webbläsaren. Checkouten genomför ingen betalning och skickar ingen order till en server.</span></div>
+        </section>
+
+        <section class="help-section" id="annonsera" data-search-section>
+          <div class="help-section-heading">
+            <div class="help-section-icon"><i class="fa-solid fa-camera"></i></div>
+            <div>
+              <h2>Lägg upp en annons</h2>
+              <p>Ge nästa skola en tydlig bild av utrustningen.</p>
+            </div>
+          </div>
+          <div class="guide-steps">
+            <article class="guide-step" data-search-item>
+              <span class="step-number">1</span>
+              <h3>Öppna din profil</h3>
+              <p>Gå till <a href="profil.html">Profil</a> och välj ”Lägg upp ny annons”.</p>
+            </article>
+            <article class="guide-step" data-search-item>
+              <span class="step-number">2</span>
+              <h3>Beskriv produkten</h3>
+              <p>Fyll i rubrik, kategori, pris, antal och skick. Skriv gärna modell, viktiga specifikationer och kända fel i beskrivningen.</p>
+            </article>
+            <article class="guide-step" data-search-item>
+              <span class="step-number">3</span>
+              <h3>Lägg till en bild</h3>
+              <p>Välj en bild från enheten eller dra den till uppladdningsytan. Använd en tydlig bild av just varan och undvik känslig information i bakgrunden.</p>
+            </article>
+          </div>
+          <div class="guide-note"><i class="fa-solid fa-lightbulb"></i><span><strong>Tips:</strong> Kontrollera pris och antal innan du publicerar. Beskriv slitage ärligt och ange vad som ingår, till exempel laddare eller kablar.</span></div>
+        </section>
+
+        <section class="help-section" id="skick" data-search-section>
+          <div class="help-section-heading">
+            <div class="help-section-icon"><i class="fa-solid fa-gauge-high"></i></div>
+            <div>
+              <h2>Skickguide</h2>
+              <p>Skalan går från 1 (mest slitage) till 10 (bäst skick).</p>
+            </div>
+          </div>
+          <div class="condition-scale">
+            <div class="condition-row condition-good" data-search-item>
+              <div class="condition-score">7–10<span>Bra skick</span></div>
+              <p>Fungerar som det ska och har normalt eller mycket litet kosmetiskt slitage. Beskriv ändå repor, batterihälsa och andra avvikelser i annonsen.</p>
+            </div>
+            <div class="condition-row condition-mid" data-search-item>
+              <div class="condition-score">4–6<span>Bruksskick</span></div>
+              <p>Fungerar, men har synligt slitage eller mindre brister. Förklara tydligt vad som påverkar utseende eller användning.</p>
+            </div>
+            <div class="condition-row condition-low" data-search-item>
+              <div class="condition-score">1–3<span>Slitet skick</span></div>
+              <p>Kraftigt slitage eller tydliga fel kan förekomma. Skriv vad som fungerar, vad som inte fungerar och om varan säljs för reparation eller reservdelar.</p>
+            </div>
+          </div>
+          <p class="condition-tip">Skickpoängen ersätter inte en beskrivning. Ange alltid kända fel och tillbehör i annonsens text.</p>
+        </section>
+
+        <section class="help-section" id="faktura" data-search-section>
+          <div class="help-section-heading">
+            <div class="help-section-icon"><i class="fa-solid fa-file-invoice"></i></div>
+            <div>
+              <h2>Checkout & faktura</h2>
+              <p>Uppgifter du behöver och hur du får ut PDF-filen.</p>
+            </div>
+          </div>
+          <div class="faq-list">
+            <details class="faq-item" data-search-item>
+              <summary>Vilka uppgifter behövs i kassan?</summary>
+              <div class="faq-answer"><p>Skolans eller företagets namn, organisationsnummer, e-post, fakturaadress och leveransadress. Telefon och referens är valfria. Uppgifter som sparats i profilen fylls i automatiskt och kan justeras i kassan.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Hur sparar jag fakturan som PDF?</summary>
+              <div class="faq-answer"><p>Bekräfta beställningen och välj ”Skriv ut / spara som PDF”. I utskriftsdialogen väljer du ”Spara som PDF” som skrivare eller destination och sparar filen på enheten.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Kan jag öppna fakturan igen?</summary>
+              <div class="faq-answer"><p>Fakturan finns kvar i samma webbläsare på samma enhet. Om du fortfarande har orderlänken kan du öppna den där. Rensad webbläsardata eller en annan enhet har inte tillgång till den lokala fakturan.</p></div>
+            </details>
+            <details class="faq-item" data-search-item>
+              <summary>Går det att betala direkt i webbplatsen?</summary>
+              <div class="faq-answer"><p>Nej. Det finns ingen betalningslösning eller orderöverföring i prototypen. Stäm av ett eventuellt köp och betalningssätt direkt mellan berörda skolor innan ni genomför en affär.</p></div>
+            </details>
+          </div>
+          <div class="help-footer-note">
+            <span>Hittade du inte svaret?</span>
+            <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Till produktflödet</a>
+          </div>
+        </section>
+        <p class="help-no-results" id="noResults" hidden>Inga guider matchar sökningen. Prova ett annat ord.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>Om plattformen</h3>
+        <ul>
+          <li><a href="help.html#kom-igang">Så fungerar det</a></li>
+          <li><a href="help.html#annonsera">Lägg upp en annons</a></li>
+          <li><a href="help.html#fragor">Vanliga frågor</a></li>
+          <li><a href="help.html#faktura">Checkout & faktura</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Guider</h3>
+        <ul>
+          <li><a href="help.html#skick">Skickbedömning</a></li>
+          <li><a href="help.html#fragor">Köp och varukorg</a></li>
+          <li><a href="help.html#fragor">Egna annonser</a></li>
+          <li><a href="help.html#faktura">Spara faktura som PDF</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>NTI-T Shopp</h3>
+        <ul>
+          <li><a href="index.html">Produkter</a></li>
+          <li><a href="profil.html">Min profil</a></li>
+          <li><a href="checkout.html">Till kassan</a></li>
+          <li><a href="help.html">Hjälpcenter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
+      <div>Hjälp & guider</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('openCartBtn').addEventListener('click', () => {
+      window.location.href = 'checkout.html';
+    });
+
+    const searchInput = document.getElementById('helpSearch');
+    const searchItems = [...document.querySelectorAll('[data-search-item]')];
+    const searchSections = [...document.querySelectorAll('[data-search-section]')];
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim().toLocaleLowerCase('sv-SE');
+      let visibleCount = 0;
+
+      searchItems.forEach(item => {
+        const matches = item.textContent.toLocaleLowerCase('sv-SE').includes(query);
+        item.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+
+      searchSections.forEach(section => {
+        const hasVisibleItem = section.querySelector('[data-search-item]:not([hidden])');
+        section.hidden = !hasVisibleItem;
+      });
+
+      document.querySelector('.help-nav').hidden = query.length > 0;
+      noResults.hidden = visibleCount > 0;
+    });
+  </script>
+</body>
+</html>

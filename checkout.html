@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kassan - NTI-T Shopp</title>
+  <!-- Font Awesome Ikoner -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <style>
+    /* --- PAGE HERO BANNER --- */
+    .page-hero {
+      background: linear-gradient(180deg, rgba(13, 21, 34, 0.92) 0%, rgba(9, 14, 23, 0.98) 100%), url('images/hero.png') center/cover no-repeat;
+      border-bottom: 1px solid var(--border-color);
+      padding: 3.5rem 1.5rem;
+    }
+
+    .page-hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 0.3rem;
+    }
+
+    .page-hero h1 {
+      font-size: 1.9rem;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    /* --- LAYOUT & CONTAINERS --- */
+    .page-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.85fr);
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .form-section, .summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .form-section { padding: 2.2rem; }
+    .summary { padding: 1.8rem; position: sticky; top: 90px; }
+
+    h2 {
+      margin: 0 0 1.5rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* --- FORMULÄRSTILAR --- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .field { min-width: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--border-hover);
+      box-shadow: 0 0 0 3px rgba(248, 246, 240, 0.05);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .section-rule {
+      border: 0;
+      border-top: 1px solid var(--border-color);
+      margin: 1.5rem 0;
+    }
+
+    /* --- VARUKORG & SAMMANSTÄLLNING --- */
+    .item-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .summary-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.9rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .summary-item img {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .item-qty { color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; }
+    .item-price { white-space: nowrap; font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .total-line.grand {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+      margin-top: 1.25rem;
+      color: var(--text-main);
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .tax-note { color: var(--text-muted); font-size: 0.78rem; margin-top: 0.8rem; line-height: 1.4; }
+
+    /* --- KNAPPAR --- */
+    .submit-btn, .print-btn, .btn-primary-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1.5rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      color: var(--accent-text);
+      background: var(--accent-main);
+    }
+
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    .print-btn {
+      color: var(--accent-text);
+      background: var(--accent-main);
+    }
+
+    .print-btn:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.65rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.05);
+    }
+
+    /* --- EMPTY STATE --- */
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .empty-state i { color: var(--text-muted); font-size: 2.2rem; margin-bottom: 1rem; }
+    .empty-state h2 { justify-content: center; margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--text-muted); margin-bottom: 1.8rem; }
+
+    .back-link {
+      color: var(--text-main);
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover { color: var(--accent-hover); }
+
+    /* --- FAKTURA VISNING (INVOICE VIEW) --- */
+    .invoice-wrap { max-width: 860px; margin: 0 auto; }
+    .invoice-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+    }
+
+    .invoice-toolbar p {
+      margin: 0;
+      color: var(--success-color);
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .invoice {
+      background: #ffffff;
+      color: #111827;
+      padding: 3.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .invoice-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      padding-bottom: 1.8rem;
+      border-bottom: 2px solid #111827;
+    }
+
+    .invoice-brand {
+      color: #0d1522;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .invoice-head h2 {
+      margin: 0.4rem 0 0;
+      font-size: 2.2rem;
+      color: #111827;
+    }
+
+    .invoice-meta { text-align: right; color: #4b5563; font-size: 0.88rem; line-height: 1.5; }
+    .invoice-meta strong { display: block; color: #111827; font-size: 1.05rem; }
+
+    .invoice-parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 1.8rem 0;
+    }
+
+    .invoice-party-label {
+      color: #4b5563;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .invoice-party { white-space: pre-line; font-size: 0.9rem; color: #1f2937; overflow-wrap: anywhere; }
+    .invoice-party strong { display: block; margin-bottom: 0.2rem; color: #111827; }
+
+    .invoice-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 1rem; }
+    .invoice-table th {
+      background: #f3f4f6;
+      text-align: left;
+      padding: 0.75rem 0.8rem;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .invoice-table th:last-child, .invoice-table td:last-child { text-align: right; }
+    .invoice-table th:nth-child(2), .invoice-table td:nth-child(2) { text-align: center; }
+    .invoice-table td { border-bottom: 1px solid #e5e7eb; padding: 0.9rem 0.8rem; color: #1f2937; vertical-align: top; }
+
+    .invoice-totals { width: min(100%, 340px); margin: 1.5rem 0 0 auto; }
+    .invoice-totals .total-line { color: #4b5563; }
+    .invoice-totals .total-line.grand { border-top: 2px solid #111827; color: #111827; font-size: 1.15rem; }
+
+    .invoice-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 2.5rem;
+      padding-top: 1.2rem;
+      color: #6b7280;
+      font-size: 0.78rem;
+    }
+
+    [hidden] { display: none !important; }
+
+    footer { border-top: 1px solid var(--border-color); }
+
+    @media (max-width: 850px) {
+      .checkout-layout { grid-template-columns: 1fr; }
+      .summary { position: static; }
+      .invoice { padding: 2rem 1.5rem; }
+    }
+
+    @media (max-width: 520px) {
+      .page-shell { padding: 1.5rem 1rem 3rem; }
+      .form-section { padding: 1.5rem 1.2rem; }
+      .form-grid, .invoice-parties { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .invoice-toolbar { flex-direction: column; align-items: flex-start; }
+      .invoice-head { flex-direction: column; }
+      .invoice-meta { text-align: left; }
+      .invoice-table { font-size: 0.78rem; }
+      .invoice-foot { flex-direction: column; }
+    }
+
+    /* PRINT STYLING */
+    @media print {
+      @page { size: A4; margin: 15mm; }
+      body { background: #ffffff; color: #000000; }
+      header, footer, .no-print, .page-hero { display: none !important; }
+      .page-shell, .invoice-wrap { max-width: none; margin: 0; padding: 0; }
+      .invoice { border: none; box-shadow: none; padding: 0; }
+      .invoice-table th { background: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="no-print">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="NTI-T Shopp Logo" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Produkter</a>
+        <a href="profil.html" class="nav-link">Profil</a>
+        <a href="help.html" class="nav-link">Hjälp</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="profil.html" class="settings-btn" title="Min profil">
+          <i class="fa-solid fa-user"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER -->
+  <section class="page-hero no-print">
+    <div class="page-hero-inner">
+      <div class="eyebrow">Beställning</div>
+      <h1>Slutför ditt köp</h1>
+    </div>
+  </section>
+
+  <!-- HUVUDINNEHÅLL -->
+  <main class="page-shell">
+    <section id="checkoutView">
+      <div class="checkout-layout" id="checkoutContent">
+        
+        <!-- FAKTURA- & KUNDFORMULÄR -->
+        <form class="form-section" id="checkoutForm">
+          <h2><i class="fa-regular fa-address-card"></i> Kund- och fakturauppgifter</h2>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="customerName">Skola / Företagsnamn</label>
+              <input id="customerName" name="customerName" autocomplete="organization" placeholder="NTI Helsingborg" required>
+            </div>
+            <div class="field">
+              <label for="orgNumber">Organisationsnummer</label>
+              <input id="orgNumber" name="orgNumber" placeholder="8504337328" required>
+            </div>
+            <div class="field">
+              <label for="customerEmail">E-post</label>
+              <input id="customerEmail" name="customerEmail" type="email" autocomplete="email" placeholder="namn@skola.se" required>
+            </div>
+            <div class="field">
+              <label for="customerPhone">Telefon</label>
+              <input id="customerPhone" name="customerPhone" type="tel" autocomplete="tel" placeholder="042-12 34 56">
+            </div>
+            <div class="field full">
+              <label for="billingAddress">Fakturaadress</label>
+              <textarea id="billingAddress" name="billingAddress" autocomplete="street-address" placeholder="Fakturaadress och FE-kod" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="deliveryAddress">Leveransadress</label>
+              <textarea id="deliveryAddress" name="deliveryAddress" placeholder="Skolans leveransadress" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="reference">Referens eller Beställar-ID</label>
+              <input id="reference" name="reference" placeholder="t.ex. Ref: IT-avdelningen / Johan">
+            </div>
+          </div>
+
+          <button class="submit-btn" type="submit">
+            <i class="fa-solid fa-file-invoice"></i> Bekräfta beställning
+          </button>
+        </form>
+
+        <!-- ORDERSAMMANSTÄLLNING -->
+        <aside class="summary" aria-label="Ordersammanställning">
+          <h2><i class="fa-solid fa-basket-shopping"></i> Din beställning</h2>
+          <div class="item-list" id="checkoutItems"></div>
+          <hr class="section-rule">
+          <div class="total-line"><span>Varor, inkl. moms</span><strong id="subtotal">0 kr</strong></div>
+          <div class="total-line"><span>Frakt</span><strong>0 kr</strong></div>
+          <div class="total-line grand"><span>Att betala</span><strong id="grandTotal">0 kr</strong></div>
+          <div class="tax-note" id="taxNote"></div>
+        </aside>
+
+      </div>
+
+      <!-- TOM VARUKORG STATE -->
+      <div class="empty-state" id="emptyCart" hidden>
+        <i class="fa-solid fa-cart-shopping"></i>
+        <h2>Varukorgen är tom</h2>
+        <p>Lägg en produkt i varukorgen innan du går till kassan.</p>
+        <a class="btn-secondary" href="index.html">
+          <i class="fa-solid fa-arrow-left"></i> Tillbaka till butiken
+        </a>
+      </div>
+    </section>
+
+    <!-- SLUTFÖRD BESTÄLLNING / FAKTURA-DOKUMENT -->
+    <section class="invoice-wrap" id="invoiceView" hidden>
+      <div class="invoice-toolbar no-print">
+        <p><i class="fa-solid fa-circle-check"></i> Beställningen är registrerad och fakturan är klar.</p>
+        <button class="print-btn" type="button" onclick="window.print()">
+          <i class="fa-solid fa-file-pdf"></i> Skriv ut / Spara som PDF
+        </button>
+      </div>
+
+      <article class="invoice" id="invoiceDocument"></article>
+
+      <div class="no-print" style="margin-top: 1.5rem;">
+        <a class="btn-secondary" href="index.html">
+          <i class="fa-solid fa-arrow-left"></i> Tillbaka till butiken
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="no-print">
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>Om plattformen</h3>
+        <ul>
+          <li><a href="#">Om NTI-T Shopp</a></li>
+          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
+          <li><a href="#">Karriär</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Säkerhet</h3>
+        <ul>
+          <li><a href="#">Verifierade säljare</a></li>
+          <li><a href="#">Köpskydd & Frakt</a></li>
+          <li><a href="#">Kundservice</a></li>
+          <li><a href="#">Villkor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Kategorier</h3>
+        <ul>
+          <li><a href="#">Laptops & Datorer</a></li>
+          <li><a href="#">Grafikkort & Komponenter</a></li>
+          <li><a href="#">Servrar & Nätverk</a></li>
+          <li><a href="#">Mobiler & Surfplattor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
+      <div>
+        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const CART_KEY = 'ntit_cart';
+    const INVOICE_KEY = 'ntit_last_invoice';
+    const cart = readJSON(CART_KEY, []).map(item => ({
+      ...item,
+      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
+    }));
+    const money = value => `${Number(value || 0).toLocaleString('sv-SE')} kr`;
+
+    function readJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+      catch { return fallback; }
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
+
+    function loadCustomerInfo() {
+      const info = readJSON('ntit_school_info', {});
+      if (info.name) document.getElementById('customerName').value = info.name;
+      if (info.org) document.getElementById('orgNumber').value = info.org;
+      if (info.email) document.getElementById('customerEmail').value = info.email;
+      if (info.phone) document.getElementById('customerPhone').value = info.phone;
+      if (info.invoice) document.getElementById('billingAddress').value = info.invoice;
+      if (info.address) document.getElementById('deliveryAddress').value = info.address;
+    }
+
+    function renderCheckout() {
+      const validCart = cart.filter(item => item && item.qty > 0 && Number(item.price) >= 0);
+      if (!validCart.length) {
+        document.getElementById('checkoutContent').hidden = true;
+        document.getElementById('emptyCart').hidden = false;
+        return;
+      }
+      const total = validCart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+      document.getElementById('checkoutItems').innerHTML = validCart.map(item => `
+        <div class="summary-item">
+          ${item.image ? `<img src="${escapeHTML(item.image)}" alt="">` : ''}
+          <div>
+            <div class="item-name">${escapeHTML(item.title)}</div>
+            <div class="item-qty">${Number(item.qty)} st x ${money(item.price)}</div>
+          </div>
+          <div class="item-price">${money(Number(item.price) * Number(item.qty))}</div>
+        </div>
+      `).join('');
+      document.getElementById('subtotal').textContent = money(total);
+      document.getElementById('grandTotal').textContent = money(total);
+      document.getElementById('taxNote').textContent = `Varav moms 25 %: ${money(total - total / 1.25)}. Priserna inkluderar moms.`;
+    }
+
+    function createInvoice(event) {
+      event.preventDefault();
+      if (!cart.length) return;
+      const formData = new FormData(event.currentTarget);
+      const customer = Object.fromEntries(formData.entries());
+      const total = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+      const invoice = {
+        number: `NTI-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
+        date: new Intl.DateTimeFormat('sv-SE', { dateStyle: 'long' }).format(new Date()),
+        customer,
+        items: cart.map(item => ({ ...item, price: Number(item.price), qty: Number(item.qty) })),
+        total
+      };
+      localStorage.setItem(INVOICE_KEY, JSON.stringify(invoice));
+      localStorage.removeItem(CART_KEY);
+      showInvoice(invoice);
+      history.replaceState(null, '', `checkout.html?faktura=${encodeURIComponent(invoice.number)}`);
+    }
+
+    function showInvoice(invoice) {
+      document.getElementById('checkoutView').hidden = true;
+      document.getElementById('invoiceView').hidden = false;
+      const customer = invoice.customer;
+      const rows = invoice.items.map(item => `
+        <tr>
+          <td>${escapeHTML(item.title)}</td>
+          <td>${item.qty}</td>
+          <td>${money(item.price)}</td>
+          <td>${money(item.price * item.qty)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('invoiceDocument').innerHTML = `
+        <div class="invoice-head">
+          <div>
+            <div class="invoice-brand">NTI-T Shopp</div>
+            <h2>Faktura</h2>
+          </div>
+          <div class="invoice-meta">
+            <strong>${escapeHTML(invoice.number)}</strong>
+            Fakturadatum: ${escapeHTML(invoice.date)}<br>
+            Betalningsvillkor: 30 dagar
+          </div>
+        </div>
+        <div class="invoice-parties">
+          <div class="invoice-party">
+            <div class="invoice-party-label">Faktureras till</div>
+            <strong>${escapeHTML(customer.customerName)}</strong>
+            ${escapeHTML(customer.billingAddress)}<br>
+            Org.nr ${escapeHTML(customer.orgNumber)}<br>
+            ${escapeHTML(customer.customerEmail)}
+            ${customer.customerPhone ? `<br>\${escapeHTML(customer.customerPhone)}` : ''}
+            ${customer.reference ? `<br>Referens: \${escapeHTML(customer.reference)}` : ''}
+          </div>
+          <div class="invoice-party">
+            <div class="invoice-party-label">Leveransadress</div>
+            <strong>${escapeHTML(customer.customerName)}</strong>
+            ${escapeHTML(customer.deliveryAddress)}
+            <div style="margin-top: 1rem;">
+              <div class="invoice-party-label">Säljare</div>
+              <strong>NTI-T Shopp AB</strong>
+            </div>
+          </div>
+        </div>
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Beskrivning</th>
+              <th>Antal</th>
+              <th>Pris/st</th>
+              <th>Summa</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="invoice-totals">
+          <div class="total-line"><span>Summa exkl. moms</span><strong>${money(invoice.total / 1.25)}</strong></div>
+          <div class="total-line"><span>Moms 25 %</span><strong>${money(invoice.total - invoice.total / 1.25)}</strong></div>
+          <div class="total-line grand"><span>Att betala</span><strong>${money(invoice.total)}</strong></div>
+        </div>
+        <div class="invoice-foot">
+          <span>NTI-T Shopp · Tack för din beställning.</span>
+          <span>Fakturan är skapad digitalt.</span>
+        </div>
+      `;
+    }
+
+    loadCustomerInfo();
+    renderCheckout();
+    document.getElementById('checkoutForm').addEventListener('submit', createInvoice);
+    const savedInvoice = readJSON(INVOICE_KEY, null);
+    const invoiceQuery = new URLSearchParams(location.search).get('faktura');
+    if (savedInvoice && invoiceQuery === savedInvoice.number) showInvoice(savedInvoice);
+  </script>
+</body>
+</html>

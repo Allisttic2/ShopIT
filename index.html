@@ -1,1 +1,1470 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTI-T Shopp</title>
+  <!-- Font Awesome Ikoner -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <style>
+    :root {
+      --bg-glass: rgba(9, 14, 23, 0.88);
+      --header-bg: var(--bg-glass);
+      --shadow-elevated: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
 
+    /* --- HERO --- */
+    .hero {
+      background: linear-gradient(rgba(9, 14, 23, 0.88), rgba(9, 14, 23, 0.95)), url('images/hero.png') center/cover no-repeat;
+      border-bottom: 1px solid var(--border-color);
+      padding: 5rem 1.5rem;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+    }
+
+    .hero-search-box {
+      display: flex;
+      background: var(--bg-card);
+      padding: 0.35rem;
+      border-radius: 10px;
+      box-shadow: var(--shadow-elevated);
+      border: 1px solid var(--border-color);
+      gap: 0.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .hero-search-box:focus-within {
+      border-color: var(--border-hover);
+    }
+
+    .hero-search-box input {
+      flex: 2;
+      min-width: 200px;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+    }
+
+    .hero-search-box input::placeholder {
+      color: #64748b;
+    }
+
+    .hero-search-box select {
+      flex: 1;
+      min-width: 160px;
+      border: none;
+      border-left: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      outline: none;
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .hero-search-box select option {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .hero-search-box button {
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+    }
+
+    .hero-search-box button:hover {
+      background: var(--accent-hover);
+    }
+
+    /* --- CONTAINER & VARVADE SEKTIONER --- */
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    .section-wrapper {
+      padding: 3.5rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-wrapper:nth-child(odd) {
+      background-color: var(--bg-main);
+    }
+
+    .section-wrapper:nth-child(even) {
+      background-color: var(--bg-alt);
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.2px;
+    }
+
+    .section-title i {
+      color: var(--text-main);
+      font-size: 1rem;
+    }
+
+    /* --- FÄRGKODAD SKICK-PILL --- */
+    .condition-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      letter-spacing: 0.2px;
+    }
+
+    /* --- LAGER-PILL --- */
+    .stock-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(9, 14, 23, 0.88);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stock-badge i {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    /* --- SENASTE ANNONSER --- */
+    .latest-section {
+      transition: all 0.3s ease;
+    }
+
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .latest-grid .stock-badge,
+    .latest-grid .fav-btn,
+    .latest-grid .product-location {
+      display: none;
+    }
+
+    .latest-grid .product-img-wrap { height: 150px; }
+
+    .latest-grid .product-info {
+      padding: 1rem;
+      justify-content: space-between;
+      gap: 0.8rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .latest-grid .product-meta { justify-content: flex-start; margin-bottom: 0; }
+
+    .latest-grid .product-title {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .latest-grid .product-footer { margin-top: 0; padding-top: 0; border-top: 0; }
+    .latest-grid .product-price { font-size: 1rem; }
+    .latest-grid .btn-add-cart { width: 32px; height: 32px; padding: 0; justify-content: center; font-size: 0.85rem; }
+    .latest-grid .btn-add-cart span { display: none; }
+
+    .latest-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .latest-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .latest-card-img-wrap {
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .latest-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+    }
+
+    .latest-card:hover .latest-card-img {
+      opacity: 1;
+    }
+
+    .latest-card-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      gap: 0.8rem;
+    }
+
+    .latest-card-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .latest-card-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-cart-icon {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+
+    .btn-cart-icon:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s ease;
+      min-width: 150px;
+    }
+
+    .filter-select:hover, .filter-select:focus {
+      border-color: var(--border-hover);
+    }
+
+    /* --- PRODUKTFLÖDE --- */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .fav-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(9, 14, 23, 0.85);
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      z-index: 2;
+      font-size: 0.85rem;
+    }
+
+    .fav-btn:hover, .fav-btn.active {
+      color: #f87171;
+      border-color: #f87171;
+    }
+
+    .product-img-wrap {
+      width: 100%;
+      height: 170px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+    }
+
+    .product-card:hover .product-img {
+      opacity: 1;
+    }
+
+    .product-info {
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.4rem;
+    }
+
+    .product-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .product-footer {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .product-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-add-cart {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.45rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-add-cart:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.05);
+    }
+
+    /* --- DEDIKERAD PRODUKTSIDA (FULL VIEW) --- */
+    .product-page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+      min-height: 70vh;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 2.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.03);
+    }
+
+    .product-page-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-elevated);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 868px) {
+      .product-page-card {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 2rem;
+      }
+    }
+
+    .product-page-img-wrap {
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .product-page-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-page-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .product-page-price {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1.5rem;
+    }
+
+    .product-page-spec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1.25rem 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    .spec-item strong {
+      color: var(--text-main);
+    }
+
+    .product-page-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      flex-grow: 1;
+    }
+
+    .product-page-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto;
+    }
+
+    .btn-page-buy {
+      flex: 1;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: background 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-page-buy:hover {
+      background: var(--accent-hover);
+    }
+
+    /* --- VARUKORG SIDEBAR (DRAWER) --- */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .cart-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 201;
+      transition: right 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-overlay.active .cart-drawer {
+      right: 0;
+    }
+
+    .cart-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-main);
+    }
+
+    .cart-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .close-cart-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .close-cart-btn:hover {
+      color: var(--text-main);
+    }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cart-empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cart-item-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--bg-main);
+    }
+
+    .cart-item-details {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .cart-item-price {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .cart-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .qty-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+    }
+
+    .qty-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+    }
+
+    .qty-val {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .cart-item-remove {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+      padding: 0.3rem;
+    }
+
+    .cart-item-remove:hover {
+      color: #f87171;
+    }
+
+    .cart-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-main);
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .checkout-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.6rem; }
+      .hero-search-box { flex-direction: column; padding: 0.5rem; }
+      .hero-search-box select { border-left: none; border-top: 1px solid var(--border-color); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / NAVBAR -->
+  <header>
+    <div class="header-container">
+      <a onclick="showHomeView(true)" class="logo">
+        <img src="images/logo.png" alt="NTI-T Shopp Logo" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      
+      <!-- Navigationslänkar utan ikoner och med hover-border -->
+      <nav class="nav-links">
+        <a href="#products.html" class="nav-link">Produkter</a>
+        <a href="profil.html" class="nav-link">Profil</a>
+        <a href="help.html" class="nav-link">Hjälp</a>
+      </nav>
+
+      <!-- Högersektion -->
+      <div class="header-actions">
+        <button class="cart-btn" id="openCartBtn" title="Varukorg">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+
+        <button class="settings-btn" title="Inställningar">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- VYN 1: STARTSIDA (HOME VIEW) -->
+  <div id="homeView">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>NTI-T SHOPP</h1>
+        <p>Köp och sälj it utrustning, mellan skolor på ett säkert sätt.</p>
+        
+        <div class="hero-search-box">
+          <input type="text" id="searchInput" placeholder="Sök hårdvara, modell eller specifikation...">
+          <select id="categorySelect">
+            <option value="alla">Alla kategorier</option>
+            <option value="datorer">Datorer & Laptops</option>
+            <option value="komponenter">Datorkomponenter</option>
+            <option value="skarmar">Skärmar & Display</option>
+            <option value="mobil">Mobil & Surfplattor</option>
+            <option value="ljud">Ljud & Tillbehör</option>
+            <option value="natverk">Nätverk & Server</option>
+          </select>
+          <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> Sök</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HUVUDINNEHÅLL -->
+    <main class="container">
+      <!-- SEKTION 1: SENASTE ANNONSER -->
+      <div class="section-wrapper" id="latestSectionWrapper">
+        <div class="section-inner">
+          <section class="latest-section" id="latestSection">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Senast inkommet</h2>
+            </div>
+            <div class="latest-grid" id="latestGrid">
+              <!-- Genereras dynamiskt via JS -->
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- SEKTION 2: FILTER BAR -->
+      <div class="section-wrapper" id="filterSectionWrapper">
+        <div class="section-inner">
+          <section class="filter-section" id="filterSection">
+            <div class="filter-label"><i class="fa-solid fa-sliders"></i> Filtrera:</div>
+            
+            <select class="filter-select" id="filterLocation">
+              <option value="alla">Hela Sverige</option>
+              <option value="stockholm">Stockholm</option>
+              <option value="goteborg">Göteborg</option>
+              <option value="malmo">Malmö</option>
+            </select>
+
+            <select class="filter-select" id="filterPrice">
+              <option value="alla">Alla priser</option>
+              <option value="low">Under 2 000 kr</option>
+              <option value="mid">2 000 - 10 000 kr</option>
+              <option value="high">Över 10 000 kr</option>
+            </select>
+
+            <select class="filter-select" id="filterSort">
+              <option value="newest">Sortera: Senaste</option>
+              <option value="price-asc">Pris: Lågt till Högt</option>
+              <option value="price-desc">Pris: Högt till Lågt</option>
+            </select>
+          </section>
+        </div>
+      </div>
+
+      <!-- SEKTION 3: PRODUKTFLÖDE -->
+      <div class="section-wrapper" id="productSectionWrapper">
+        <div class="section-inner">
+          <section id="productSection">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-server"></i> Utforska hårdvara</h2>
+            </div>
+            <div class="feed-grid" id="productFeed">
+              <!-- Genereras dynamiskt via JS -->
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- VYN 2: DEDIKERAD PRODUKTSIDA (PRODUCT PAGE VIEW) -->
+  <div id="productPageView" style="display: none;">
+    <div class="product-page-wrapper">
+      <button class="btn-back" onclick="showHomeView(true)">
+        <i class="fa-solid fa-arrow-left"></i> Tillbaka till alla produkter
+      </button>
+
+      <div class="product-page-card" id="productPageContent">
+        <!-- Genereras dynamiskt när användaren klickar på en produkt -->
+      </div>
+    </div>
+  </div>
+
+  <!-- VARUKORG SIDEBAR / MODAL -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3><i class="fa-solid fa-cart-shopping"></i> Din varukorg</h3>
+        <button class="close-cart-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="cart-body" id="cartBody">
+        <!-- Produkterna hamnar här -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span>Totalt:</span>
+          <span id="cartTotal">0 kr</span>
+        </div>
+        <button class="checkout-btn" onclick="goToCheckout()" id="checkoutBtn" disabled>
+          Gå till kassan <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>Om plattformen</h3>
+        <ul>
+          <li><a href="#">Om NTI-T Shopp</a></li>
+          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
+          <li><a href="#">Karriär</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Säkerhet</h3>
+        <ul>
+          <li><a href="#">Verifierade säljare</a></li>
+          <li><a href="#">Köpskydd & Frakt</a></li>
+          <li><a href="#">Kundservice</a></li>
+          <li><a href="#">Villkor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Kategorier</h3>
+        <ul>
+          <li><a href="#">Laptops & Datorer</a></li>
+          <li><a href="#">Grafikkort & Komponenter</a></li>
+          <li><a href="#">Servrar & Nätverk</a></li>
+          <li><a href="#">Mobiler & Surfplattor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
+      <div>
+        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // DATA MED LAGERANTAL (STOCK) OCH SKICK (1-10)
+    const productDatabase = [
+      {
+        id: 101,
+        featured: true,
+        title: "Lenovo ThinkPad X1 Carbon Gen 11",
+        price: 14500,
+        category: "datorer",
+        location: "stockholm",
+        time: "Idag 15:10",
+        stock: 4,
+        condition: 9,
+        description: "Mycket välvårdad Lenovo ThinkPad X1 Carbon Gen 11. Utrustad med Intel Core i7, 32GB RAM och 1TB NVMe SSD. Professionell kvalitet och tunn design."
+      },
+      {
+        id: 102,
+        featured: true,
+        title: "Samsung Odyssey Neo G9 49\" OLED",
+        price: 12900,
+        category: "skarmar",
+        location: "goteborg",
+        time: "Idag 14:00",
+        stock: 2,
+        condition: 8,
+        description: "Böjd 49-tums ultrawide OLED-skärm med 240Hz uppdateringsfrekvens. Magnifik svärta och fantastisk responstid för e-sport och multitasking."
+      },
+      {
+        id: 103,
+        featured: true,
+        title: "Keychron Q1 Pro Mekaniskt Tangentbord",
+        price: 1800,
+        category: "ljud",
+        location: "stockholm",
+        time: "Idag 12:30",
+        stock: 12,
+        condition: 10,
+        description: "Helt nytt mekaniskt tangentbord i massivt aluminiumchassi med trådlös Bluetooth-anslutning och fabrikssmorda switchar."
+      },
+      {
+        id: 104,
+        featured: true,
+        title: "Apple iPad Pro 12.9\" M2 128GB",
+        price: 9400,
+        category: "mobil",
+        location: "malmo",
+        time: "Igår 20:15",
+        stock: 1,
+        condition: 7,
+        description: "Kraftfull iPad Pro med M2-chip. Har några obetydliga repor på baksidans chassi men skärmen är i perfekt skick med monterat skärmskydd."
+      },
+      {
+        id: 1,
+        title: "MacBook Pro 16\" M3 Max 36GB",
+        price: 32500,
+        category: "datorer",
+        location: "stockholm",
+        time: "Idag 14:20",
+        stock: 3,
+        condition: 9,
+        description: "Klassledande prestanda med M3 Max, 36GB enhetligt minne och 1TB SSD. Säljes i absolut nyskick inklusive tillbehör och originalförpackning."
+      },
+      {
+        id: 2,
+        title: "ASUS ROG Swift 32\" 4K OLED Monitor",
+        price: 11200,
+        category: "skarmar",
+        location: "goteborg",
+        time: "Idag 13:45",
+        stock: 5,
+        condition: 8,
+        description: "Perfekt färgåtergivning och blixtsnabb bildskärpa för gaming och kreativt arbete. Inga inbränningar eller defekter."
+      },
+      {
+        id: 3,
+        title: "NVIDIA GeForce RTX 4090 24GB",
+        price: 18900,
+        category: "komponenter",
+        location: "malmo",
+        time: "Igår 18:10",
+        stock: 2,
+        condition: 8,
+        description: "Världens kraftfullaste grafikkort för konsumenter. Använt sparsamt i välventilerat chassi utan överklockning."
+      },
+      {
+        id: 4,
+        title: "iPhone 15 Pro Max 256GB Titanium",
+        price: 12800,
+        category: "mobil",
+        location: "stockholm",
+        time: "Igår 16:00",
+        stock: 6,
+        condition: 6,
+        description: "Funktionellt helt felfri med 93% batterihälsa. Mindre slitage längs titanramen men skärm och kameralinser är orörda."
+      },
+      {
+        id: 5,
+        title: "Sony WH-1000XM5 Hörlurar",
+        price: 2900,
+        category: "ljud",
+        location: "goteborg",
+        time: "2 okt",
+        stock: 8,
+        condition: 10,
+        description: "Fabriksny vara i oöppnad kartong. Bäst-i-test aktiv brusreducering och fantastisk samtalskvalitet."
+      },
+      {
+        id: 6,
+        title: "Ubiquiti UniFi Dream Router & AP",
+        price: 3400,
+        category: "natverk",
+        location: "malmo",
+        time: "1 okt",
+        stock: 2,
+        condition: 5,
+        description: "Professionell nätverksutrustning för kontoret eller den krävande hemanvändaren. Kosmetiska bruksspår på chassit."
+      }
+    ];
+
+    // VARUKORG TILLSTÅND
+    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
+      ...item,
+      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
+    }));
+
+    // ELEMENT REFERENSER
+    const feedContainer = document.getElementById('productFeed');
+    const latestGrid = document.getElementById('latestGrid');
+    const latestSectionWrapper = document.getElementById('latestSectionWrapper');
+    const filterSectionWrapper = document.getElementById('filterSectionWrapper');
+    const filterSection = document.getElementById('filterSection');
+    const cartOverlay = document.getElementById('cartOverlay');
+    const openCartBtn = document.getElementById('openCartBtn');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+    const cartBody = document.getElementById('cartBody');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.getElementById('cartBadge');
+
+    const homeView = document.getElementById('homeView');
+    const productPageView = document.getElementById('productPageView');
+    const productPageContent = document.getElementById('productPageContent');
+
+    // SKICK-FÄRGKODNING (1-10)
+    function getConditionPill(score) {
+      let bg = 'rgba(16, 185, 129, 0.15)';
+      let color = '#10b981'; // Grön (7-10)
+      let border = 'rgba(16, 185, 129, 0.3)';
+
+      if (score <= 3) {
+        bg = 'rgba(239, 68, 68, 0.15)';
+        color = '#ef4444'; // Röd (1-3)
+        border = 'rgba(239, 68, 68, 0.3)';
+      } else if (score <= 6) {
+        bg = 'rgba(245, 158, 11, 0.15)';
+        color = '#f59e0b'; // Orange/Gul (4-6)
+        border = 'rgba(245, 158, 11, 0.3)';
+      }
+
+      return `<span class="condition-pill" style="background:${bg}; color:${color}; border:1px solid ${border};">
+                <i class="fa-solid fa-gauge"></i> Skick ${score}/10
+              </span>`;
+    }
+
+    function createProductCard(product) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.onclick = () => openProductPage(product.id);
+      card.innerHTML = `
+        <div class="stock-badge"><i class="fa-solid fa-boxes-stacked"></i> ${product.stock} i lager</div>
+        <button class="fav-btn" title="Spara som favorit">
+          <i class="fa-regular fa-heart"></i>
+        </button>
+        ${product.image ? `<div class="product-img-wrap"><img src="${product.image}" alt="${product.title}" class="product-img"></div>` : ''}
+        <div class="product-info">
+          <div class="product-meta">
+            <span class="product-location"><i class="fa-solid fa-location-dot"></i> ${capitalize(product.location)}</span>
+            ${getConditionPill(product.condition)}
+          </div>
+          <div class="product-title">${product.title}</div>
+          <div class="product-footer">
+            <div class="product-price">${product.price.toLocaleString('sv-SE')} kr</div>
+            <button class="btn-add-cart" title="Lägg i varukorg">
+              <i class="fa-solid fa-cart-plus"></i><span> Köp</span>
+            </button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.fav-btn').addEventListener('click', event => {
+        event.stopPropagation();
+        toggleFav(event.currentTarget);
+      });
+      card.querySelector('.btn-add-cart').addEventListener('click', event => {
+        event.stopPropagation();
+        addToCart(product.id);
+      });
+      return card;
+    }
+
+    function renderLatest() {
+      latestGrid.innerHTML = '';
+      productDatabase.filter(product => product.featured).forEach(product => {
+        latestGrid.appendChild(createProductCard(product));
+      });
+    }
+
+    function renderProducts(productList) {
+      feedContainer.innerHTML = '';
+      if(productList.length === 0) {
+        feedContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Inga produkter matchar dina sökkriterier.</p>';
+        return;
+      }
+      productList.forEach(product => feedContainer.appendChild(createProductCard(product)));
+    }
+
+    // VY-NAVIGERING: ÖPPNA PRODUKTSIDA (HELTÄCKANDE VY)
+    function openProductPage(id) {
+      const product = productDatabase.find(p => p.id === id);
+      if (!product) return;
+
+      productPageContent.innerHTML = `
+        ${product.image ? `<div class="product-page-img-wrap"><img src="${product.image}" alt="${product.title}" class="product-page-img"></div>` : ''}
+        <div class="product-page-info">
+          <div class="product-page-title">${product.title}</div>
+          <div class="product-page-price">${product.price.toLocaleString('sv-SE')} kr</div>
+          
+          <div class="product-page-spec-list">
+            <div class="spec-item">
+              <span>Lagerstatus:</span>
+              <strong style="color:var(--text-main);"><i class="fa-solid fa-boxes-stacked"></i> ${product.stock} st tillgängliga</strong>
+            </div>
+            <div class="spec-item">
+              <span>Tillstånd/Skick:</span>
+              ${getConditionPill(product.condition)}
+            </div>
+            <div class="spec-item">
+              <span>Plats / Ort:</span>
+              <strong><i class="fa-solid fa-location-dot"></i> ${capitalize(product.location)}</strong>
+            </div>
+          </div>
+
+          <div class="product-page-desc">
+            <h4 style="color:var(--text-main); margin-bottom: 0.5rem; font-weight:600;">Produktbeskrivning</h4>
+            ${product.description || 'Ingen ytterligare beskrivning angiven.'}
+          </div>
+
+          <div class="product-page-actions">
+            <button class="btn-page-buy" onclick="addToCart(${product.id})">
+              <i class="fa-solid fa-cart-plus"></i> Lägg i varukorg
+            </button>
+          </div>
+        </div>
+      `;
+
+      homeView.style.display = 'none';
+      productPageView.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    // VISA STARTSIDAN IGEN
+    function showHomeView(scrollToTop = false) {
+      if (productPageView.style.display !== 'none') {
+        productPageView.style.display = 'none';
+        homeView.style.display = 'block';
+      }
+      if (scrollToTop) {
+        window.scrollTo(0, 0);
+      }
+    }
+
+    // VARUKORG LOGIK
+    function addToCart(id) {
+      const product = productDatabase.find(p => p.id === id);
+      if (!product) return;
+
+      const existing = cart.find(item => item.id === id);
+      if(existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          qty: 1
+        });
+      }
+      updateCartUI();
+      openCart();
+    }
+
+    function updateQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+          removeFromCart(id);
+        } else {
+          updateCartUI();
+        }
+      }
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(item => item.id !== id);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      cartBadge.textContent = totalCount;
+      document.getElementById('checkoutBtn').disabled = cart.length === 0;
+
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      cartTotal.textContent = totalPrice.toLocaleString('sv-SE') + ' kr';
+
+      if(cart.length === 0) {
+        cartBody.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-cart-flatbed" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity:0.5;"></i><br>Din varukorg är tom.</div>';
+        return;
+      }
+
+      cartBody.innerHTML = '';
+      cart.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'cart-item';
+        itemEl.innerHTML = `
+          ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-item-img">` : ''}
+          <div class="cart-item-details">
+            <div class="cart-item-title">${item.title}</div>
+            <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>
+            <div class="cart-qty-controls">
+              <button class="qty-btn" onclick="updateQty(${item.id}, -1)" title="Minska antal">-</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="updateQty(${item.id}, 1)" title="Öka antal">+</button>
+            </div>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart(${item.id})" title="Ta bort">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        cartBody.appendChild(itemEl);
+      });
+    }
+
+    function openCart() { cartOverlay.classList.add('active'); }
+    function closeCart() { cartOverlay.classList.remove('active'); }
+    function goToCheckout() {
+      if (cart.length) window.location.href = 'checkout.html';
+    }
+
+    openCartBtn.addEventListener('click', openCart);
+    closeCartBtn.addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', (e) => {
+      if(e.target === cartOverlay) closeCart();
+    });
+
+    // HJÄLPFUNKTIONER
+    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+    function toggleFav(btn) {
+      btn.classList.toggle('active');
+      const icon = btn.querySelector('i');
+      if(btn.classList.contains('active')) {
+        icon.className = 'fa-solid fa-heart';
+      } else {
+        icon.className = 'fa-regular fa-heart';
+      }
+    }
+
+    // FILTRERING OCH HERO-SÖKNING (Behåller exakt scrollposition när man filtrerar)
+    function applyFilters(shouldScroll = false) {
+      showHomeView(false);
+
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+      const catVal = document.getElementById('categorySelect').value;
+      const locVal = document.getElementById('filterLocation').value;
+      const priceVal = document.getElementById('filterPrice').value;
+      const sortVal = document.getElementById('filterSort').value;
+
+      const isHeroFiltering = searchVal !== '' || catVal !== 'alla';
+
+      if (isHeroFiltering) {
+        latestSectionWrapper.style.display = 'none';
+        filterSectionWrapper.style.display = 'none';
+      } else {
+        latestSectionWrapper.style.display = 'block';
+        filterSectionWrapper.style.display = 'block';
+      }
+
+      let filtered = productDatabase.filter(p => !p.featured).filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(searchVal);
+        const matchesCat = catVal === 'alla' || p.category === catVal;
+        const matchesLoc = locVal === 'alla' || p.location === locVal;
+
+        let matchesPrice = true;
+        if(priceVal === 'low') matchesPrice = p.price < 2000;
+        else if(priceVal === 'mid') matchesPrice = p.price >= 2000 && p.price <= 10000;
+        else if(priceVal === 'high') matchesPrice = p.price > 10000;
+
+        return matchesSearch && matchesCat && matchesLoc && matchesPrice;
+      });
+
+      if(sortVal === 'price-asc') {
+        filtered.sort((a,b) => a.price - b.price);
+      } else if(sortVal === 'price-desc') {
+        filtered.sort((a,b) => b.price - a.price);
+      }
+
+      renderProducts(filtered);
+
+      if (shouldScroll) {
+        document.getElementById('productSectionWrapper').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // EVENT LISTENERS
+    document.getElementById('searchBtn').addEventListener('click', () => applyFilters(true));
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+      if(e.key === 'Enter') {
+        applyFilters(true);
+      } else {
+        applyFilters(false);
+      }
+    });
+    document.getElementById('categorySelect').addEventListener('change', () => applyFilters(true));
+    document.getElementById('filterLocation').addEventListener('change', () => applyFilters(false));
+    document.getElementById('filterPrice').addEventListener('change', () => applyFilters(false));
+    document.getElementById('filterSort').addEventListener('change', () => applyFilters(false));
+
+    // INITIALISERING
+    renderLatest();
+    renderProducts(productDatabase.filter(product => !product.featured));
+    updateCartUI();
+  </script>
+</body>
+</html>
