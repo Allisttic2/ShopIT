@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-labelledby="title desc">
+  <title id="title">Produktbild saknas</title>
+  <desc id="desc">Illustration av en dator med ett enkelt paketmönster.</desc>
+  <rect width="800" height="560" fill="#101a24"/>
+  <path d="M0 420 800 170v390H0z" fill="#15252b"/>
+  <circle cx="655" cy="112" r="92" fill="#b5c9b9" opacity=".1"/>
+  <g fill="none" stroke="#aebfb3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="246" y="136" width="308" height="224" rx="13" stroke-width="12"/>
+    <path d="M222 386h356l-32 37H254z" stroke-width="12"/>
+    <path d="M366 397h68" stroke-width="8"/>
+    <path d="M383 225h34m-17-17v34" stroke-width="8" opacity=".8"/>
+  </g>
+  <path d="M0 466h800" stroke="#b5c9b9" stroke-opacity=".12" stroke-width="2"/>
+  <text x="400" y="508" fill="#d9e2db" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle" letter-spacing="3">PRODUKTBILD SAKNAS</text>
+</svg>

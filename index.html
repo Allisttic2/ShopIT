@@ -1205,7 +1205,7 @@
         <button class="fav-btn" title="Spara som favorit">
           <i class="fa-regular fa-heart"></i>
         </button>
-        ${product.image ? `<div class="product-img-wrap"><img src="${product.image}" alt="${product.title}" class="product-img"></div>` : ''}
+        <div class="product-img-wrap"><img src="${product.image || 'images/product-placeholder.svg'}" alt="${product.title}" class="product-img"></div>
         <div class="product-info">
           <div class="product-meta">
             <span class="product-location"><i class="fa-solid fa-location-dot"></i> ${capitalize(product.location)}</span>
@@ -1253,7 +1253,7 @@
       if (!product) return;
 
       productPageContent.innerHTML = `
-        ${product.image ? `<div class="product-page-img-wrap"><img src="${product.image}" alt="${product.title}" class="product-page-img"></div>` : ''}
+        <div class="product-page-img-wrap"><img src="${product.image || 'images/product-placeholder.svg'}" alt="${product.title}" class="product-page-img"></div>
         <div class="product-page-info">
           <div class="product-page-title">${product.title}</div>
           <div class="product-page-price">${product.price.toLocaleString('sv-SE')} kr</div>
@@ -1359,7 +1359,7 @@
         const itemEl = document.createElement('div');
         itemEl.className = 'cart-item';
         itemEl.innerHTML = `
-          ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-item-img">` : ''}
+          <img src="${item.image || 'images/product-placeholder.svg'}" alt="${item.title}" class="cart-item-img">
           <div class="cart-item-details">
             <div class="cart-item-title">${item.title}</div>
             <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>

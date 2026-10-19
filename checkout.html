@@ -589,7 +589,7 @@
       const total = validCart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
       document.getElementById('checkoutItems').innerHTML = validCart.map(item => `
         <div class="summary-item">
-          ${item.image ? `<img src="${escapeHTML(item.image)}" alt="">` : ''}
+          <img src="${escapeHTML(item.image || 'images/product-placeholder.svg')}" alt="">
           <div>
             <div class="item-name">${escapeHTML(item.title)}</div>
             <div class="item-qty">${Number(item.qty)} st x ${money(item.price)}</div>

@@ -1593,7 +1593,7 @@
         card.className = 'ad-card';
         card.innerHTML = `
           <div class="ad-status-badge">${ad.status}</div>
-          ${ad.image ? `<div class="ad-img-wrap"><img src="${ad.image}" alt="${ad.title}" class="ad-img"></div>` : ''}
+          <div class="ad-img-wrap"><img src="${ad.image || 'images/product-placeholder.svg'}" alt="${ad.title}" class="ad-img"></div>
           <div class="ad-body">
             <div class="ad-meta-row">
               ${getConditionPill(ad.condition || 8)}
@@ -1837,7 +1837,7 @@
         const itemEl = document.createElement('div');
         itemEl.className = 'cart-item';
         itemEl.innerHTML = `
-          ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-item-img">` : ''}
+          <img src="${item.image || 'images/product-placeholder.svg'}" alt="${item.title}" class="cart-item-img">
           <div class="cart-item-details">
             <div class="cart-item-title">${item.title}</div>
             <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>
