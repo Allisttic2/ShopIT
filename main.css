@@ -162,6 +162,26 @@ header {
   border-color: var(--border-hover);
 }
 
+.auth-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-logout-btn:hover {
+  color: var(--text-main);
+  border-color: var(--border-hover);
+}
+
 footer {
   padding: 4rem 1.5rem 2rem;
   background-color: #05080e;

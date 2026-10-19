@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Logga in eller skapa konto på NTI-T Shopp.">
+  <title>Logga in - NTI-T Shopp</title>
+  <script src="auth.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body class="login-page">
+  <header class="login-header">
+    <div class="header-container">
+      <a href="login.html" class="logo" aria-label="NTI-T Shopp">
+        <img src="images/logo.png" alt="" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      <a class="login-help-link" href="help.html"><i class="fa-regular fa-circle-question"></i> Hjälpcenter</a>
+    </div>
+  </header>
+
+  <main class="login-main">
+    <section class="login-art" aria-label="NTI-T Shopp">
+      <div class="art-topline"><span class="art-mark"></span> SKOLANS IT-MARKNAD</div>
+      <div class="art-copy">
+        <p class="art-kicker">Ge tekniken ett nytt liv</p>
+        <h1>Rätt utrustning.<br>Rätt skola.</h1>
+        <p>Hitta, sälj och återanvänd IT-utrustning tillsammans med andra skolor.</p>
+      </div>
+      <div class="art-bottom"><span>NTI-T SHOPP</span><span>01 / 04</span></div>
+    </section>
+
+    <section class="auth-panel" aria-labelledby="authTitle">
+      <div class="auth-panel-inner">
+        <div class="auth-mobile-brand">
+          <img src="images/logo.png" alt="" class="logo-img">
+          <span>NTI-T SHOPP</span>
+        </div>
+        <p class="auth-eyebrow" id="authEyebrow">Välkommen tillbaka</p>
+        <h2 id="authTitle">Logga in</h2>
+        <p class="auth-subtitle" id="authSubtitle">Logga in för att fortsätta till marknadsplatsen.</p>
+
+        <div class="auth-tabs" role="tablist" aria-label="Välj kontoåtgärd">
+          <button class="auth-tab active" id="loginTab" type="button" role="tab" aria-selected="true">Logga in</button>
+          <button class="auth-tab" id="registerTab" type="button" role="tab" aria-selected="false">Skapa konto</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <div class="auth-field" id="nameField" hidden>
+            <label for="fullName">Namn / skola</label>
+            <div class="auth-input-wrap">
+              <i class="fa-regular fa-building" aria-hidden="true"></i>
+              <input id="fullName" name="fullName" type="text" autocomplete="organization" placeholder="Exempelvis NTI Gymnasiet">
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label for="email">E-postadress</label>
+            <div class="auth-input-wrap">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="namn@skola.se" required>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label for="password">Lösenord</label>
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Minst 8 tecken" minlength="8" required>
+              <button class="password-toggle" id="passwordToggle" type="button" title="Visa lösenord" aria-label="Visa lösenord"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="auth-field" id="confirmField" hidden>
+            <label for="confirmPassword">Bekräfta lösenord</label>
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Skriv lösenordet igen">
+            </div>
+          </div>
+
+          <p class="auth-message" id="authMessage" role="status" aria-live="polite" hidden></p>
+          <button class="auth-submit" id="authSubmit" type="submit">Logga in <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+
+        <p class="auth-legal" id="authLegal">Genom att logga in fortsätter du till NTI-T Shopp.</p>
+        <div class="auth-local-note"><i class="fa-solid fa-lock"></i><span>Detta konto sparas lokalt i den här webbläsaren.</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const USERS_KEY = 'ntit_users';
+      const SESSION_KEY = 'ntit_session';
+      const form = document.getElementById('authForm');
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const nameField = document.getElementById('nameField');
+      const confirmField = document.getElementById('confirmField');
+      const password = document.getElementById('password');
+      const message = document.getElementById('authMessage');
+      let mode = 'login';
+
+      function setMessage(text, isError = false) {
+        message.textContent = text;
+        message.hidden = !text;
+        message.classList.toggle('error', isError);
+      }
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        const registering = mode === 'register';
+        loginTab.classList.toggle('active', !registering);
+        registerTab.classList.toggle('active', registering);
+        loginTab.setAttribute('aria-selected', String(!registering));
+        registerTab.setAttribute('aria-selected', String(registering));
+        nameField.hidden = !registering;
+        confirmField.hidden = !registering;
+        document.getElementById('fullName').required = registering;
+        document.getElementById('confirmPassword').required = registering;
+        password.autocomplete = registering ? 'new-password' : 'current-password';
+        document.getElementById('authEyebrow').textContent = registering ? 'Bli en del av marknaden' : 'Välkommen tillbaka';
+        document.getElementById('authTitle').textContent = registering ? 'Skapa konto' : 'Logga in';
+        document.getElementById('authSubtitle').textContent = registering
+          ? 'Skapa ett konto för att köpa och annonsera skolutrustning.'
+          : 'Logga in för att fortsätta till marknadsplatsen.';
+        document.getElementById('authSubmit').innerHTML = registering
+          ? 'Skapa konto <i class="fa-solid fa-arrow-right"></i>'
+          : 'Logga in <i class="fa-solid fa-arrow-right"></i>';
+        document.getElementById('authLegal').textContent = registering
+          ? 'Kontot används för att komma åt NTI-T Shopp på den här enheten.'
+          : 'Genom att logga in fortsätter du till NTI-T Shopp.';
+        setMessage('');
+      }
+
+      function bytesToBase64(bytes) {
+        return btoa(String.fromCharCode(...new Uint8Array(bytes)));
+      }
+
+      async function hashPassword(value, salt) {
+        const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, keyMaterial, 256);
+        return bytesToBase64(bits);
+      }
+
+      function getUsers() {
+        try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+        catch { return []; }
+      }
+
+      loginTab.addEventListener('click', () => setMode('login'));
+      registerTab.addEventListener('click', () => setMode('register'));
+
+      document.getElementById('passwordToggle').addEventListener('click', event => {
+        const visible = password.type === 'password';
+        password.type = visible ? 'text' : 'password';
+        event.currentTarget.setAttribute('aria-label', visible ? 'Dölj lösenord' : 'Visa lösenord');
+        event.currentTarget.title = visible ? 'Dölj lösenord' : 'Visa lösenord';
+        event.currentTarget.innerHTML = `<i class="fa-regular fa-eye${visible ? '-slash' : ''}"></i>`;
+      });
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        setMessage('');
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const passwordValue = password.value;
+        const users = getUsers();
+        const submit = document.getElementById('authSubmit');
+        submit.disabled = true;
+
+        try {
+          if (mode === 'register') {
+            const name = document.getElementById('fullName').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (!name) throw new Error('Fyll i namn eller skolans namn.');
+            if (passwordValue.length < 8) throw new Error('Lösenordet måste innehålla minst 8 tecken.');
+            if (passwordValue !== confirmPassword) throw new Error('Lösenorden matchar inte.');
+            if (users.some(user => user.email === email)) throw new Error('Det finns redan ett konto med den e-postadressen. Logga in i stället.');
+
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            users.push({ email, name, salt: bytesToBase64(salt), passwordHash: await hashPassword(passwordValue, salt) });
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+          } else {
+            const user = users.find(entry => entry.email === email);
+            if (!user) throw new Error('Kontot hittades inte. Skapa ett konto först.');
+            const salt = Uint8Array.from(atob(user.salt), character => character.charCodeAt(0));
+            if (await hashPassword(passwordValue, salt) !== user.passwordHash) throw new Error('E-postadressen eller lösenordet stämmer inte.');
+          }
+
+          localStorage.setItem(SESSION_KEY, JSON.stringify({ email, createdAt: Date.now() }));
+          const next = new URLSearchParams(location.search).get('next');
+          const allowedPages = ['index.html', 'profil.html', 'checkout.html', 'help.html'];
+          location.replace(allowedPages.includes(next) ? next : 'index.html');
+        } catch (error) {
+          setMessage(error.message || 'Det gick inte att spara kontot. Kontrollera webbläsarens lagring och försök igen.', true);
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
