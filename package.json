@@ -1,0 +1,21 @@
+{
+  "name": "shopit-database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ShopIT database setup and verification tools",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "db:status": "node database/manage.mjs status",
+    "db:migrate": "node database/manage.mjs migrate",
+    "db:seed": "node database/manage.mjs seed",
+    "db:verify": "node database/manage.mjs verify"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.2",
+    "@neon/env": "^1.6.3",
+    "dotenv": "^18.0.8",
+    "pg": "^8.23.1"
+  }
+}

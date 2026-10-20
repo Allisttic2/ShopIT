@@ -14,7 +14,15 @@ React kommunicerar med backend via ett API. Backend läser och skriver i Postgre
 
 Vid köp ska ordern skapas och lagersaldot uppdateras i samma databastransaktion, så att samtidiga köp inte kan sälja fler exemplar än vad som finns. Varje orderrad sparar priset vid köptillfället, så att senare prisändringar inte påverkar tidigare order eller fakturor.
 
-Val av hosting och integration med SchoolSoft återstår att fastställa.
+Databasen körs på **Neon (molnbaserad PostgreSQL)** i projektet `sweet-sky-05648360`, branch `production`, för demon med upp till cirka 15 testare. Hosting för frontend/backend och integration med SchoolSoft återstår att fastställa.
+
+## Databas – Anton Lindgren och Rasmus
+
+Anton och Rasmus ansvarar för databasdelen: SQL-schema, relationer, ER-diagram, testdata och Neon-konfiguration. Backendteamet ansvarar för Node.js/Express, anslutningen till databasen, API, behörigheter och köptransaktioner.
+
+Databasfiler, ER-diagram, installationssteg och överlämning finns i [database/README.md](database/README.md). De fem tabeller som uppgiften kräver och sex dummy-annonser är nu installerade i Neon och verifierade via Node.js-databasverktygen. Schema och seed testades först på en isolerad Neon-branch. Backendteamet behöver fortfarande koppla in API och autentisering. Kör `npm install` och `npm run db:status` efter att anslutningsuppgifterna har konfigurerats privat. Ingen ny webbserver eller app-build har lagts till i detta databasarbete.
+
+Underlag: [databaskortet i Trello](https://trello.com/c/kcTl3R5z), [planeringsmötet](https://trello.com/c/lmzzXC1y) och [projektspecifikationen](https://docs.google.com/document/d/1954j7vGA32ExfJ2vr5VcZzSdrLb0nRkv/edit). Befintlig plan är publicering 3 november och slutpresentation 6 november 2026.
 
 ## Definition of Done
 
