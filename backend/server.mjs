@@ -35,13 +35,14 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ error: 'Något gick fel på servern. Försök igen.' });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`ShopIT backend körs på http://localhost:${port} (databas: ${process.env.NEON_BRANCH ?? 'okänd branch'})`);
 });
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, () => {
-    app.close(async () => {
+    // Express 5: the app is a request handler; only the http.Server can close.
+    server.close(async () => {
       await closePool().catch(() => {});
       process.exit(0);
     });
