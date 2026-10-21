@@ -24,6 +24,12 @@ function demoPassword() {
   return process.env.DEMO_PASSWORD || 'demo1234';
 }
 
+function matchesDemoPassword(password) {
+  const expected = Buffer.from(demoPassword());
+  const given = Buffer.from(password);
+  return expected.length === given.length && crypto.timingSafeEqual(expected, given);
+}
+
 function isUuid(value) {
   return typeof value === 'string' && UUID.test(value);
 }
@@ -86,7 +92,7 @@ async function placeOrder(buyer, items) {
   return withTransaction(async (client) => {
     const orderRes = await client.query(
       `INSERT INTO shopit.orders (buyer_school_id, buyer_name, buyer_email, buyer_billing_address, buyer_billing_reference)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`,
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [buyer.id, buyer.name, buyer.contact_email, buyer.billing_address, buyer.billing_reference]
     );
     const orderId = orderRes.rows[0].id;
@@ -103,7 +109,7 @@ async function placeOrder(buyer, items) {
          JOIN shopit.products p ON p.id = l.product_id
          JOIN shopit.schools s ON s.id = p.school_id
          WHERE l.id = $1
-         FOR UPDATE`,
+         FOR UPDATE OF l, p`,
         [item.listing_id]
       );
       const row = res.rows[0];
@@ -127,7 +133,7 @@ async function placeOrder(buyer, items) {
         await client.query(`UPDATE shopit.listings SET status = 'sold' WHERE id = $1`, [row.id]);
       }
     }
-    return { order: { id: orderId, created_at: orderRes.rows[0].created_at }, items: placed };
+    return { order: orderRes.rows[0], items: placed };
   });
 }
 
@@ -179,9 +185,7 @@ export function createApiRouter() {
       const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
       const password = typeof req.body?.password === 'string' ? req.body.password : '';
       const school = await fetchSchoolByContactEmail(email);
-      const expected = Buffer.from(demoPassword());
-      const given = Buffer.from(password);
-      const ok = school && expected.length === given.length && crypto.timingSafeEqual(expected, given);
+      const ok = school && matchesDemoPassword(password);
       if (!ok) throw new HttpError(401, 'E-postadressen eller lösenordet stämmer inte.');
       res.json({ token: signToken(school.id), school: schoolSummary(school) });
     } catch (error) { next(error); }
@@ -195,6 +199,9 @@ export function createApiRouter() {
       if (!name) throw new HttpError(400, 'Ange ett namn eller skolans namn.');
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, 'Ange en giltig e-postadress.');
       if (password.length < 8) throw new HttpError(400, 'Lösenordet måste innehålla minst 8 tecken.');
+      if (!matchesDemoPassword(password)) {
+        throw new HttpError(400, 'Alla skolor använder projektets gemensamma demolösenord, även vid registrering. Ange demolösenordet och försök igen.');
+      }
       if (await fetchSchoolByContactEmail(email)) {
         throw new HttpError(409, 'Det finns redan en skola med den e-postadressen. Logga in i stället.');
       }
@@ -397,7 +404,8 @@ export function createApiRouter() {
         byListing.set(raw.listing_id, (byListing.get(raw.listing_id) || 0) + quantity);
       }
       if (!byListing.size) throw new HttpError(400, 'Inga produkter att köpa.');
-      const items = [...byListing].map(([listing_id, quantity]) => ({ listing_id, quantity }));
+      const items = [...byListing].map(([listing_id, quantity]) => ({ listing_id, quantity }))
+        .sort((a, b) => a.listing_id.localeCompare(b.listing_id));
 
       const placed = await placeOrder(req.school, items);
       const total = placed.items.reduce((sum, item) => sum + Number(item.line_total), 0);

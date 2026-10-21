@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NTI-T Shopp</title>
   <script src="api.js"></script>
+  <script src="auth.js"></script>
   <!-- Font Awesome Ikoner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="main.css">
@@ -1115,12 +1116,7 @@
 
     // VARUKORG TILLSTÅND (lokal; rader pekar på listings via uuid)
     const CART_KEY = 'ntit_cart';
-    let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]')
-      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
-      .map(item => ({
-        ...item,
-        image: typeof item.image === 'string' && item.image ? item.image : ''
-      }));
+    let cart = NTIT.readCart();
 
     // ELEMENT REFERENSER
     const feedContainer = document.getElementById('productFeed');

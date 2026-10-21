@@ -589,12 +589,7 @@
     const CART_KEY = 'ntit_cart';
     const INVOICE_KEY = 'ntit_last_invoice';
     // Rader i varukorgen pekar på listings via uuid; äldre mock-rader kastas.
-    const cart = readJSON(CART_KEY, [])
-      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
-      .map(item => ({
-        ...item,
-        image: typeof item.image === 'string' && item.image ? item.image : ''
-      }));
+    const cart = NTIT.readCart();
     // Beställaren snapshottas av servern från skolraden – formfälten är informativa.
     const school = (NTIT.getSession() || {}).school || {};
     const money = value => NTIT.money(value);

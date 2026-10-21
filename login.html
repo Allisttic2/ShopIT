@@ -87,7 +87,7 @@
         </form>
 
         <div class="auth-demo-hint" id="authDemoHint">
-          <i class="fa-solid fa-flask"></i> Demo: logga in med <code>stockholm@example.test</code> och lösenordet <code>demo1234</code> (samma lösenord gäller för alla inlagda skolor).
+          <i class="fa-solid fa-flask"></i> Demo: logga in med <code>stockholm@example.test</code>. Alla skolor använder projektets gemensamma demolösenord (standard: <code>demo1234</code>), även när ett nytt konto skapas.
         </div>
 
         <p class="auth-legal" id="authLegal">Genom att logga in fortsätter du till NTI-T Shopp.</p>
@@ -136,7 +136,7 @@
         document.getElementById('authLegal').textContent = registering
           ? 'Kontot används för att komma åt NTI-T Shopp.'
           : 'Genom att logga in fortsätter du till NTI-T Shopp.';
-        document.getElementById('authDemoHint').hidden = registering;
+        document.getElementById('authDemoHint').hidden = false;
         setMessage('');
       }
 
@@ -153,10 +153,12 @@
 
       form.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!form.reportValidity()) return;
         setMessage('');
         const email = document.getElementById('email').value.trim().toLowerCase();
         const passwordValue = password.value;
         const submit = document.getElementById('authSubmit');
+        if (submit.disabled) return;
         submit.disabled = true;
 
         try {

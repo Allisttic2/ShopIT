@@ -24,8 +24,14 @@ app.use('/api', createApiRouter());
 // Uploaded product images (served under /uploads/...).
 app.use('/uploads', express.static(path.join(backendDir, 'uploads'), { fallthrough: false, maxAge: '7d' }));
 
-// Static frontend (index.html, login.html, ... and /images).
-app.use(express.static(root, { index: 'index.html' }));
+// Only frontend assets are public; backend source, SQL and outbox stay private.
+app.use('/images', express.static(path.join(root, 'images')));
+const publicFiles = new Set([
+  '/', '/index.html', '/login.html', '/profil.html', '/checkout.html', '/help.html',
+  '/main.css', '/login.css', '/help.css', '/api.js', '/auth.js'
+]);
+const frontend = express.static(root, { index: 'index.html' });
+app.use((req, res, next) => publicFiles.has(req.path) ? frontend(req, res, next) : next());
 
 // JSON error handler: HttpError keeps its status, everything else is 500.
 app.use((error, _req, res, _next) => {

@@ -23,6 +23,17 @@
     localStorage.removeItem(SESSION_KEY);
   }
 
+  function readCart() {
+    let value;
+    try { value = JSON.parse(localStorage.getItem('ntit_cart') || '[]'); }
+    catch { return []; }
+    if (!Array.isArray(value)) return [];
+    return value.filter(item => item && UUID.test(String(item.id || '')) &&
+      typeof item.title === 'string' && Number.isSafeInteger(Number(item.qty)) && Number(item.qty) > 0 &&
+      Number.isFinite(Number(item.price)) && Number(item.price) >= 0
+    ).map(item => ({ ...item, qty: Number(item.qty), price: Number(item.price) }));
+  }
+
   async function request(path, options = {}) {
     const headers = { Accept: 'application/json' };
     const session = getSession();
@@ -95,5 +106,14 @@
     escapeHTML,
     money,
     shortId,
+    readCart,
   };
+
+  // Every HTML page loads api.js, including the public homepage.
+  if (window.location?.protocol === 'file:') {
+    const pages = ['login.html', 'index.html', 'profil.html', 'checkout.html', 'help.html'];
+    const name = window.location.pathname.split('/').pop();
+    const page = pages.includes(name) ? name : 'index.html';
+    window.location.replace(`http://127.0.0.1:3000/${page}${window.location.search || ''}${window.location.hash || ''}`);
+  }
 })();

@@ -9,18 +9,9 @@ npm install
 cp .env.example .env   # fyll i DATABASE_URL (se nedan) och AUTH_SECRET
 ```
 
-Databas – två alternativ:
+Databasen körs på **Neon**. Använd projektets befintliga `.env.local`, eller konfigurera `DATABASE_URL` och `DATABASE_URL_UNPOOLED` med anslutningsuppgifterna från Neon. `.env.local` läses före `.env`. Behåll befintliga anslutningsuppgifter om de redan är konfigurerade. Schema och seed är redan installerade på `production`.
 
-1. **Lokalt (Docker)**:
-   ```bash
-   docker compose up -d db
-   # .env (port 5433 – 5432 är ofta upptagen av en lokal PostgreSQL):
-   DATABASE_URL=postgresql://shopit:shopit@localhost:5433/shopit
-   DATABASE_URL_UNPOOLED=postgresql://shopit:shopit@localhost:5433/shopit
-   npm run db:migrate
-   npm run db:seed
-   ```
-2. **Neon** (befintlig installation): kopiera `DATABASE_URL`/`DATABASE_URL_UNPOOLED` från `neon deploy` (`neon deploy` skapar `.env.local`). Schema och seed är redan installerade på `production`.
+Kontrollera anslutningen med `npm run db:status`.
 
 Kör sedan:
 
@@ -84,4 +75,10 @@ curl -s -X POST localhost:3000/api/orders/direct \
 ## Bekräftade gränser
 
 - Inloggning är demonivå: alla skolor delar `DEMO_PASSWORD` och skolan är kontot (ingen `users`-tabell i schemat). SchoolSoft-kopplingen är planerad och ersätter detta.
-- Frontenden i rotkatalogen är i dagsläget statisk och kallar ännu inte API:et – det är nästa steg. Endpunkterna ovan täcker allt som behövs.
+- Frontenden i rotkatalogen använder API:et för annonser, inloggning, inventarie, bilduppladdning och beställningar. Skoluppgifter är ännu skrivskyddade i profilen.
+- Registrering kräver samma `DEMO_PASSWORD` som inloggning; separata användarlösenord stöds inte i denna demo.
+- Utan SMTP sparas bekräftelser lokalt som HTML. Detta verifierar inte faktisk e-postleverans eller bifogad PDF.
+
+## Regressionstester
+
+Kör `npm test` för tester av sessionshantering, sparad varukorg, fakturaunderlag och frontendens syntax. Databas- och köpflöden behöver dessutom integrationstestas mot en separat testdatabas.
