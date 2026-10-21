@@ -1,5 +1,22 @@
 # ShopIT
 
+## Kör frontendprototypen lokalt
+
+Kör `npm start` från projektmappen och öppna `http://127.0.0.1:4173/login.html`.
+Använd samma adress varje gång: lokala konton och annonser delas inte mellan
+`localhost`, `127.0.0.1`, andra portar, filadresser eller olika webbläsare.
+Skapa ett eget testkonto via **Skapa konto** första gången. Något förinstallerat
+gemensamt testkonto finns inte. Förhandsvisningen kräver Node.js 22 eller senare.
+Öppnade HTML-filer omdirigeras till denna lokala server för att förhindra att
+inloggningen växlar mellan `login.html` och `index.html`. Servern måste vara igång.
+
+Detta startar den nuvarande HTML/JavaScript-prototypen. Node/Express-backend och
+SchoolSoft-inloggning är ännu inte inkopplade. Konton och data sparas lokalt i
+webbläsaren. Inloggningen kräver Web Crypto, som finns på HTTPS och lokala
+loopback-adresser. Använd inte en vanlig HTTP-adress på nätverket för login.
+
+Inloggningens regressionstester körs med `npm run test:auth`.
+
 ## Teknikstack
 
 Vi använder **JavaScript i både frontend och backend** samt **SQL för databasen**.

@@ -792,6 +792,79 @@
       background: var(--accent-hover);
     }
 
+    .ad-dialog {
+      margin: auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--text-main);
+      width: min(640px, calc(100% - 2rem));
+      max-height: calc(100dvh - 2rem);
+      overflow: visible;
+    }
+
+    .ad-dialog::backdrop {
+      background: rgba(4, 7, 12, 0.82);
+      backdrop-filter: blur(5px);
+    }
+
+    body:has(.ad-dialog[open]) { overflow: hidden; }
+
+    .ad-dialog .modal-card {
+      transform: none;
+      max-height: calc(100dvh - 2rem);
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+    }
+
+    .ad-dialog form {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .ad-dialog .modal-body { max-height: none; min-height: 0; }
+    .ad-dialog .modal-header, .ad-dialog .modal-footer { flex-shrink: 0; }
+    .ad-dialog .form-group { min-width: 0; }
+    .ad-heading-grid, .ad-number-grid, .ad-content-grid { display: grid; gap: 1rem; }
+    .ad-heading-grid { grid-template-columns: 1.3fr 1fr; }
+    .ad-number-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ad-content-grid { grid-template-columns: 210px minmax(0, 1fr); align-items: start; }
+    .ad-content-grid textarea { min-height: 180px; }
+    .ad-content-grid .file-upload-zone { padding: 1rem; min-height: 160px; }
+    .ad-content-grid .file-upload-text { font-size: 0.85rem; }
+    .ad-content-grid .file-upload-subtext { font-size: 0.72rem; }
+    .ad-content-grid .btn-secondary { padding: 0.5rem 0.65rem; font-size: 0.8rem; }
+    .ad-dialog textarea { resize: vertical; min-height: 110px; }
+    .ad-dialog button:focus-visible { outline: 2px solid var(--text-main); outline-offset: 3px; }
+    .ad-dialog [hidden] { display: none !important; }
+    .ad-dialog .file-preview-wrap img { object-fit: contain; }
+    .ad-image-actions { display: flex; gap: 0.6rem; margin-top: 0.7rem; flex-wrap: wrap; }
+    .ad-image-actions button { min-height: 42px; }
+    .ad-form-error { color: #fca5a5; font-size: 0.9rem; }
+    .ad-form-error:not([hidden]) { padding: 0.8rem; border: 1px solid #ef444466; border-radius: 8px; }
+    #deleteAdModal { width: min(440px, calc(100% - 2rem)); }
+    .delete-ad-summary { display: flex; align-items: center; gap: 1rem; }
+    .delete-ad-summary img { width: 70px; height: 70px; object-fit: contain; border-radius: 8px; background: var(--bg-main); }
+    .delete-ad-summary p { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.4rem; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .ad-feedback { color: var(--success-color); margin-bottom: 1rem; }
+    .ad-feedback:empty { display: none; }
+
+    @media (max-width: 600px) {
+      .ad-dialog .modal-header, .ad-dialog .modal-body, .ad-dialog .modal-footer { padding: 1rem; }
+      .ad-dialog .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .ad-heading-grid, .ad-content-grid { grid-template-columns: 1fr; }
+      .ad-number-grid { gap: 0.6rem; }
+      .ad-number-grid .form-input { padding-inline: 0.6rem; }
+      .ad-number-grid label { font-size: 0.7rem; letter-spacing: 0; }
+      .ad-dialog .modal-footer button { flex: 1; min-height: 44px; padding-inline: 0.6rem; }
+      .ad-dialog .modal-header h3 { font-size: 1.05rem; }
+    }
+
     /* --- VARUKORG SIDEBAR --- */
     .cart-overlay {
       position: fixed;
@@ -1165,6 +1238,7 @@
           <span style="color: var(--text-muted); font-size: 0.9rem;" id="myAdsCount">0 publicerade annonser</span>
         </div>
 
+        <p class="ad-feedback" id="adFeedback" role="status" aria-live="polite"></p>
         <div class="ads-grid" id="myAdsGrid">
           <!-- Genereras dynamiskt via JS -->
         </div>
@@ -1303,20 +1377,20 @@
   </div>
 
   <!-- MODAL 2: LÄGG UPP NY ANNONSER -->
-  <div class="modal-overlay" id="newAdModal">
+  <dialog class="ad-dialog" id="newAdModal" aria-labelledby="adModalTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-plus-circle"></i> Skapa ny annons</h3>
-        <button class="close-modal-btn" onclick="closeNewAdModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="adModalTitle">Skapa ny annons</h3>
+        <button class="close-modal-btn" type="button" aria-label="Stäng annonsfönstret" onclick="closeNewAdModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="newAdForm" onsubmit="handleCreateAd(event)">
         <div class="modal-body">
-          <div class="form-group">
-            <label for="adTitle">Rubrik / Titel</label>
-            <input type="text" id="adTitle" class="form-input no-icon" placeholder="t.ex. Lenovo ThinkPad L14 Gen 2" required>
-          </div>
+          <div class="ad-heading-grid">
+            <div class="form-group">
+              <label for="adTitle">Rubrik / Titel</label>
+              <input type="text" id="adTitle" class="form-input no-icon" placeholder="t.ex. Lenovo ThinkPad L14 Gen 2" maxlength="160" required autofocus>
+            </div>
 
-          <div class="form-grid">
             <div class="form-group">
               <label for="adCategory">Kategori</label>
               <select id="adCategory" class="form-input no-icon" style="background:var(--bg-main);" required>
@@ -1328,38 +1402,41 @@
                 <option value="natverk">Nätverk & Server</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label for="adPrice">Pris (kr)</label>
-              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" required>
-            </div>
           </div>
 
-          <div class="form-grid">
+          <div class="ad-number-grid">
             <div class="form-group">
-              <label for="adStock">Antal i lager</label>
-              <input type="number" id="adStock" class="form-input no-icon" value="1" min="1" required>
+              <label for="adPrice">Pris (kr)</label>
+              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="adStock">Antal</label>
+              <input type="number" id="adStock" class="form-input no-icon" value="1" min="1" step="1" required>
             </div>
 
             <div class="form-group">
               <label for="adCondition">Skick (1 - 10)</label>
-              <input type="number" id="adCondition" class="form-input no-icon" value="8" min="1" max="10" required>
+              <input type="number" id="adCondition" class="form-input no-icon" value="8" min="1" max="10" step="1" required>
             </div>
           </div>
 
           <!-- GALLERILADDNING -->
+          <div class="ad-content-grid">
           <div class="form-group">
-            <label>Annonsbild (Ladda upp från enhet/galleri)</label>
-            <div class="file-upload-zone" id="adDropZone" onclick="document.getElementById('adFileInput').click()">
+            <label>Annonsbild</label>
+            <div class="file-upload-zone" id="adDropZone" role="button" tabindex="0" aria-label="Välj annonsbild" onclick="document.getElementById('adFileInput').click()">
               <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
-              <div class="file-upload-text">Klicka för att välja bild från galleriet</div>
-              <div class="file-upload-subtext">Eller dra och släpp en bildfil här (PNG, JPG, WEBP)</div>
-              <input type="file" id="adFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'ad')">
+              <div class="file-upload-text">Välj bild eller dra hit</div>
+              <div class="file-upload-subtext">PNG, JPG, WEBP · max 3 MB</div>
             </div>
 
+            <input type="file" id="adFileInput" accept="image/png,image/jpeg,image/webp" hidden onchange="handleFileSelect(event, 'ad')">
             <div class="file-preview-wrap" id="adPreviewWrap" style="display:none;">
               <img id="adImagePreview" alt="Förhandsgranskning">
-              <button type="button" class="btn-remove-img" onclick="removeImage('ad')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="ad-image-actions" id="adImageActions" hidden>
+              <button type="button" class="btn-secondary" onclick="document.getElementById('adFileInput').click()"><i class="fa-regular fa-image"></i> Byt bild</button>
+              <button type="button" class="btn-secondary" onclick="removeImage('ad')">Ta bort bild</button>
             </div>
           </div>
 
@@ -1367,15 +1444,40 @@
             <label for="adDescription">Beskrivning</label>
             <textarea id="adDescription" class="form-input no-icon" rows="3" placeholder="Beskriv hårdvarans skick, specifikationer..." style="resize:vertical;"></textarea>
           </div>
+          </div>
+          <p class="ad-form-error" id="adFormError" role="alert" hidden></p>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeNewAdModal()">Avbryt</button>
-          <button type="submit" class="btn-primary">Publicera annons</button>
+          <button type="submit" class="btn-primary" id="adSubmitButton">Publicera annons</button>
         </div>
       </form>
     </div>
-  </div>
+  </dialog>
+
+  <dialog class="ad-dialog" id="deleteAdModal" aria-labelledby="deleteAdTitle" aria-describedby="deleteAdDescription">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="deleteAdTitle">Ta bort annons?</h3>
+        <button type="button" class="close-modal-btn" aria-label="Stäng bekräftelsen" onclick="closeDeleteAdModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-ad-summary">
+          <img id="deleteAdImage" src="images/product-placeholder.svg" alt="">
+          <div>
+            <strong id="deleteAdName"></strong>
+            <p id="deleteAdDescription">Annonsen tas bort. Inventariet påverkas inte.</p>
+          </div>
+        </div>
+        <p class="ad-form-error" id="deleteAdError" role="alert" hidden></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeDeleteAdModal()" autofocus>Avbryt</button>
+        <button type="button" class="btn-primary btn-danger" id="confirmDeleteAdButton" onclick="confirmDeleteAd()"><i class="fa-solid fa-trash-can"></i> Ta bort annons</button>
+      </div>
+    </div>
+  </dialog>
 
   <!-- VARUKORG SIDEBAR / MODAL -->
   <div class="cart-overlay" id="cartOverlay">
@@ -1449,6 +1551,8 @@
         price: 3200,
         stock: 2,
         condition: 9,
+        category: "natverk",
+        description: "Cisco Catalyst 2960X med 48 portar.",
         status: "Aktiv",
       },
       {
@@ -1457,6 +1561,8 @@
         price: 4500,
         stock: 5,
         condition: 8,
+        category: "datorer",
+        description: "Dell Latitude 5420 med Intel Core i5 och 16 GB RAM.",
         status: "Aktiv",
       },
       {
@@ -1465,6 +1571,8 @@
         price: 850,
         stock: 10,
         condition: 7,
+        category: "skarmar",
+        description: "HP EliteDisplay E243i, 24-tumsskärm.",
         status: "Aktiv",
       }
     ];
@@ -1477,14 +1585,52 @@
       { id: "INV-5112", title: "HP EliteDisplay E243i", category: "Skärmar", serial: "6CM912108Y", status: "for-sale", location: "Förråd A", price: 850, condition: 8 }
     ];
 
-    let myAds = (JSON.parse(localStorage.getItem('ntit_my_ads')) || initialAds).map(ad => ({
+    function readStoredAds() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('ntit_my_ads'));
+        return Array.isArray(stored) ? stored : initialAds;
+      } catch { return initialAds; }
+    }
+
+    let myAds = readStoredAds().filter(ad => ad && typeof ad === 'object').map(ad => ({
+      ...initialAds.find(initial => initial.id === ad.id),
       ...ad,
       image: typeof ad.image === 'string' && ad.image.startsWith('data:image/') ? ad.image : ''
     }));
-    let inventory = JSON.parse(localStorage.getItem('ntit_inventory')) || initialInventory;
+    let inventory = window.ShopITStorage.read('ntit_inventory', initialInventory).filter(item => item && typeof item === 'object');
 
     let invUploadedBase64 = null;
     let adUploadedBase64 = null;
+    let editingAdId = null;
+    let deletingAdId = null;
+    let adImageReadVersion = 0;
+    let adImageLoading = false;
+    let adDialogTrigger = null;
+    let deleteDialogTrigger = null;
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[character]));
+    }
+
+    function showAdError(id, message = '') {
+      const error = document.getElementById(id);
+      error.textContent = message;
+      error.hidden = !message;
+    }
+
+    function persistAds(nextAds, errorId) {
+      try {
+        localStorage.setItem('ntit_my_ads', JSON.stringify(nextAds));
+        myAds = nextAds;
+        renderMyAds();
+        return true;
+      } catch {
+        showAdError(errorId, 'Det gick inte att spara. Webbläsarens lagring kan vara full eller blockerad. Prova en mindre bild och försök igen.');
+        return false;
+      }
+    }
 
     function saveToLocalStorage() {
       localStorage.setItem('ntit_my_ads', JSON.stringify(myAds));
@@ -1495,6 +1641,18 @@
       const file = e.target.files ? e.target.files[0] : (e.dataTransfer ? e.dataTransfer.files[0] : null);
       if (!file) return;
 
+      if (type === 'ad') {
+        showAdError('adFormError');
+        if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 3 * 1024 * 1024) {
+          showAdError('adFormError', 'Välj en PNG-, JPG- eller WEBP-bild som är högst 3 MB.');
+          document.getElementById('adFileInput').value = '';
+          return;
+        }
+        adImageLoading = true;
+        document.getElementById('adSubmitButton').disabled = true;
+      }
+
+      const readVersion = type === 'ad' ? ++adImageReadVersion : null;
       const reader = new FileReader();
       reader.onload = function(evt) {
         const base64Url = evt.target.result;
@@ -1504,11 +1662,21 @@
           document.getElementById('invDropZone').style.display = 'none';
           document.getElementById('invPreviewWrap').style.display = 'block';
         } else {
+          if (readVersion !== adImageReadVersion) return;
+          adImageLoading = false;
+          document.getElementById('adSubmitButton').disabled = false;
           adUploadedBase64 = base64Url;
           document.getElementById('adImagePreview').src = base64Url;
           document.getElementById('adDropZone').style.display = 'none';
           document.getElementById('adPreviewWrap').style.display = 'block';
+          document.getElementById('adImageActions').hidden = false;
         }
+      };
+      reader.onerror = () => {
+        if (type !== 'ad' || readVersion !== adImageReadVersion) return;
+        adImageLoading = false;
+        document.getElementById('adSubmitButton').disabled = false;
+        showAdError('adFormError', 'Bilden kunde inte läsas. Välj en annan bild och försök igen.');
       };
       reader.readAsDataURL(file);
     }
@@ -1521,11 +1689,15 @@
         document.getElementById('invPreviewWrap').style.display = 'none';
         document.getElementById('invDropZone').style.display = 'flex';
       } else {
+        adImageReadVersion++;
+        adImageLoading = false;
+        document.getElementById('adSubmitButton').disabled = false;
         adUploadedBase64 = null;
         document.getElementById('adFileInput').value = '';
         document.getElementById('adImagePreview').removeAttribute('src');
         document.getElementById('adPreviewWrap').style.display = 'none';
         document.getElementById('adDropZone').style.display = 'flex';
+        document.getElementById('adImageActions').hidden = true;
       }
     }
 
@@ -1592,21 +1764,23 @@
         const card = document.createElement('div');
         card.className = 'ad-card';
         card.innerHTML = `
-          <div class="ad-status-badge">${ad.status}</div>
-          <div class="ad-img-wrap"><img src="${ad.image || 'images/product-placeholder.svg'}" alt="${ad.title}" class="ad-img"></div>
+          <div class="ad-status-badge">${escapeHTML(ad.status)}</div>
+          <div class="ad-img-wrap"><img src="${escapeHTML(ad.image || 'images/product-placeholder.svg')}" alt="${escapeHTML(ad.title)}" class="ad-img"></div>
           <div class="ad-body">
             <div class="ad-meta-row">
               ${getConditionPill(ad.condition || 8)}
               <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.stock} i lager</span>
             </div>
-            <div class="ad-title">${ad.title}</div>
-            <div class="ad-price">${parseInt(ad.price).toLocaleString('sv-SE')} kr</div>
+            <div class="ad-title">${escapeHTML(ad.title)}</div>
+            <div class="ad-price">${Number(ad.price).toLocaleString('sv-SE')} kr</div>
             <div class="ad-actions">
-              <button class="btn-ad-action" onclick="alert('Redigera annons ${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
-              <button class="btn-ad-action delete" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i> Ta bort</button>
+              <button type="button" class="btn-ad-action" data-ad-action="edit"><i class="fa-solid fa-pen"></i> Redigera</button>
+              <button type="button" class="btn-ad-action delete" data-ad-action="delete"><i class="fa-solid fa-trash"></i> Ta bort</button>
             </div>
           </div>
         `;
+        card.querySelector('[data-ad-action="edit"]').addEventListener('click', () => openEditAdModal(ad.id));
+        card.querySelector('[data-ad-action="delete"]').addEventListener('click', () => deleteAd(ad.id));
         grid.appendChild(card);
       });
 
@@ -1614,11 +1788,25 @@
     }
 
     function deleteAd(id) {
-      if (confirm('Är du säker på att du vill ta bort den här annonsen?')) {
-        myAds = myAds.filter(a => a.id !== id);
-        saveToLocalStorage();
-        renderMyAds();
-      }
+      const ad = myAds.find(item => item.id === id);
+      if (!ad) return;
+      deletingAdId = id;
+      deleteDialogTrigger = document.activeElement;
+      document.getElementById('deleteAdName').textContent = ad.title;
+      document.getElementById('deleteAdImage').src = ad.image || 'images/product-placeholder.svg';
+      showAdError('deleteAdError');
+      document.getElementById('deleteAdModal').showModal();
+    }
+
+    function closeDeleteAdModal() {
+      document.getElementById('deleteAdModal').close();
+    }
+
+    function confirmDeleteAd() {
+      if (deletingAdId === null || !myAds.some(ad => ad.id === deletingAdId)) return;
+      if (!persistAds(myAds.filter(ad => ad.id !== deletingAdId), 'deleteAdError')) return;
+      closeDeleteAdModal();
+      document.getElementById('adFeedback').textContent = 'Annonsen har tagits bort. Inventariet finns kvar.';
     }
 
     function renderInventory(items = inventory) {
@@ -1725,7 +1913,10 @@
           stock: 1,
           condition: condition,
           status: "Aktiv",
-          image: finalImage
+          image: finalImage,
+          category: ({ Datorer: 'datorer', 'Skärmar': 'skarmar', 'Nätverk': 'natverk', Komponenter: 'komponenter', 'VR / Tillbehör': 'ljud', Ljud: 'ljud' })[category] || 'datorer',
+          description: '',
+          createdAt: new Date().toISOString()
         };
         myAds.unshift(newAd);
         renderMyAds();
@@ -1738,42 +1929,100 @@
     }
 
     function openNewAdModal() {
-      document.getElementById('newAdModal').classList.add('active');
+      editingAdId = null;
+      document.getElementById('newAdForm').reset();
+      removeImage('ad');
+      showAdError('adFormError');
+      document.getElementById('adModalTitle').textContent = 'Skapa ny annons';
+      document.getElementById('adSubmitButton').textContent = 'Publicera annons';
+      adDialogTrigger = document.activeElement;
+      document.getElementById('newAdModal').showModal();
+    }
+
+    function openEditAdModal(id) {
+      const ad = myAds.find(item => item.id === id);
+      if (!ad) return;
+      openNewAdModal();
+      editingAdId = id;
+      document.getElementById('adModalTitle').textContent = 'Redigera annons';
+      document.getElementById('adSubmitButton').textContent = 'Spara ändringar';
+      document.getElementById('adTitle').value = ad.title;
+      document.getElementById('adCategory').value = ad.category || 'datorer';
+      document.getElementById('adPrice').value = ad.price;
+      document.getElementById('adStock').value = ad.stock;
+      document.getElementById('adCondition').value = ad.condition || 8;
+      document.getElementById('adDescription').value = ad.description || '';
+      if (ad.image) {
+        adUploadedBase64 = ad.image;
+        document.getElementById('adImagePreview').src = ad.image;
+        document.getElementById('adPreviewWrap').style.display = 'block';
+        document.getElementById('adDropZone').style.display = 'none';
+        document.getElementById('adImageActions').hidden = false;
+      }
     }
 
     function closeNewAdModal() {
-      document.getElementById('newAdModal').classList.remove('active');
-      removeImage('ad');
+      document.getElementById('newAdModal').close();
     }
 
     function handleCreateAd(e) {
       e.preventDefault();
-      const title = document.getElementById('adTitle').value;
-      const price = parseInt(document.getElementById('adPrice').value);
-      const stock = parseInt(document.getElementById('adStock').value);
-      const condition = parseInt(document.getElementById('adCondition').value);
-      const finalImage = adUploadedBase64 || '';
-
-      const newAd = {
-        id: Date.now(),
-        title: title,
-        price: price,
-        stock: stock,
-        condition: condition,
-        status: "Aktiv",
-        image: finalImage
+      if (!e.currentTarget.reportValidity() || adImageLoading) return;
+      const title = document.getElementById('adTitle').value.trim();
+      const price = Number(document.getElementById('adPrice').value);
+      const stock = Number(document.getElementById('adStock').value);
+      const condition = Number(document.getElementById('adCondition').value);
+      if (!title || !Number.isFinite(price) || price < 0 || !Number.isSafeInteger(stock) || stock < 1 || !Number.isInteger(condition) || condition < 1 || condition > 10) {
+        showAdError('adFormError', 'Ange en titel, ett giltigt pris, ett helt antal och ett skick mellan 1 och 10.');
+        return;
+      }
+      const existing = editingAdId === null ? null : myAds.find(ad => ad.id === editingAdId);
+      if (editingAdId !== null && !existing) {
+        showAdError('adFormError', 'Annonsen finns inte längre. Stäng fönstret och försök igen.');
+        return;
+      }
+      const wasEditing = editingAdId !== null;
+      const savedAd = {
+        ...(existing || { id: Date.now(), status: 'Aktiv', createdAt: new Date().toISOString() }),
+        title, price, stock, condition,
+        category: document.getElementById('adCategory').value,
+        description: document.getElementById('adDescription').value.trim(),
+        image: adUploadedBase64 || ''
       };
-
-      myAds.unshift(newAd);
-      saveToLocalStorage();
-      renderMyAds();
+      const nextAds = wasEditing ? myAds.map(ad => ad.id === editingAdId ? savedAd : ad) : [savedAd, ...myAds];
+      if (!persistAds(nextAds, 'adFormError')) return;
       closeNewAdModal();
-      document.getElementById('newAdForm').reset();
+      document.getElementById('adFeedback').textContent = wasEditing ? 'Annonsens ändringar har sparats.' : 'Annonsen har publicerats.';
     }
 
+    const adDialog = document.getElementById('newAdModal');
+    const deleteAdDialog = document.getElementById('deleteAdModal');
+    adDialog.addEventListener('close', () => {
+      editingAdId = null;
+      removeImage('ad');
+      document.getElementById('newAdForm').reset();
+      restoreAdFocus(adDialogTrigger);
+    });
+    deleteAdDialog.addEventListener('close', () => {
+      deletingAdId = null;
+      restoreAdFocus(deleteDialogTrigger);
+    });
+
+    function restoreAdFocus(trigger) {
+      if (trigger?.isConnected) trigger.focus();
+      else document.querySelector('#myAdsGrid button, .btn-create-ad').focus();
+    }
+
+    document.getElementById('adDropZone').addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        document.getElementById('adFileInput').click();
+      }
+    });
+
     function loadSchoolInfo() {
-      const storedInfo = JSON.parse(localStorage.getItem('ntit_school_info'));
-      if (storedInfo) {
+      const storedInfo = window.ShopITStorage.read('ntit_school_info', {});
+      if (storedInfo.name) {
         document.getElementById('inputSchoolName').value = storedInfo.name;
         document.getElementById('inputOrgNum').value = storedInfo.org;
         document.getElementById('inputSchoolEmail').value = storedInfo.email;
@@ -1807,10 +2056,7 @@
       setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
     }
 
-    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
+    let cart = window.ShopITStorage.readCart();
     const cartOverlay = document.getElementById('cartOverlay');
     const openCartBtn = document.getElementById('openCartBtn');
     const closeCartBtn = document.getElementById('closeCartBtn');
@@ -1819,7 +2065,7 @@
     const cartBadge = document.getElementById('cartBadge');
 
     function updateCartUI() {
-      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      window.ShopITStorage.write('ntit_cart', cart);
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       cartBadge.textContent = totalCount;
       document.getElementById('checkoutBtn').disabled = cart.length === 0;

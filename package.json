@@ -7,6 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test:auth": "node --test tests/auth.test.mjs",
     "db:status": "node database/manage.mjs status",
     "db:migrate": "node database/manage.mjs migrate",
     "db:seed": "node database/manage.mjs seed",

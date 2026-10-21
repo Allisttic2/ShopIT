@@ -140,15 +140,31 @@
         return btoa(String.fromCharCode(...new Uint8Array(bytes)));
       }
 
+      function passwordCrypto() {
+        if (!window.crypto?.subtle || typeof window.crypto.getRandomValues !== 'function') {
+          throw new Error('Inloggning kräver HTTPS eller en lokal webbserver på http://localhost. Öppna sidan där och försök igen.');
+        }
+        return window.crypto;
+      }
+
       async function hashPassword(value, salt) {
-        const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, keyMaterial, 256);
+        const provider = passwordCrypto();
+        const keyMaterial = await provider.subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
+        const bits = await provider.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, keyMaterial, 256);
         return bytesToBase64(bits);
       }
 
       function getUsers() {
-        try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-        catch { return []; }
+        let users;
+        try { users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+        catch (error) {
+          if (error.name === 'SecurityError') throw error;
+          throw new Error('Sparade konton kunde inte läsas. Öppna sidan i samma webbläsare och på samma adress som när kontot skapades.');
+        }
+        if (!Array.isArray(users) || users.some(user => !user || typeof user.email !== 'string' || typeof user.salt !== 'string' || typeof user.passwordHash !== 'string')) {
+          throw new Error('Sparade konton har ett ogiltigt format. Inga konton har ändrats.');
+        }
+        return users;
       }
 
       loginTab.addEventListener('click', () => setMode('login'));
@@ -164,15 +180,19 @@
 
       form.addEventListener('submit', async event => {
         event.preventDefault();
+        const submit = document.getElementById('authSubmit');
+        if (submit.disabled || !form.reportValidity()) return;
         setMessage('');
         const email = document.getElementById('email').value.trim().toLowerCase();
         const passwordValue = password.value;
-        const users = getUsers();
-        const submit = document.getElementById('authSubmit');
+        const registering = mode === 'register';
         submit.disabled = true;
+        loginTab.disabled = true;
+        registerTab.disabled = true;
 
         try {
-          if (mode === 'register') {
+          const users = getUsers();
+          if (registering) {
             const name = document.getElementById('fullName').value.trim();
             const confirmPassword = document.getElementById('confirmPassword').value;
             if (!name) throw new Error('Fyll i namn eller skolans namn.');
@@ -180,7 +200,7 @@
             if (passwordValue !== confirmPassword) throw new Error('Lösenorden matchar inte.');
             if (users.some(user => user.email === email)) throw new Error('Det finns redan ett konto med den e-postadressen. Logga in i stället.');
 
-            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const salt = passwordCrypto().getRandomValues(new Uint8Array(16));
             users.push({ email, name, salt: bytesToBase64(salt), passwordHash: await hashPassword(passwordValue, salt) });
             localStorage.setItem(USERS_KEY, JSON.stringify(users));
           } else {
@@ -195,9 +215,14 @@
           const allowedPages = ['index.html', 'profil.html', 'checkout.html', 'help.html'];
           location.replace(allowedPages.includes(next) ? next : 'index.html');
         } catch (error) {
-          setMessage(error.message || 'Det gick inte att spara kontot. Kontrollera webbläsarens lagring och försök igen.', true);
+          const storageError = ['SecurityError', 'QuotaExceededError'].includes(error.name);
+          setMessage(storageError
+            ? 'Webbläsaren kunde inte spara inloggningen. Tillåt webbplatsdata och kontrollera att lagringen inte är full. Försök sedan igen.'
+            : error.message || 'Det gick inte att logga in. Försök igen.', true);
         } finally {
           submit.disabled = false;
+          loginTab.disabled = false;
+          registerTab.disabled = false;
         }
       });
     })();

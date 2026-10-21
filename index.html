@@ -1153,10 +1153,7 @@
     ];
 
     // VARUKORG TILLSTÅND
-    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
+    let cart = window.ShopITStorage.readCart();
 
     // ELEMENT REFERENSER
     const feedContainer = document.getElementById('productFeed');
@@ -1341,7 +1338,7 @@
     }
 
     function updateCartUI() {
-      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      window.ShopITStorage.write('ntit_cart', cart);
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       cartBadge.textContent = totalCount;
       document.getElementById('checkoutBtn').disabled = cart.length === 0;

@@ -552,15 +552,11 @@
   <script>
     const CART_KEY = 'ntit_cart';
     const INVOICE_KEY = 'ntit_last_invoice';
-    const cart = readJSON(CART_KEY, []).map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
+    const cart = window.ShopITStorage.readCart();
     const money = value => `${Number(value || 0).toLocaleString('sv-SE')} kr`;
 
     function readJSON(key, fallback) {
-      try { return JSON.parse(localStorage.getItem(key)) || fallback; }
-      catch { return fallback; }
+      return window.ShopITStorage.read(key, fallback);
     }
 
     function escapeHTML(value) {
