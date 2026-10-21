@@ -4,3 +4,6 @@
 node_modules/
 .database-validation/
 .neon
+backend/uploads/
+backend/mail-outbox/
+!backend/mail-outbox/.gitkeep

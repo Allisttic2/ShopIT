@@ -1,33 +1,35 @@
+// Sessionsvakt + loggut-knapp, byggd ovanpå det gemensamma API-lagret (api.js).
+// Kör synkront i <head> – token-validering mot servern sker i bakgrunden.
 (() => {
   const LOGIN_PAGE = 'login.html';
-  const SESSION_KEY = 'ntit_session';
-  const USERS_KEY = 'ntit_users';
+  const PROTECTED_PAGES = ['profil.html', 'checkout.html', 'help.html'];
   const allowedPages = ['index.html', 'profil.html', 'checkout.html', 'help.html'];
   const currentPage = location.pathname.split('/').pop() || 'index.html';
+  const isLogin = currentPage === LOGIN_PAGE;
+  const isProtected = PROTECTED_PAGES.includes(currentPage);
 
-  function getSession() {
-    try {
-      const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-      return session && users.some(user => user.email === session.email) ? session : null;
-    } catch {
-      return null;
-    }
-  }
+  const session = NTIT.getSession();
 
-  const session = getSession();
-  if (currentPage === LOGIN_PAGE && session) {
-    location.replace('index.html');
+  if (isLogin && session) {
+    const next = new URLSearchParams(location.search).get('next');
+    location.replace(allowedPages.includes(next) ? next : 'index.html');
     return;
   }
 
-  if (currentPage !== LOGIN_PAGE && !session) {
-    const next = allowedPages.includes(currentPage) ? currentPage : 'index.html';
+  if (!isLogin && !session) {
+    const next = isProtected ? currentPage : 'index.html';
     location.replace(`${LOGIN_PAGE}?next=${encodeURIComponent(next)}`);
     return;
   }
 
-  if (currentPage !== LOGIN_PAGE) {
+  if (!isLogin) {
+    // Tokenet kan vara utgånget eller ogiltigt – validera mot servern i bakgrunden.
+    NTIT.api('/auth/me').catch(() => {
+      NTIT.clearSession();
+      const next = isProtected ? currentPage : 'index.html';
+      location.replace(`${LOGIN_PAGE}?next=${encodeURIComponent(next)}`);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       const headerActions = document.querySelector('.header-actions');
       if (!headerActions || headerActions.querySelector('.auth-logout-btn')) return;
@@ -39,7 +41,7 @@
       logoutButton.setAttribute('aria-label', 'Logga ut');
       logoutButton.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket"></i>';
       logoutButton.addEventListener('click', () => {
-        localStorage.removeItem(SESSION_KEY);
+        NTIT.clearSession();
         location.replace(LOGIN_PAGE);
       });
       headerActions.appendChild(logoutButton);

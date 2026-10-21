@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Min Profil - NTI-T Shopp</title>
+  <script src="api.js"></script>
   <script src="auth.js"></script>
   <!-- Font Awesome Ikoner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -314,6 +315,37 @@
       border-radius: 8px;
       font-size: 0.9rem;
       font-weight: 500;
+    }
+
+    .info-note {
+      margin-top: 1.5rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(248, 246, 240, 0.03);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+    }
+
+    .info-note i {
+      margin-top: 0.2rem;
+      color: #60a5fa;
+    }
+
+
+    .ad-form-error {
+      margin: 0.25rem 0 0;
+      padding: 0.75rem 0.9rem;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 8px;
+      color: var(--danger-color);
+      font-size: 0.88rem;
+      line-height: 1.5;
     }
 
     /* --- MINA ANNONSER GRID --- */
@@ -936,6 +968,21 @@
       text-align: center;
     }
 
+
+    .cart-item-remove {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+      padding: 0.3rem;
+    }
+
+    .cart-item-remove:hover {
+      color: #f87171;
+    }
+
     .cart-footer {
       padding: 1.25rem 1.5rem;
       border-top: 1px solid var(--border-color);
@@ -1015,9 +1062,9 @@
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
 
-        <button class="settings-btn" title="Inställningar">
+        <a href="profil.html" class="settings-btn" title="Inställningar">
           <i class="fa-solid fa-gear"></i>
-        </button>
+        </a>
       </div>
     </div>
   </header>
@@ -1031,8 +1078,8 @@
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div class="profile-title">
-            <h1 id="headerSchoolName">NTI Helsingborg</h1>
-            <p><i class="fa-solid fa-building"></i> Org.nr: <span id="headerOrgNum">8504337328</span></p>
+            <h1 id="headerSchoolName">Min skola</h1>
+            <p><i class="fa-solid fa-location-dot"></i> Ort: <span id="headerCity">–</span></p>
           </div>
         </div>
 
@@ -1090,22 +1137,14 @@
         </div>
 
         <div class="info-card">
-          <form id="schoolInfoForm" onsubmit="saveSchoolInfo(event)">
+          <form id="schoolInfoForm">
             <div class="form-grid">
               
               <div class="form-group">
                 <label for="inputSchoolName">Skolnamn</label>
                 <div class="input-wrapper">
                   <i class="fa-solid fa-school"></i>
-                  <input type="text" id="inputSchoolName" class="form-input" value="NTI Helsingborg" required>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="inputOrgNum">Organisationsnummer</label>
-                <div class="input-wrapper">
-                  <i class="fa-solid fa-fingerprint"></i>
-                  <input type="text" id="inputOrgNum" class="form-input" value="8504337328" required>
+                  <input type="text" id="inputSchoolName" class="form-input" value="" disabled>
                 </div>
               </div>
 
@@ -1113,43 +1152,37 @@
                 <label for="inputSchoolEmail">Kontakt e-post</label>
                 <div class="input-wrapper">
                   <i class="fa-solid fa-envelope"></i>
-                  <input type="email" id="inputSchoolEmail" class="form-input" value="helsingborg@ntigymnasiet.se" required>
+                  <input type="email" id="inputSchoolEmail" class="form-input" value="" disabled>
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="inputSchoolPhone">Telefonnummer</label>
-                <div class="input-wrapper">
-                  <i class="fa-solid fa-phone"></i>
-                  <input type="tel" id="inputSchoolPhone" class="form-input" value="042-12 34 56">
-                </div>
-              </div>
-
-              <div class="form-group full-width">
                 <label for="inputSchoolAddress">Skoladress (Leveransadress)</label>
                 <div class="input-wrapper">
                   <i class="fa-solid fa-location-dot"></i>
-                  <input type="text" id="inputSchoolAddress" class="form-input" value="Järnvägsgatan 25, 252 24 Helsingborg" required>
+                  <input type="text" id="inputSchoolAddress" class="form-input" value="" disabled>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputInvoiceAddress">Fakturaadress</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-file-invoice-dollar"></i>
+                  <input type="text" id="inputInvoiceAddress" class="form-input" value="" disabled>
                 </div>
               </div>
 
               <div class="form-group full-width">
-                <label for="inputInvoiceAddress">Fakturaadress</label>
+                <label for="inputInvoiceReference">Faktura-/referens-ID</label>
                 <div class="input-wrapper">
-                  <i class="fa-solid fa-file-invoice-dollar"></i>
-                  <input type="text" id="inputInvoiceAddress" class="form-input" value="NTI Gymnasiet Helsingborg, FE 123, 838 73 Frösön" required>
+                  <i class="fa-solid fa-hashtag"></i>
+                  <input type="text" id="inputInvoiceReference" class="form-input" value="" disabled>
                 </div>
               </div>
 
             </div>
 
-            <button type="submit" class="btn-save-info">
-              <i class="fa-solid fa-floppy-disk"></i> Spara ändringar
-            </button>
-
-            <div class="save-alert" id="saveAlert">
-              <i class="fa-solid fa-circle-check"></i> Uppgifterna har sparats framgångsrikt!
-            </div>
+            <p class="info-note"><i class="fa-solid fa-circle-info"></i> Uppgifterna hämtas från servern och används vid beställningar. De kan just nu inte ändras här.</p>
           </form>
         </div>
       </div>
@@ -1178,7 +1211,7 @@
           <h2 class="section-title">
             <i class="fa-solid fa-server"></i> Mitt inventarie
           </h2>
-          <button class="btn-secondary" onclick="openNewInventoryModal()">
+          <button class="btn-secondary" onclick="openNewAdModal()">
             <i class="fa-solid fa-plus"></i> Lägg till i inventarie
           </button>
         </div>
@@ -1187,7 +1220,7 @@
         <div class="inventory-controls">
           <div class="inventory-search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="inventorySearch" class="inventory-search-input" placeholder="Sök i inventarier (namn, serienummer, ID...)" onkeyup="filterInventory()">
+            <input type="text" id="inventorySearch" class="inventory-search-input" placeholder="Sök i inventarier (namn, kategori, ID...)" onkeyup="filterInventory()">
           </div>
         </div>
 
@@ -1198,12 +1231,9 @@
                 <th>ID</th>
                 <th>Produkt / Modell</th>
                 <th>Kategori</th>
-                <th>Serienummer</th>
-                <th>Skick</th>
+                <th>Antal</th>
+                <th>Pris</th>
                 <th>Status</th>
-                <th>Värde</th>
-                <th>Placering</th>
-                <th>Åtgärd</th>
               </tr>
             </thead>
             <tbody id="inventoryTableBody">
@@ -1216,97 +1246,11 @@
 
   </main>
 
-  <!-- MODAL 1: LÄGG TILL INVENTARIE -->
-  <div class="modal-overlay" id="newInventoryModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-boxes-stacked"></i> Lägg till i inventarie</h3>
-        <button class="close-modal-btn" onclick="closeNewInventoryModal()"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <form id="newInventoryForm" onsubmit="handleCreateInventory(event)">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="invTitle">Produktnamn / Modell</label>
-            <input type="text" id="invTitle" class="form-input no-icon" placeholder="t.ex. MacBook Pro 14 M2" required>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="invCategory">Kategori</label>
-              <select id="invCategory" class="form-input no-icon" style="background:var(--bg-main);" required>
-                <option value="Datorer">Datorer & Laptops</option>
-                <option value="Skärmar">Skärmar & Display</option>
-                <option value="Nätverk">Nätverk & Server</option>
-                <option value="Komponenter">Datorkomponenter</option>
-                <option value="VR / Tillbehör">VR & Tillbehör</option>
-                <option value="Ljud">Ljud & Utrustning</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="invStatus">Status</label>
-              <select id="invStatus" class="form-input no-icon" style="background:var(--bg-main);" required>
-                <option value="storage">I lager</option>
-                <option value="in-use">I bruk</option>
-                <option value="for-sale">Annons (Till försäljning)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="invSerial">Serienummer</label>
-              <input type="text" id="invSerial" class="form-input no-icon" placeholder="t.ex. C02DF123MD6R" required>
-            </div>
-
-            <div class="form-group">
-              <label for="invCondition">Skick (1 - 10)</label>
-              <input type="number" id="invCondition" class="form-input no-icon" value="8" min="1" max="10" required>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="invPrice">Värde / Pris (kr)</label>
-              <input type="number" id="invPrice" class="form-input no-icon" placeholder="4500" required>
-            </div>
-
-            <div class="form-group">
-              <label for="invLocation">Placering / Rum</label>
-              <input type="text" id="invLocation" class="form-input no-icon" placeholder="t.ex. Förråd B / Sal 204" required>
-            </div>
-          </div>
-
-          <!-- GALLERILADDNING -->
-          <div class="form-group">
-            <label>Produktbild (Ladda upp från enhet/galleri)</label>
-            <div class="file-upload-zone" id="invDropZone" onclick="document.getElementById('invFileInput').click()">
-              <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
-              <div class="file-upload-text">Klicka för att välja bild från galleriet</div>
-              <div class="file-upload-subtext">Eller dra och släpp en bildfil här (PNG, JPG, WEBP)</div>
-              <input type="file" id="invFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'inv')">
-            </div>
-
-            <div class="file-preview-wrap" id="invPreviewWrap" style="display:none;">
-              <img id="invImagePreview" alt="Förhandsgranskning">
-              <button type="button" class="btn-remove-img" onclick="removeImage('inv')"><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" onclick="closeNewInventoryModal()">Avbryt</button>
-          <button type="submit" class="btn-primary">Spara i inventarie</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 2: LÄGG UPP NY ANNONSER -->
+  <!-- MODAL: SKAPA / REDIGERA ANNONS -->
   <div class="modal-overlay" id="newAdModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-plus-circle"></i> Skapa ny annons</h3>
+        <h3 id="adModalTitle"><i class="fa-solid fa-plus-circle"></i> Skapa ny annons</h3>
         <button class="close-modal-btn" onclick="closeNewAdModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="newAdForm" onsubmit="handleCreateAd(event)">
@@ -1320,46 +1264,39 @@
             <div class="form-group">
               <label for="adCategory">Kategori</label>
               <select id="adCategory" class="form-input no-icon" style="background:var(--bg-main);" required>
-                <option value="datorer">Datorer & Laptops</option>
-                <option value="komponenter">Datorkomponenter</option>
-                <option value="skarmar">Skärmar & Display</option>
-                <option value="mobil">Mobil & Surfplattor</option>
-                <option value="ljud">Ljud & Tillbehör</option>
-                <option value="natverk">Nätverk & Server</option>
+                <option value="Datorer">Datorer</option>
+                <option value="Laddare">Laddare</option>
+                <option value="Kablar">Kablar</option>
+                <option value="Skärmar">Skärmar</option>
+                <option value="Switchar">Switchar</option>
+                <option value="Router">Router</option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="adPrice">Pris (kr)</label>
-              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" required>
+              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" min="0" step="1" required>
             </div>
           </div>
 
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="adStock">Antal i lager</label>
-              <input type="number" id="adStock" class="form-input no-icon" value="1" min="1" required>
-            </div>
-
-            <div class="form-group">
-              <label for="adCondition">Skick (1 - 10)</label>
-              <input type="number" id="adCondition" class="form-input no-icon" value="8" min="1" max="10" required>
-            </div>
+          <div class="form-group">
+            <label for="adStock">Antal i lager</label>
+            <input type="number" id="adStock" class="form-input no-icon" value="1" min="0" step="1" required>
           </div>
 
           <!-- GALLERILADDNING -->
           <div class="form-group">
-            <label>Annonsbild (Ladda upp från enhet/galleri)</label>
+            <label>Annonsbild</label> (Ladda upp från enhet/galleri)</label>
             <div class="file-upload-zone" id="adDropZone" onclick="document.getElementById('adFileInput').click()">
               <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
               <div class="file-upload-text">Klicka för att välja bild från galleriet</div>
               <div class="file-upload-subtext">Eller dra och släpp en bildfil här (PNG, JPG, WEBP)</div>
-              <input type="file" id="adFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'ad')">
+              <input type="file" id="adFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
             </div>
 
             <div class="file-preview-wrap" id="adPreviewWrap" style="display:none;">
               <img id="adImagePreview" alt="Förhandsgranskning">
-              <button type="button" class="btn-remove-img" onclick="removeImage('ad')"><i class="fa-solid fa-trash-can"></i></button>
+              <button type="button" class="btn-remove-img" onclick="removeImage()"><i class="fa-solid fa-trash-can"></i></button>
             </div>
           </div>
 
@@ -1367,15 +1304,18 @@
             <label for="adDescription">Beskrivning</label>
             <textarea id="adDescription" class="form-input no-icon" rows="3" placeholder="Beskriv hårdvarans skick, specifikationer..." style="resize:vertical;"></textarea>
           </div>
+
+          <p class="ad-form-error" id="adFormError" hidden></p>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeNewAdModal()">Avbryt</button>
-          <button type="submit" class="btn-primary">Publicera annons</button>
+          <button type="submit" class="btn-primary" id="adSubmitBtn">Publicera annons</button>
         </div>
       </form>
     </div>
   </div>
+
 
   <!-- VARUKORG SIDEBAR / MODAL -->
   <div class="cart-overlay" id="cartOverlay">
@@ -1441,150 +1381,52 @@
   </footer>
 
   <script>
-    // TESTDATA (MED LOCALSTORAGE)
-    const initialAds = [
-      {
-        id: 201,
-        title: "Cisco Catalyst 2960X Switch 48-Port",
-        price: 3200,
-        stock: 2,
-        condition: 9,
-        status: "Aktiv",
-      },
-      {
-        id: 202,
-        title: "Dell Latitude 5420 i5 16GB RAM",
-        price: 4500,
-        stock: 5,
-        condition: 8,
-        status: "Aktiv",
-      },
-      {
-        id: 203,
-        title: "HP EliteDisplay E243i 24\" Skärmar",
-        price: 850,
-        stock: 10,
-        condition: 7,
-        status: "Aktiv",
-      }
-    ];
+    // DATA LÄGRET: skola, annonser och inventarie hämtas från backend-API:et
+    let myAds = [];     // egna listings (GET /api/school/me/listings)
+    let inventory = []; // egna produkter (GET /api/school/me/inventory)
 
-    const initialInventory = [
-      { id: "INV-8091", title: "Dell Latitude 5420", category: "Datorer", serial: "CN-0G7101", status: "for-sale", location: "Förråd B", price: 4500, condition: 8 },
-      { id: "INV-8092", title: "Cisco Catalyst 2960X", category: "Nätverk", serial: "FOC2134L09A", status: "for-sale", location: "Serverrum 1", price: 3200, condition: 9 },
-      { id: "INV-7210", title: "Apple iMac 27\" 5K", category: "Datorer", serial: "C02DF123MD6R", status: "in-use", location: "Sal 204", price: 12500, condition: 9 },
-      { id: "INV-6540", title: "Meta Quest 2 256GB", category: "VR / Tillbehör", serial: "1WMHH81001", status: "storage", location: "Teknikförråd", price: 2100, condition: 7 },
-      { id: "INV-5112", title: "HP EliteDisplay E243i", category: "Skärmar", serial: "6CM912108Y", status: "for-sale", location: "Förråd A", price: 850, condition: 8 }
-    ];
+    const AD_STATUS_LABELS = {
+      active: 'Aktiv',
+      sold: 'Såld',
+      expired: 'Utgången',
+      withdrawn: 'Tagen ner',
+    };
 
-    let myAds = (JSON.parse(localStorage.getItem('ntit_my_ads')) || initialAds).map(ad => ({
-      ...ad,
-      image: typeof ad.image === 'string' && ad.image.startsWith('data:image/') ? ad.image : ''
-    }));
-    let inventory = JSON.parse(localStorage.getItem('ntit_inventory')) || initialInventory;
+    // ANNONS-MODAL: samma formulär för skapande och redigering
+    let editingListingId = null; // null = ny annons, annars listingens uuid
+    let adImage = { current: null, file: null, removed: false };
 
-    let invUploadedBase64 = null;
-    let adUploadedBase64 = null;
-
-    function saveToLocalStorage() {
-      localStorage.setItem('ntit_my_ads', JSON.stringify(myAds));
-      localStorage.setItem('ntit_inventory', JSON.stringify(inventory));
+    // --- SKOLINFO (från sessionen; backend har inget ändrings-API) ---
+    function loadSchoolInfo() {
+      const session = NTIT.getSession();
+      const school = session && session.school ? session.school : null;
+      if (!school) return;
+      document.getElementById('headerSchoolName').textContent = school.name || 'Min skola';
+      document.getElementById('headerCity').textContent = school.city || '–';
+      document.getElementById('inputSchoolName').value = school.name || '';
+      document.getElementById('inputSchoolEmail').value = school.contact_email || '';
+      document.getElementById('inputSchoolAddress').value = school.visiting_address || '';
+      document.getElementById('inputInvoiceAddress').value = school.billing_address || '';
+      document.getElementById('inputInvoiceReference').value = school.billing_reference || '';
     }
 
-    function handleFileSelect(e, type) {
-      const file = e.target.files ? e.target.files[0] : (e.dataTransfer ? e.dataTransfer.files[0] : null);
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const base64Url = evt.target.result;
-        if (type === 'inv') {
-          invUploadedBase64 = base64Url;
-          document.getElementById('invImagePreview').src = base64Url;
-          document.getElementById('invDropZone').style.display = 'none';
-          document.getElementById('invPreviewWrap').style.display = 'block';
-        } else {
-          adUploadedBase64 = base64Url;
-          document.getElementById('adImagePreview').src = base64Url;
-          document.getElementById('adDropZone').style.display = 'none';
-          document.getElementById('adPreviewWrap').style.display = 'block';
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function removeImage(type) {
-      if (type === 'inv') {
-        invUploadedBase64 = null;
-        document.getElementById('invFileInput').value = '';
-        document.getElementById('invImagePreview').removeAttribute('src');
-        document.getElementById('invPreviewWrap').style.display = 'none';
-        document.getElementById('invDropZone').style.display = 'flex';
-      } else {
-        adUploadedBase64 = null;
-        document.getElementById('adFileInput').value = '';
-        document.getElementById('adImagePreview').removeAttribute('src');
-        document.getElementById('adPreviewWrap').style.display = 'none';
-        document.getElementById('adDropZone').style.display = 'flex';
-      }
-    }
-
-    ['invDropZone', 'adDropZone'].forEach(id => {
-      const el = document.getElementById(id);
-      if(!el) return;
-      
-      el.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        el.classList.add('dragover');
-      });
-
-      el.addEventListener('dragleave', () => {
-        el.classList.remove('dragover');
-      });
-
-      el.addEventListener('drop', (e) => {
-        e.preventDefault();
-        el.classList.remove('dragover');
-        const type = id === 'invDropZone' ? 'inv' : 'ad';
-        handleFileSelect(e, type);
-      });
-    });
-
-    function getConditionPill(score) {
-      let bg = 'rgba(16, 185, 129, 0.15)';
-      let color = '#10b981'; 
-      let border = 'rgba(16, 185, 129, 0.3)';
-
-      if (score <= 3) {
-        bg = 'rgba(239, 68, 68, 0.15)';
-        color = '#ef4444'; 
-        border = 'rgba(239, 68, 68, 0.3)';
-      } else if (score <= 6) {
-        bg = 'rgba(245, 158, 11, 0.15)';
-        color = '#f59e0b'; 
-        border = 'rgba(245, 158, 11, 0.3)';
-      }
-
-      return `<span class="condition-pill" style="background:${bg}; color:${color}; border:1px solid ${border};">
-                <i class="fa-solid fa-gauge"></i> Skick ${score}/10
-              </span>`;
-    }
-
-    function updateStats() {
-      const totalInvValue = inventory.reduce((sum, item) => sum + (parseInt(item.price) || 0), 0);
-      document.getElementById('statTotalValue').textContent = totalInvValue.toLocaleString('sv-SE') + ' kr';
-      document.getElementById('statInventoryCount').textContent = inventory.length + ' st';
-      document.getElementById('statAdsCount').textContent = myAds.length + ' st';
+    // --- MINA ANNONSER (listings) ---
+    async function loadMyAds() {
+      const data = await NTIT.api('/school/me/listings');
+      myAds = data.listings || [];
+      renderMyAds();
     }
 
     function renderMyAds() {
       const grid = document.getElementById('myAdsGrid');
       const countLabel = document.getElementById('myAdsCount');
       grid.innerHTML = '';
-      countLabel.textContent = `${myAds.length} publicerade annonser`;
+
+      const activeCount = myAds.filter(ad => ad.status === 'active').length;
+      countLabel.textContent = `${myAds.length} publicerade annonser (${activeCount} aktiva)`;
 
       if (myAds.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga aktiva annonser just nu.</p>';
+        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga annonser just nu. Klicka på "Lägg upp ny annons" för att publicera din första.</p>';
         return;
       }
 
@@ -1592,18 +1434,18 @@
         const card = document.createElement('div');
         card.className = 'ad-card';
         card.innerHTML = `
-          <div class="ad-status-badge">${ad.status}</div>
-          <div class="ad-img-wrap"><img src="${ad.image || 'images/product-placeholder.svg'}" alt="${ad.title}" class="ad-img"></div>
+          <div class="ad-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
+          <div class="ad-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="ad-img"></div>
           <div class="ad-body">
             <div class="ad-meta-row">
-              ${getConditionPill(ad.condition || 8)}
-              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.stock} i lager</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-tag"></i> ${NTIT.escapeHTML(ad.category || 'Övrigt')}</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.quantity} i lager</span>
             </div>
-            <div class="ad-title">${ad.title}</div>
-            <div class="ad-price">${parseInt(ad.price).toLocaleString('sv-SE')} kr</div>
+            <div class="ad-title">${NTIT.escapeHTML(ad.title)}</div>
+            <div class="ad-price">${NTIT.money(ad.price)}</div>
             <div class="ad-actions">
-              <button class="btn-ad-action" onclick="alert('Redigera annons ${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
-              <button class="btn-ad-action delete" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i> Ta bort</button>
+              <button class="btn-ad-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
+              <button class="btn-ad-action delete" onclick="deleteAd('${ad.id}')"><i class="fa-solid fa-trash"></i> Ta bort</button>
             </div>
           </div>
         `;
@@ -1613,48 +1455,49 @@
       updateStats();
     }
 
-    function deleteAd(id) {
-      if (confirm('Är du säker på att du vill ta bort den här annonsen?')) {
-        myAds = myAds.filter(a => a.id !== id);
-        saveToLocalStorage();
-        renderMyAds();
+    async function deleteAd(id) {
+      if (!confirm('Vill du ta ner den här annonsen? Produkten behålls i inventariet och orderhistoriken påverkas inte.')) return;
+      try {
+        await NTIT.api(`/listings/${id}`, { method: 'DELETE' });
+        await Promise.all([loadMyAds(), loadInventory()]);
+      } catch (error) {
+        alert(`Annonsen kunde inte tas bort: ${error.message}`);
       }
+    }
+
+    // --- MITT INVENTARIE (produkter) ---
+    async function loadInventory() {
+      const data = await NTIT.api('/school/me/inventory');
+      inventory = data.products || [];
+      renderInventory();
+    }
+
+    function inventoryStatusBadge(item) {
+      if (item.listing_id) {
+        const label = AD_STATUS_LABELS[item.listing_status] || item.listing_status || '?';
+        return `<span class="badge-status badge-for-sale"><span class="status-dot"></span>Annons (${NTIT.escapeHTML(label)})</span>`;
+      }
+      return '<span class="badge-status badge-storage"><span class="status-dot"></span>I lager</span>';
     }
 
     function renderInventory(items = inventory) {
       const tbody = document.getElementById('inventoryTableBody');
       tbody.innerHTML = '';
 
-      if(items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:2rem;">Inga inventarier hittades.</td></tr>';
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Inga inventarier hittades.</td></tr>';
         return;
       }
 
       items.forEach(item => {
-        let statusBadge = '';
-        if (item.status === 'in-use') {
-          statusBadge = '<span class="badge-status badge-in-use"><span class="status-dot"></span>I bruk</span>';
-        } else if (item.status === 'storage') {
-          statusBadge = '<span class="badge-status badge-storage"><span class="status-dot"></span>I lager</span>';
-        } else if (item.status === 'for-sale') {
-          statusBadge = '<span class="badge-status badge-for-sale"><span class="status-dot"></span>Annons</span>';
-        }
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${item.id}</strong></td>
-          <td style="font-weight:600;">${item.title}</td>
-          <td>${item.category}</td>
-          <td class="serial-code">${item.serial}</td>
-          <td>${getConditionPill(item.condition)}</td>
-          <td>${statusBadge}</td>
-          <td class="price-value">${item.price ? parseInt(item.price).toLocaleString('sv-SE') + ' kr' : '-'}</td>
-          <td><i class="fa-solid fa-location-dot" style="font-size:0.75rem; color:var(--text-muted);"></i> ${item.location}</td>
-          <td>
-            <button class="btn-ad-action delete" onclick="deleteInventoryItem('${item.id}')" title="Ta bort inventarie">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
+          <td class="serial-code">${NTIT.escapeHTML(NTIT.shortId(item.id))}</td>
+          <td style="font-weight:600;">${NTIT.escapeHTML(item.title)}</td>
+          <td>${NTIT.escapeHTML(item.category)}</td>
+          <td>${item.quantity}</td>
+          <td class="price-value">${item.price != null ? NTIT.money(item.price) : '–'}</td>
+          <td>${inventoryStatusBadge(item)}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1662,155 +1505,194 @@
       updateStats();
     }
 
-    function deleteInventoryItem(id) {
-      if(confirm(`Vill du ta bort inventarie ${id}?`)) {
-        inventory = inventory.filter(i => i.id !== id);
-        saveToLocalStorage();
-        renderInventory();
-      }
-    }
-
     function filterInventory() {
       const query = document.getElementById('inventorySearch').value.toLowerCase().trim();
-      const filtered = inventory.filter(item => 
-        item.title.toLowerCase().includes(query) ||
-        item.id.toLowerCase().includes(query) ||
-        item.serial.toLowerCase().includes(query) ||
-        item.category.toLowerCase().includes(query)
+      const filtered = inventory.filter(item =>
+        String(item.title || '').toLowerCase().includes(query) ||
+        String(item.category || '').toLowerCase().includes(query) ||
+        String(item.id || '').toLowerCase().includes(query)
       );
       renderInventory(filtered);
     }
 
-    function openNewInventoryModal() {
-      document.getElementById('newInventoryModal').classList.add('active');
+    // --- DOCKAD STATISTIK ---
+    function updateStats() {
+      const seen = new Set();
+      let totalValue = 0;
+      let totalCount = 0;
+      inventory.forEach(item => {
+        if (seen.has(item.id)) return;
+        seen.add(item.id);
+        totalCount += item.quantity || 0;
+        if (item.listing_id && item.listing_status === 'active') {
+          totalValue += (item.quantity || 0) * (item.price || 0);
+        }
+      });
+      const activeAds = myAds.filter(ad => ad.status === 'active').length;
+
+      document.getElementById('statTotalValue').textContent = NTIT.money(totalValue);
+      document.getElementById('statInventoryCount').textContent = `${totalCount} st`;
+      document.getElementById('statAdsCount').textContent = `${activeAds} st`;
     }
 
-    function closeNewInventoryModal() {
-      document.getElementById('newInventoryModal').classList.remove('active');
-      removeImage('inv');
+    // --- ANNONS-MODAL: SKAPA + REDIGERA ---
+    function setAdModalMode(editing) {
+      document.getElementById('adModalTitle').innerHTML = editing
+        ? '<i class="fa-solid fa-pen"></i> Redigera annons'
+        : '<i class="fa-solid fa-plus-circle"></i> Skapa ny annons';
+      document.getElementById('adSubmitBtn').textContent = editing ? 'Spara ändringar' : 'Publicera annons';
     }
 
-    function handleCreateInventory(e) {
-      e.preventDefault();
-      const title = document.getElementById('invTitle').value;
-      const category = document.getElementById('invCategory').value;
-      const status = document.getElementById('invStatus').value;
-      const serial = document.getElementById('invSerial').value;
-      const condition = parseInt(document.getElementById('invCondition').value);
-      const price = parseInt(document.getElementById('invPrice').value);
-      const location = document.getElementById('invLocation').value;
-      const finalImage = invUploadedBase64 || '';
-
-      const newId = "INV-" + Math.floor(1000 + Math.random() * 9000);
-
-      const newItem = {
-        id: newId,
-        title,
-        category,
-        serial,
-        status,
-        location,
-        price,
-        condition,
-        image: finalImage
-      };
-
-      inventory.unshift(newItem);
-
-      if (status === 'for-sale') {
-        const newAd = {
-          id: Date.now(),
-          title: title,
-          price: price,
-          stock: 1,
-          condition: condition,
-          status: "Aktiv",
-          image: finalImage
-        };
-        myAds.unshift(newAd);
-        renderMyAds();
-      }
-
-      saveToLocalStorage();
-      renderInventory();
-      closeNewInventoryModal();
-      document.getElementById('newInventoryForm').reset();
+    function resetAdModal() {
+      editingListingId = null;
+      adImage = { current: null, file: null, removed: false };
+      document.getElementById('newAdForm').reset();
+      document.getElementById('adStock').value = '1';
+      removeImage();
+      hideAdFormError();
+      setAdModalMode(false);
     }
 
     function openNewAdModal() {
+      resetAdModal();
       document.getElementById('newAdModal').classList.add('active');
+    }
+
+    async function openEditAd(id) {
+      try {
+        const data = await NTIT.api(`/listings/${id}`);
+        const ad = data.listing;
+        resetAdModal();
+        editingListingId = ad.id;
+        adImage.current = ad.image_url || null;
+        setAdModalMode(true);
+        document.getElementById('adTitle').value = ad.title || '';
+        document.getElementById('adCategory').value = ad.category || 'Datorer';
+        document.getElementById('adPrice').value = ad.price != null ? ad.price : '';
+        document.getElementById('adStock').value = ad.quantity != null ? ad.quantity : 0;
+        document.getElementById('adDescription').value = ad.description || '';
+        if (adImage.current) showImagePreview(adImage.current);
+        document.getElementById('newAdModal').classList.add('active');
+      } catch (error) {
+        alert(`Annonsen kunde inte läsas: ${error.message}`);
+      }
     }
 
     function closeNewAdModal() {
       document.getElementById('newAdModal').classList.remove('active');
-      removeImage('ad');
     }
 
-    function handleCreateAd(e) {
+    function showAdFormError(message) {
+      const el = document.getElementById('adFormError');
+      el.textContent = message;
+      el.hidden = false;
+    }
+
+    function hideAdFormError() {
+      const el = document.getElementById('adFormError');
+      el.textContent = '';
+      el.hidden = true;
+    }
+
+    async function handleCreateAd(e) {
       e.preventDefault();
-      const title = document.getElementById('adTitle').value;
-      const price = parseInt(document.getElementById('adPrice').value);
-      const stock = parseInt(document.getElementById('adStock').value);
-      const condition = parseInt(document.getElementById('adCondition').value);
-      const finalImage = adUploadedBase64 || '';
+      hideAdFormError();
 
-      const newAd = {
-        id: Date.now(),
-        title: title,
-        price: price,
-        stock: stock,
-        condition: condition,
-        status: "Aktiv",
-        image: finalImage
-      };
+      const title = document.getElementById('adTitle').value.trim();
+      const category = document.getElementById('adCategory').value;
+      const quantity = parseInt(document.getElementById('adStock').value, 10);
+      const price = Number(document.getElementById('adPrice').value);
+      const description = document.getElementById('adDescription').value.trim();
 
-      myAds.unshift(newAd);
-      saveToLocalStorage();
-      renderMyAds();
-      closeNewAdModal();
-      document.getElementById('newAdForm').reset();
-    }
+      if (!Number.isInteger(quantity) || quantity < 0) {
+        showAdFormError('Ange ett giltigt antal (heltal, minst 0).');
+        return;
+      }
+      if (!Number.isFinite(price) || price < 0) {
+        showAdFormError('Ange ett giltigt pris (0 kr eller högre).');
+        return;
+      }
 
-    function loadSchoolInfo() {
-      const storedInfo = JSON.parse(localStorage.getItem('ntit_school_info'));
-      if (storedInfo) {
-        document.getElementById('inputSchoolName').value = storedInfo.name;
-        document.getElementById('inputOrgNum').value = storedInfo.org;
-        document.getElementById('inputSchoolEmail').value = storedInfo.email;
-        document.getElementById('inputSchoolPhone').value = storedInfo.phone;
-        document.getElementById('inputSchoolAddress').value = storedInfo.address;
-        document.getElementById('inputInvoiceAddress').value = storedInfo.invoice;
+      const body = { title, category, quantity, price, description };
+      const submitBtn = document.getElementById('adSubmitBtn');
+      submitBtn.disabled = true;
 
-        document.getElementById('headerSchoolName').textContent = storedInfo.name;
-        document.getElementById('headerOrgNum').textContent = storedInfo.org;
+      try {
+        if (adImage.file) {
+          body.image_url = await NTIT.uploadImage(adImage.file);
+        } else if (adImage.removed && editingListingId) {
+          body.image_url = ''; // tar bort den nuvarande bilden
+        }
+
+        if (editingListingId) {
+          await NTIT.api(`/listings/${editingListingId}`, { method: 'PATCH', body });
+        } else {
+          await NTIT.api('/school/me/listings', { method: 'POST', body });
+        }
+
+        document.getElementById('newAdModal').classList.remove('active');
+        resetAdModal();
+        await Promise.all([loadMyAds(), loadInventory()]);
+      } catch (error) {
+        showAdFormError(error.message);
+      } finally {
+        submitBtn.disabled = false;
       }
     }
 
-    function saveSchoolInfo(e) {
-      e.preventDefault();
-      const info = {
-        name: document.getElementById('inputSchoolName').value,
-        org: document.getElementById('inputOrgNum').value,
-        email: document.getElementById('inputSchoolEmail').value,
-        phone: document.getElementById('inputSchoolPhone').value,
-        address: document.getElementById('inputSchoolAddress').value,
-        invoice: document.getElementById('inputInvoiceAddress').value
-      };
-
-      localStorage.setItem('ntit_school_info', JSON.stringify(info));
-
-      document.getElementById('headerSchoolName').textContent = info.name;
-      document.getElementById('headerOrgNum').textContent = info.org;
-
-      const alertBox = document.getElementById('saveAlert');
-      alertBox.style.display = 'block';
-      setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+    // --- ANNONSBILD (fil vald i modalen, uppladdas först vid skicka) ---
+    function handleFileSelect(e) {
+      const file = e.target && e.target.files ? e.target.files[0] : (e.dataTransfer ? e.dataTransfer.files[0] : null);
+      if (!file) return;
+      adImage.file = file;
+      adImage.removed = false;
+      showImagePreview(URL.createObjectURL(file));
     }
 
-    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
+    function showImagePreview(src) {
+      document.getElementById('adImagePreview').src = src;
+      document.getElementById('adDropZone').style.display = 'none';
+      document.getElementById('adPreviewWrap').style.display = 'block';
+    }
+
+    function removeImage() {
+      adImage.file = null;
+      adImage.removed = adImage.current !== null;
+      const preview = document.getElementById('adImagePreview');
+      if (preview) preview.removeAttribute('src');
+      const fileInput = document.getElementById('adFileInput');
+      if (fileInput) fileInput.value = '';
+      const dropZone = document.getElementById('adDropZone');
+      const previewWrap = document.getElementById('adPreviewWrap');
+      if (dropZone) dropZone.style.display = 'flex';
+      if (previewWrap) previewWrap.style.display = 'none';
+    }
+
+    const adDropZone = document.getElementById('adDropZone');
+    adDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      adDropZone.classList.add('dragover');
+    });
+
+    adDropZone.addEventListener('dragleave', () => {
+      adDropZone.classList.remove('dragover');
+    });
+
+    adDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      adDropZone.classList.remove('dragover');
+      handleFileSelect(e);
+    });
+
+    // --- VARUKORG (lokal; rader pekar på listings via uuid) ---
+    const CART_KEY = 'ntit_cart';
+    let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]')
+      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
+      .map(item => ({
+        ...item,
+        image: typeof item.image === 'string' && item.image ? item.image : ''
+      }));
+
     const cartOverlay = document.getElementById('cartOverlay');
     const openCartBtn = document.getElementById('openCartBtn');
     const closeCartBtn = document.getElementById('closeCartBtn');
@@ -1819,15 +1701,15 @@
     const cartBadge = document.getElementById('cartBadge');
 
     function updateCartUI() {
-      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       cartBadge.textContent = totalCount;
       document.getElementById('checkoutBtn').disabled = cart.length === 0;
 
       const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      cartTotal.textContent = totalPrice.toLocaleString('sv-SE') + ' kr';
+      cartTotal.textContent = NTIT.money(totalPrice);
 
-      if(cart.length === 0) {
+      if (cart.length === 0) {
         cartBody.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-cart-flatbed" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity:0.5;"></i><br>Din varukorg är tom.</div>';
         return;
       }
@@ -1837,27 +1719,35 @@
         const itemEl = document.createElement('div');
         itemEl.className = 'cart-item';
         itemEl.innerHTML = `
-          <img src="${item.image || 'images/product-placeholder.svg'}" alt="${item.title}" class="cart-item-img">
+          <img src="${NTIT.escapeHTML(item.image || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(item.title)}" class="cart-item-img">
           <div class="cart-item-details">
-            <div class="cart-item-title">${item.title}</div>
-            <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>
+            <div class="cart-item-title">${NTIT.escapeHTML(item.title)}</div>
+            <div class="cart-item-price">${NTIT.money(item.price * item.qty)}</div>
             <div class="cart-qty-controls">
-              <button class="qty-btn" onclick="updateQty(${JSON.stringify(item.id)}, -1)" title="Minska antal">-</button>
+              <button class="qty-btn" onclick="updateQty('${item.id}', -1)" title="Minska antal">-</button>
               <span class="qty-val">${item.qty}</span>
-              <button class="qty-btn" onclick="updateQty(${JSON.stringify(item.id)}, 1)" title="Öka antal">+</button>
+              <button class="qty-btn" onclick="updateQty('${item.id}', 1)" title="Öka antal">+</button>
             </div>
           </div>
+          <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Ta bort">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
         `;
         cartBody.appendChild(itemEl);
       });
     }
 
     function updateQty(id, delta) {
-      const item = cart.find(entry => entry.id === id);
+      const item = cart.find(i => i.id === id);
       if (!item) return;
+      const max = item.max || Number.MAX_SAFE_INTEGER;
       item.qty += delta;
-      if (item.qty <= 0) removeFromCart(id);
-      else updateCartUI();
+      if (item.qty > max) item.qty = max;
+      if (item.qty <= 0) {
+        removeFromCart(id);
+      } else {
+        updateCartUI();
+      }
     }
 
     function removeFromCart(id) {
@@ -1872,13 +1762,21 @@
     openCartBtn.addEventListener('click', () => cartOverlay.classList.add('active'));
     closeCartBtn.addEventListener('click', () => cartOverlay.classList.remove('active'));
     cartOverlay.addEventListener('click', (e) => {
-      if(e.target === cartOverlay) cartOverlay.classList.remove('active');
+      if (e.target === cartOverlay) cartOverlay.classList.remove('active');
     });
 
+    // --- START ---
     loadSchoolInfo();
-    renderMyAds();
-    renderInventory();
+    loadMyAds().catch(error => {
+      document.getElementById('myAdsGrid').innerHTML =
+        `<p style="grid-column: 1/-1; color: var(--danger-color); text-align: center; padding: 2rem;">Kunde inte hämta dina annonser: ${NTIT.escapeHTML(error.message)}</p>`;
+    });
+    loadInventory().catch(error => {
+      document.getElementById('inventoryTableBody').innerHTML =
+        `<tr><td colspan="6" style="text-align:center; color:var(--danger-color); padding:2rem;">Kunde inte hämta inventariet: ${NTIT.escapeHTML(error.message)}</td></tr>`;
+    });
     updateCartUI();
+
   </script>
 </body>
 </html>

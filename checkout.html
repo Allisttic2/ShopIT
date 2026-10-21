@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kassan - NTI-T Shopp</title>
+  <script src="api.js"></script>
   <script src="auth.js"></script>
   <!-- Font Awesome Ikoner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -167,6 +168,34 @@
     }
 
     .tax-note { color: var(--text-muted); font-size: 0.78rem; margin-top: 0.8rem; line-height: 1.4; }
+
+    .form-note {
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+      margin: 0 0 1.5rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(248, 246, 240, 0.03);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .form-note i { margin-top: 0.2rem; color: #60a5fa; }
+
+    .order-error {
+      margin: 1rem 0 0;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid rgba(239, 125, 112, 0.4);
+      border-radius: 8px;
+      background: rgba(116, 43, 38, 0.18);
+      color: #f0a39a;
+      font-size: 0.85rem;
+    }
+
+    .order-error[hidden] { display: none; }
 
     /* --- KNAPPAR --- */
     .submit-btn, .print-btn, .btn-primary-link {
@@ -341,6 +370,15 @@
     .invoice-table th:nth-child(2), .invoice-table td:nth-child(2) { text-align: center; }
     .invoice-table td { border-bottom: 1px solid #e5e7eb; padding: 0.9rem 0.8rem; color: #1f2937; vertical-align: top; }
 
+    .invoice-seller-row td {
+      background: #f3f4f6;
+      font-weight: 700;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #374151;
+    }
+
     .invoice-totals { width: min(100%, 340px); margin: 1.5rem 0 0 auto; }
     .invoice-totals .total-line { color: #4b5563; }
     .invoice-totals .total-line.grand { border-top: 2px solid #111827; color: #111827; font-size: 1.15rem; }
@@ -429,22 +467,19 @@
         <!-- FAKTURA- & KUNDFORMULÄR -->
         <form class="form-section" id="checkoutForm">
           <h2><i class="fa-regular fa-address-card"></i> Kund- och fakturauppgifter</h2>
+          <p class="form-note"><i class="fa-solid fa-circle-info"></i><span>Uppgifterna fylls i från din profil. Beställningen registreras med de uppgifter som är sparade för din skola – ändringar i fälten påverkar inte den registrerade ordern.</span></p>
           <div class="form-grid">
             <div class="field full">
               <label for="customerName">Skola / Företagsnamn</label>
               <input id="customerName" name="customerName" autocomplete="organization" placeholder="NTI Helsingborg" required>
             </div>
             <div class="field">
-              <label for="orgNumber">Organisationsnummer</label>
-              <input id="orgNumber" name="orgNumber" placeholder="8504337328" required>
+              <label for="orgNumber">Organisationsnummer (valfritt)</label>
+              <input id="orgNumber" name="orgNumber" placeholder="8504337328">
             </div>
             <div class="field">
               <label for="customerEmail">E-post</label>
               <input id="customerEmail" name="customerEmail" type="email" autocomplete="email" placeholder="namn@skola.se" required>
-            </div>
-            <div class="field">
-              <label for="customerPhone">Telefon</label>
-              <input id="customerPhone" name="customerPhone" type="tel" autocomplete="tel" placeholder="042-12 34 56">
             </div>
             <div class="field full">
               <label for="billingAddress">Fakturaadress</label>
@@ -460,9 +495,10 @@
             </div>
           </div>
 
-          <button class="submit-btn" type="submit">
+          <button class="submit-btn" type="submit" id="checkoutSubmit">
             <i class="fa-solid fa-file-invoice"></i> Bekräfta beställning
           </button>
+          <p class="order-error" id="orderError" role="alert" hidden></p>
         </form>
 
         <!-- ORDERSAMMANSTÄLLNING -->
@@ -552,11 +588,16 @@
   <script>
     const CART_KEY = 'ntit_cart';
     const INVOICE_KEY = 'ntit_last_invoice';
-    const cart = readJSON(CART_KEY, []).map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
-    const money = value => `${Number(value || 0).toLocaleString('sv-SE')} kr`;
+    // Rader i varukorgen pekar på listings via uuid; äldre mock-rader kastas.
+    const cart = readJSON(CART_KEY, [])
+      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
+      .map(item => ({
+        ...item,
+        image: typeof item.image === 'string' && item.image ? item.image : ''
+      }));
+    // Beställaren snapshottas av servern från skolraden – formfälten är informativa.
+    const school = (NTIT.getSession() || {}).school || {};
+    const money = value => NTIT.money(value);
 
     function readJSON(key, fallback) {
       try { return JSON.parse(localStorage.getItem(key)) || fallback; }
@@ -564,19 +605,15 @@
     }
 
     function escapeHTML(value) {
-      return String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      })[char]);
+      return NTIT.escapeHTML(value);
     }
 
     function loadCustomerInfo() {
-      const info = readJSON('ntit_school_info', {});
-      if (info.name) document.getElementById('customerName').value = info.name;
-      if (info.org) document.getElementById('orgNumber').value = info.org;
-      if (info.email) document.getElementById('customerEmail').value = info.email;
-      if (info.phone) document.getElementById('customerPhone').value = info.phone;
-      if (info.invoice) document.getElementById('billingAddress').value = info.invoice;
-      if (info.address) document.getElementById('deliveryAddress').value = info.address;
+      if (school.name) document.getElementById('customerName').value = school.name;
+      if (school.contact_email) document.getElementById('customerEmail').value = school.contact_email;
+      if (school.billing_address) document.getElementById('billingAddress').value = school.billing_address;
+      if (school.visiting_address) document.getElementById('deliveryAddress').value = school.visiting_address;
+      if (school.billing_reference) document.getElementById('reference').value = school.billing_reference;
     }
 
     function renderCheckout() {
@@ -602,37 +639,60 @@
       document.getElementById('taxNote').textContent = `Varav moms 25 %: ${money(total - total / 1.25)}. Priserna inkluderar moms.`;
     }
 
-    function createInvoice(event) {
+    async function createOrder(event) {
       event.preventDefault();
       if (!cart.length) return;
-      const formData = new FormData(event.currentTarget);
-      const customer = Object.fromEntries(formData.entries());
-      const total = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
-      const invoice = {
-        number: `NTI-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
-        date: new Intl.DateTimeFormat('sv-SE', { dateStyle: 'long' }).format(new Date()),
-        customer,
-        items: cart.map(item => ({ ...item, price: Number(item.price), qty: Number(item.qty) })),
-        total
-      };
-      localStorage.setItem(INVOICE_KEY, JSON.stringify(invoice));
-      localStorage.removeItem(CART_KEY);
-      showInvoice(invoice);
-      history.replaceState(null, '', `checkout.html?faktura=${encodeURIComponent(invoice.number)}`);
+      const submit = document.getElementById('checkoutSubmit');
+      const errorBox = document.getElementById('orderError');
+      errorBox.hidden = true;
+      submit.disabled = true;
+
+      try {
+        const data = await NTIT.api('/orders/checkout', {
+          method: 'POST',
+          body: { items: cart.map(item => ({ listing_id: item.id, quantity: item.qty })) }
+        });
+        localStorage.setItem(INVOICE_KEY, JSON.stringify(data.order));
+        localStorage.removeItem(CART_KEY);
+        showInvoice(data.order);
+        history.replaceState(null, '', `checkout.html?faktura=${encodeURIComponent(data.order.id)}`);
+      } catch (error) {
+        errorBox.textContent = error.message || 'Beställningen kunde inte registreras. Försök igen.';
+        errorBox.hidden = false;
+      } finally {
+        submit.disabled = false;
+      }
     }
 
-    function showInvoice(invoice) {
+    // order: { id, created_at, total_sek, invoice_number, email_sent, email_delivery, items: [...] }
+    function showInvoice(order) {
       document.getElementById('checkoutView').hidden = true;
       document.getElementById('invoiceView').hidden = false;
-      const customer = invoice.customer;
-      const rows = invoice.items.map(item => `
-        <tr>
-          <td>${escapeHTML(item.title)}</td>
-          <td>${item.qty}</td>
-          <td>${money(item.price)}</td>
-          <td>${money(item.price * item.qty)}</td>
-        </tr>
+
+      // Varukorgen kan sträcka sig över flera säljarskolor – gruppera rader per säljare.
+      const sellerNames = [...new Set(order.items.map(item => item.seller_name))];
+      const rows = sellerNames.map(name => `
+        <tr class="invoice-seller-row"><td colspan="4">Säljare: ${escapeHTML(name)}</td></tr>
+        ${order.items
+          .filter(item => item.seller_name === name)
+          .map(item => `
+            <tr>
+              <td>${escapeHTML(item.product_title)}</td>
+              <td>${item.quantity}</td>
+              <td>${money(item.unit_price)}</td>
+              <td>${money(item.line_total != null ? item.line_total : item.quantity * item.unit_price)}</td>
+            </tr>
+          `).join('')}
       `).join('');
+
+      const total = Number(order.total_sek) || 0;
+      const date = new Intl.DateTimeFormat('sv-SE', { dateStyle: 'long' }).format(new Date(order.created_at));
+      const emailNote = order.email_sent
+        ? (order.email_delivery === 'outbox'
+          ? 'Bekräftelsemailet har sparats i demo-mappen backend/mail-outbox/.'
+          : `Bekräftelsemailet är skickat till ${escapeHTML(school.contact_email || 'skolans kontaktadress')}.`)
+        : 'Bekräftelsemailet kunde inte skickas, men ordern är registrerad.';
+
       document.getElementById('invoiceDocument').innerHTML = `
         <div class="invoice-head">
           <div>
@@ -640,29 +700,23 @@
             <h2>Faktura</h2>
           </div>
           <div class="invoice-meta">
-            <strong>${escapeHTML(invoice.number)}</strong>
-            Fakturadatum: ${escapeHTML(invoice.date)}<br>
+            <strong>${escapeHTML(order.invoice_number)}</strong>
+            Fakturadatum: ${escapeHTML(date)}<br>
             Betalningsvillkor: 30 dagar
           </div>
         </div>
         <div class="invoice-parties">
           <div class="invoice-party">
             <div class="invoice-party-label">Faktureras till</div>
-            <strong>${escapeHTML(customer.customerName)}</strong>
-            ${escapeHTML(customer.billingAddress)}<br>
-            Org.nr ${escapeHTML(customer.orgNumber)}<br>
-            ${escapeHTML(customer.customerEmail)}
-            ${customer.customerPhone ? `<br>\${escapeHTML(customer.customerPhone)}` : ''}
-            ${customer.reference ? `<br>Referens: \${escapeHTML(customer.reference)}` : ''}
+            <strong>${escapeHTML(school.name || 'Okänd skola')}</strong>
+            ${escapeHTML(school.billing_address)}<br>
+            ${escapeHTML(school.contact_email)}
+            ${school.billing_reference ? `<br>Referens: ${escapeHTML(school.billing_reference)}` : ''}
           </div>
           <div class="invoice-party">
             <div class="invoice-party-label">Leveransadress</div>
-            <strong>${escapeHTML(customer.customerName)}</strong>
-            ${escapeHTML(customer.deliveryAddress)}
-            <div style="margin-top: 1rem;">
-              <div class="invoice-party-label">Säljare</div>
-              <strong>NTI-T Shopp AB</strong>
-            </div>
+            <strong>${escapeHTML(school.name || 'Okänd skola')}</strong>
+            ${escapeHTML(school.visiting_address || school.billing_address)}
           </div>
         </div>
         <table class="invoice-table">
@@ -677,23 +731,23 @@
           <tbody>${rows}</tbody>
         </table>
         <div class="invoice-totals">
-          <div class="total-line"><span>Summa exkl. moms</span><strong>${money(invoice.total / 1.25)}</strong></div>
-          <div class="total-line"><span>Moms 25 %</span><strong>${money(invoice.total - invoice.total / 1.25)}</strong></div>
-          <div class="total-line grand"><span>Att betala</span><strong>${money(invoice.total)}</strong></div>
+          <div class="total-line"><span>Summa exkl. moms</span><strong>${money(total / 1.25)}</strong></div>
+          <div class="total-line"><span>Moms 25 %</span><strong>${money(total - total / 1.25)}</strong></div>
+          <div class="total-line grand"><span>Att betala</span><strong>${money(total)}</strong></div>
         </div>
         <div class="invoice-foot">
           <span>NTI-T Shopp · Tack för din beställning.</span>
-          <span>Fakturan är skapad digitalt.</span>
+          <span>${escapeHTML(emailNote)}</span>
         </div>
       `;
     }
 
     loadCustomerInfo();
     renderCheckout();
-    document.getElementById('checkoutForm').addEventListener('submit', createInvoice);
+    document.getElementById('checkoutForm').addEventListener('submit', createOrder);
     const savedInvoice = readJSON(INVOICE_KEY, null);
     const invoiceQuery = new URLSearchParams(location.search).get('faktura');
-    if (savedInvoice && invoiceQuery === savedInvoice.number) showInvoice(savedInvoice);
+    if (savedInvoice && savedInvoice.id && invoiceQuery === String(savedInvoice.id)) showInvoice(savedInvoice);
   </script>
 </body>
 </html>

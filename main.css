@@ -153,6 +153,7 @@ header {
   background: transparent;
   color: var(--text-muted);
   font-size: 0.9rem;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }

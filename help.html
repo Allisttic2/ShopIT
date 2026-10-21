@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Hjälp och guider för NTI-T Shopp: köp, annonser, fakturor och produktskick.">
   <title>Hjälp & guider - NTI-T Shopp</title>
+  <script src="api.js"></script>
   <script src="auth.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="main.css">
@@ -23,13 +24,9 @@
         <a href="help.html" class="nav-link">Hjälp</a>
       </nav>
       <div class="header-actions">
-        <button class="cart-btn" id="openCartBtn" title="Varukorg">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <span class="cart-badge" id="cartBadge">0</span>
-        </button>
-        <button class="settings-btn" title="Inställningar">
+        <a href="profil.html" class="settings-btn" title="Inställningar">
           <i class="fa-solid fa-gear"></i>
-        </button>
+        </a>
       </div>
     </div>
   </header>
@@ -103,11 +100,11 @@
             </details>
             <details class="faq-item" data-search-item>
               <summary>Kan jag ändra eller ta bort min annons?</summary>
-              <div class="faq-answer"><p>Du kan ta bort annonsen från profilens ”Mina annonser”. Redigeringsknappen finns där, men i den här versionen är den ännu inte kopplad till ett redigeringsformulär.</p></div>
+              <div class="faq-answer"><p>Du kan både redigera och ta bort annonsen från profilens ”Mina annonser”. Redigeringen öppnar samma formulär som vid skapande, och annonsen uppdateras på servern.</p></div>
             </details>
             <details class="faq-item" data-search-item>
               <summary>Var sparas varukorg och profiluppgifter?</summary>
-              <div class="faq-answer"><p>Den här versionen sparar uppgifter lokalt i webbläsaren på enheten du använder. De synkas inte till andra enheter och skickas inte till någon server.</p></div>
+              <div class="faq-answer"><p>Profiluppgifter, annonser och ordrar sparas på servern och är knutna till inloggningen. Varukorgen sparas lokalt i webbläsaren och syns därför bara på den enhet du använder.</p></div>
             </details>
           </div>
         </section>
@@ -137,7 +134,7 @@
               <p>Efter bekräftelsen visas fakturan. Välj ”Skriv ut / spara som PDF” och sedan PDF som skrivare eller mål.</p>
             </article>
           </div>
-          <div class="guide-note"><i class="fa-solid fa-circle-info"></i><span>Butiken är en prototyp: beställningar och uppgifter sparas lokalt i webbläsaren. Checkouten genomför ingen betalning och skickar ingen order till en server.</span></div>
+          <div class="guide-note"><i class="fa-solid fa-circle-info"></i><span>Butiken är en prototyp: checkouten genomför ingen betalning, men beställningen skickas till servern och en faktura skapas. Varukorgen sparas lokalt i webbläsaren.</span></div>
         </section>
 
         <section class="help-section" id="annonsera" data-search-section>
@@ -157,7 +154,7 @@
             <article class="guide-step" data-search-item>
               <span class="step-number">2</span>
               <h3>Beskriv produkten</h3>
-              <p>Fyll i rubrik, kategori, pris, antal och skick. Skriv gärna modell, viktiga specifikationer och kända fel i beskrivningen.</p>
+              <p>Fyll i rubrik, kategori, pris, antal och beskrivning. Skriv gärna modell, viktiga specifikationer och kända fel i beskrivningen.</p>
             </article>
             <article class="guide-step" data-search-item>
               <span class="step-number">3</span>
@@ -266,10 +263,6 @@
   </footer>
 
   <script>
-    document.getElementById('openCartBtn').addEventListener('click', () => {
-      window.location.href = 'checkout.html';
-    });
-
     const searchInput = document.getElementById('helpSearch');
     const searchItems = [...document.querySelectorAll('[data-search-item]')];
     const searchSections = [...document.querySelectorAll('[data-search-section]')];

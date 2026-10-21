@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NTI-T Shopp</title>
-  <script src="auth.js"></script>
+  <script src="api.js"></script>
   <!-- Font Awesome Ikoner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="main.css">
@@ -629,6 +629,72 @@
       background: var(--accent-hover);
     }
 
+    .btn-page-buy-direct {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-page-buy-direct:hover {
+      background: rgba(248, 246, 240, 0.05);
+      border-color: var(--border-hover);
+    }
+
+    /* --- BESTÄLLNINGSMODAL (KÖP DIREKT) --- */
+    .order-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 1.5rem;
+    }
+
+    .order-modal-overlay.active { display: flex; }
+
+    .order-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-elevated);
+      max-width: 460px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .order-modal-icon { font-size: 2.6rem; color: #10b981; margin-bottom: 1rem; }
+    .order-modal-icon.error { color: #ef4444; }
+
+    .order-modal-card h3 { margin: 0 0 0.75rem; font-size: 1.25rem; color: var(--text-main); }
+    .order-modal-card p { margin: 0.25rem 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+    .order-modal-total {
+      margin: 0.75rem 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .order-modal-actions { margin-top: 1.5rem; }
+
+    .order-modal-btn {
+      width: 100%;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .order-modal-btn:hover { background: var(--accent-hover); }
+
     /* --- VARUKORG SIDEBAR (DRAWER) --- */
     .cart-overlay {
       position: fixed;
@@ -865,9 +931,9 @@
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
 
-        <button class="settings-btn" title="Inställningar">
+        <a href="profil.html" class="settings-btn" title="Inställningar">
           <i class="fa-solid fa-gear"></i>
-        </button>
+        </a>
       </div>
     </div>
   </header>
@@ -884,12 +950,12 @@
           <input type="text" id="searchInput" placeholder="Sök hårdvara, modell eller specifikation...">
           <select id="categorySelect">
             <option value="alla">Alla kategorier</option>
-            <option value="datorer">Datorer & Laptops</option>
-            <option value="komponenter">Datorkomponenter</option>
-            <option value="skarmar">Skärmar & Display</option>
-            <option value="mobil">Mobil & Surfplattor</option>
-            <option value="ljud">Ljud & Tillbehör</option>
-            <option value="natverk">Nätverk & Server</option>
+            <option value="Datorer">Datorer</option>
+            <option value="Laddare">Laddare</option>
+            <option value="Kablar">Kablar</option>
+            <option value="Skärmar">Skärmar</option>
+            <option value="Switchar">Switchar</option>
+            <option value="Router">Router</option>
           </select>
           <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> Sök</button>
         </div>
@@ -920,9 +986,6 @@
             
             <select class="filter-select" id="filterLocation">
               <option value="alla">Hela Sverige</option>
-              <option value="stockholm">Stockholm</option>
-              <option value="goteborg">Göteborg</option>
-              <option value="malmo">Malmö</option>
             </select>
 
             <select class="filter-select" id="filterPrice">
@@ -992,8 +1055,20 @@
     </div>
   </div>
 
+  <!-- ORDERMOTAL (BEKRÄFTELSE EFTER "KÖP DIREKT") -->
+  <div class="order-modal-overlay" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+    <div class="order-modal-card">
+      <div class="order-modal-icon" id="orderModalIcon"><i class="fa-solid fa-circle-check"></i></div>
+      <h3 id="orderModalTitle">Tack för ditt köp!</h3>
+      <div id="orderModalBody"></div>
+      <div class="order-modal-actions">
+        <button class="order-modal-btn" id="orderModalClose" type="button">Tillbaka till butiken</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
-  <footer>
+  <footer></footer>
     <div class="footer-container">
       <div class="footer-col">
         <h3>Om plattformen</h3>
@@ -1034,129 +1109,18 @@
   </footer>
 
   <script>
-    // DATA MED LAGERANTAL (STOCK) OCH SKICK (1-10)
-    const productDatabase = [
-      {
-        id: 101,
-        featured: true,
-        title: "Lenovo ThinkPad X1 Carbon Gen 11",
-        price: 14500,
-        category: "datorer",
-        location: "stockholm",
-        time: "Idag 15:10",
-        stock: 4,
-        condition: 9,
-        description: "Mycket välvårdad Lenovo ThinkPad X1 Carbon Gen 11. Utrustad med Intel Core i7, 32GB RAM och 1TB NVMe SSD. Professionell kvalitet och tunn design."
-      },
-      {
-        id: 102,
-        featured: true,
-        title: "Samsung Odyssey Neo G9 49\" OLED",
-        price: 12900,
-        category: "skarmar",
-        location: "goteborg",
-        time: "Idag 14:00",
-        stock: 2,
-        condition: 8,
-        description: "Böjd 49-tums ultrawide OLED-skärm med 240Hz uppdateringsfrekvens. Magnifik svärta och fantastisk responstid för e-sport och multitasking."
-      },
-      {
-        id: 103,
-        featured: true,
-        title: "Keychron Q1 Pro Mekaniskt Tangentbord",
-        price: 1800,
-        category: "ljud",
-        location: "stockholm",
-        time: "Idag 12:30",
-        stock: 12,
-        condition: 10,
-        description: "Helt nytt mekaniskt tangentbord i massivt aluminiumchassi med trådlös Bluetooth-anslutning och fabrikssmorda switchar."
-      },
-      {
-        id: 104,
-        featured: true,
-        title: "Apple iPad Pro 12.9\" M2 128GB",
-        price: 9400,
-        category: "mobil",
-        location: "malmo",
-        time: "Igår 20:15",
-        stock: 1,
-        condition: 7,
-        description: "Kraftfull iPad Pro med M2-chip. Har några obetydliga repor på baksidans chassi men skärmen är i perfekt skick med monterat skärmskydd."
-      },
-      {
-        id: 1,
-        title: "MacBook Pro 16\" M3 Max 36GB",
-        price: 32500,
-        category: "datorer",
-        location: "stockholm",
-        time: "Idag 14:20",
-        stock: 3,
-        condition: 9,
-        description: "Klassledande prestanda med M3 Max, 36GB enhetligt minne och 1TB SSD. Säljes i absolut nyskick inklusive tillbehör och originalförpackning."
-      },
-      {
-        id: 2,
-        title: "ASUS ROG Swift 32\" 4K OLED Monitor",
-        price: 11200,
-        category: "skarmar",
-        location: "goteborg",
-        time: "Idag 13:45",
-        stock: 5,
-        condition: 8,
-        description: "Perfekt färgåtergivning och blixtsnabb bildskärpa för gaming och kreativt arbete. Inga inbränningar eller defekter."
-      },
-      {
-        id: 3,
-        title: "NVIDIA GeForce RTX 4090 24GB",
-        price: 18900,
-        category: "komponenter",
-        location: "malmo",
-        time: "Igår 18:10",
-        stock: 2,
-        condition: 8,
-        description: "Världens kraftfullaste grafikkort för konsumenter. Använt sparsamt i välventilerat chassi utan överklockning."
-      },
-      {
-        id: 4,
-        title: "iPhone 15 Pro Max 256GB Titanium",
-        price: 12800,
-        category: "mobil",
-        location: "stockholm",
-        time: "Igår 16:00",
-        stock: 6,
-        condition: 6,
-        description: "Funktionellt helt felfri med 93% batterihälsa. Mindre slitage längs titanramen men skärm och kameralinser är orörda."
-      },
-      {
-        id: 5,
-        title: "Sony WH-1000XM5 Hörlurar",
-        price: 2900,
-        category: "ljud",
-        location: "goteborg",
-        time: "2 okt",
-        stock: 8,
-        condition: 10,
-        description: "Fabriksny vara i oöppnad kartong. Bäst-i-test aktiv brusreducering och fantastisk samtalskvalitet."
-      },
-      {
-        id: 6,
-        title: "Ubiquiti UniFi Dream Router & AP",
-        price: 3400,
-        category: "natverk",
-        location: "malmo",
-        time: "1 okt",
-        stock: 2,
-        condition: 5,
-        description: "Professionell nätverksutrustning för kontoret eller den krävande hemanvändaren. Kosmetiska bruksspår på chassit."
-      }
-    ];
+    // DATA LAGER: annonserna hämtas från backend-API:et (GET /api/listings)
+    let listings = [];
+    let currentListingId = null;
 
-    // VARUKORG TILLSTÅND
-    let cart = JSON.parse(localStorage.getItem('ntit_cart') || '[]').map(item => ({
-      ...item,
-      image: typeof item.image === 'string' && item.image.startsWith('data:image/') ? item.image : ''
-    }));
+    // VARUKORG TILLSTÅND (lokal; rader pekar på listings via uuid)
+    const CART_KEY = 'ntit_cart';
+    let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]')
+      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
+      .map(item => ({
+        ...item,
+        image: typeof item.image === 'string' && item.image ? item.image : ''
+      }));
 
     // ELEMENT REFERENSER
     const feedContainer = document.getElementById('productFeed');
@@ -1175,45 +1139,31 @@
     const productPageView = document.getElementById('productPageView');
     const productPageContent = document.getElementById('productPageContent');
 
-    // SKICK-FÄRGKODNING (1-10)
-    function getConditionPill(score) {
-      let bg = 'rgba(16, 185, 129, 0.15)';
-      let color = '#10b981'; // Grön (7-10)
-      let border = 'rgba(16, 185, 129, 0.3)';
-
-      if (score <= 3) {
-        bg = 'rgba(239, 68, 68, 0.15)';
-        color = '#ef4444'; // Röd (1-3)
-        border = 'rgba(239, 68, 68, 0.3)';
-      } else if (score <= 6) {
-        bg = 'rgba(245, 158, 11, 0.15)';
-        color = '#f59e0b'; // Orange/Gul (4-6)
-        border = 'rgba(245, 158, 11, 0.3)';
-      }
-
-      return `<span class="condition-pill" style="background:${bg}; color:${color}; border:1px solid ${border};">
-                <i class="fa-solid fa-gauge"></i> Skick ${score}/10
+    // NEUTRAL KATEGORIPILL
+    function categoryPill(category) {
+      return `<span class="condition-pill" style="background:rgba(96,165,250,0.12); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">
+                <i class="fa-solid fa-tag"></i> ${NTIT.escapeHTML(category || 'Övrigt')}
               </span>`;
     }
 
-    function createProductCard(product) {
+    function createListingCard(listing) {
       const card = document.createElement('div');
       card.className = 'product-card';
-      card.onclick = () => openProductPage(product.id);
+      card.onclick = () => openProductPage(listing.id);
       card.innerHTML = `
-        <div class="stock-badge"><i class="fa-solid fa-boxes-stacked"></i> ${product.stock} i lager</div>
+        <div class="stock-badge"><i class="fa-solid fa-boxes-stacked"></i> ${listing.quantity} i lager</div>
         <button class="fav-btn" title="Spara som favorit">
           <i class="fa-regular fa-heart"></i>
         </button>
-        <div class="product-img-wrap"><img src="${product.image || 'images/product-placeholder.svg'}" alt="${product.title}" class="product-img"></div>
+        <div class="product-img-wrap"><img src="${NTIT.escapeHTML(listing.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(listing.title)}" class="product-img" loading="lazy"></div>
         <div class="product-info">
           <div class="product-meta">
-            <span class="product-location"><i class="fa-solid fa-location-dot"></i> ${capitalize(product.location)}</span>
-            ${getConditionPill(product.condition)}
+            <span class="product-location"><i class="fa-solid fa-location-dot"></i> ${NTIT.escapeHTML(listing.city || 'Anges senare')}</span>
+            ${categoryPill(listing.category)}
           </div>
-          <div class="product-title">${product.title}</div>
+          <div class="product-title">${NTIT.escapeHTML(listing.title)}</div>
           <div class="product-footer">
-            <div class="product-price">${product.price.toLocaleString('sv-SE')} kr</div>
+            <div class="product-price">${NTIT.money(listing.price)}</div>
             <button class="btn-add-cart" title="Lägg i varukorg">
               <i class="fa-solid fa-cart-plus"></i><span> Köp</span>
             </button>
@@ -1226,61 +1176,69 @@
       });
       card.querySelector('.btn-add-cart').addEventListener('click', event => {
         event.stopPropagation();
-        addToCart(product.id);
+        addToCart(listing.id);
       });
       return card;
     }
 
     function renderLatest() {
       latestGrid.innerHTML = '';
-      productDatabase.filter(product => product.featured).forEach(product => {
-        latestGrid.appendChild(createProductCard(product));
+      listings.slice(0, 4).forEach(listing => {
+        latestGrid.appendChild(createListingCard(listing));
       });
     }
 
-    function renderProducts(productList) {
+    function renderProducts(listingList) {
       feedContainer.innerHTML = '';
-      if(productList.length === 0) {
+      if(listingList.length === 0) {
         feedContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Inga produkter matchar dina sökkriterier.</p>';
         return;
       }
-      productList.forEach(product => feedContainer.appendChild(createProductCard(product)));
+      listingList.forEach(listing => feedContainer.appendChild(createListingCard(listing)));
     }
 
     // VY-NAVIGERING: ÖPPNA PRODUKTSIDA (HELTÄCKANDE VY)
     function openProductPage(id) {
-      const product = productDatabase.find(p => p.id === id);
-      if (!product) return;
+      const listing = listings.find(l => l.id === id);
+      if (!listing) return;
+      currentListingId = id;
 
       productPageContent.innerHTML = `
-        <div class="product-page-img-wrap"><img src="${product.image || 'images/product-placeholder.svg'}" alt="${product.title}" class="product-page-img"></div>
+        <div class="product-page-img-wrap"><img src="${NTIT.escapeHTML(listing.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(listing.title)}" class="product-page-img"></div>
         <div class="product-page-info">
-          <div class="product-page-title">${product.title}</div>
-          <div class="product-page-price">${product.price.toLocaleString('sv-SE')} kr</div>
-          
+          <div class="product-page-title">${NTIT.escapeHTML(listing.title)}</div>
+          <div class="product-page-price">${NTIT.money(listing.price)}</div>
+
           <div class="product-page-spec-list">
             <div class="spec-item">
               <span>Lagerstatus:</span>
-              <strong style="color:var(--text-main);"><i class="fa-solid fa-boxes-stacked"></i> ${product.stock} st tillgängliga</strong>
+              <strong style="color:var(--text-main);"><i class="fa-solid fa-boxes-stacked"></i> ${listing.quantity} st tillgängliga</strong>
             </div>
             <div class="spec-item">
-              <span>Tillstånd/Skick:</span>
-              ${getConditionPill(product.condition)}
+              <span>Kategori:</span>
+              ${categoryPill(listing.category)}
             </div>
             <div class="spec-item">
               <span>Plats / Ort:</span>
-              <strong><i class="fa-solid fa-location-dot"></i> ${capitalize(product.location)}</strong>
+              <strong><i class="fa-solid fa-location-dot"></i> ${NTIT.escapeHTML(listing.city || 'Anges senare')}</strong>
+            </div>
+            <div class="spec-item">
+              <span>Säljare:</span>
+              <strong><i class="fa-solid fa-graduation-cap"></i> ${NTIT.escapeHTML(listing.school_name || 'Okänd skola')}</strong>
             </div>
           </div>
 
           <div class="product-page-desc">
             <h4 style="color:var(--text-main); margin-bottom: 0.5rem; font-weight:600;">Produktbeskrivning</h4>
-            ${product.description || 'Ingen ytterligare beskrivning angiven.'}
+            ${NTIT.escapeHTML(listing.description || 'Ingen ytterligare beskrivning angiven.').replace(/\n/g, '<br>')}
           </div>
 
           <div class="product-page-actions">
-            <button class="btn-page-buy" onclick="addToCart(${product.id})">
+            <button class="btn-page-buy" onclick="addToCart('${listing.id}')">
               <i class="fa-solid fa-cart-plus"></i> Lägg i varukorg
+            </button>
+            <button class="btn-page-buy btn-page-buy-direct" onclick="buyDirect('${listing.id}')">
+              <i class="fa-solid fa-bolt"></i> Köp direkt
             </button>
           </div>
         </div>
@@ -1302,21 +1260,30 @@
       }
     }
 
+    // KÖPÅTGÄRDER KRÄVER INLOGGNAD SESSION (annars till inloggning)
+    function requireSession() {
+      if (NTIT.getSession()) return true;
+      location.replace('login.html?next=index.html');
+      return false;
+    }
+
     // VARUKORG LOGIK
     function addToCart(id) {
-      const product = productDatabase.find(p => p.id === id);
-      if (!product) return;
+      if (!requireSession()) return;
+      const listing = listings.find(l => l.id === id);
+      if (!listing || listing.quantity <= 0) return;
 
       const existing = cart.find(item => item.id === id);
       if(existing) {
-        existing.qty += 1;
+        if (existing.qty < (existing.max || listing.quantity)) existing.qty += 1;
       } else {
         cart.push({
-          id: product.id,
-          title: product.title,
-          price: product.price,
-          image: product.image,
-          qty: 1
+          id: listing.id,
+          title: listing.title,
+          price: listing.price,
+          image: listing.image_url,
+          qty: 1,
+          max: listing.quantity
         });
       }
       updateCartUI();
@@ -1325,13 +1292,14 @@
 
     function updateQty(id, delta) {
       const item = cart.find(i => i.id === id);
-      if (item) {
-        item.qty += delta;
-        if (item.qty <= 0) {
-          removeFromCart(id);
-        } else {
-          updateCartUI();
-        }
+      if (!item) return;
+      const max = item.max || Number.MAX_SAFE_INTEGER;
+      item.qty += delta;
+      if (item.qty > max) item.qty = max;
+      if (item.qty <= 0) {
+        removeFromCart(id);
+      } else {
+        updateCartUI();
       }
     }
 
@@ -1341,13 +1309,13 @@
     }
 
     function updateCartUI() {
-      localStorage.setItem('ntit_cart', JSON.stringify(cart));
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       cartBadge.textContent = totalCount;
       document.getElementById('checkoutBtn').disabled = cart.length === 0;
 
       const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      cartTotal.textContent = totalPrice.toLocaleString('sv-SE') + ' kr';
+      cartTotal.textContent = NTIT.money(totalPrice);
 
       if(cart.length === 0) {
         cartBody.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-cart-flatbed" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity:0.5;"></i><br>Din varukorg är tom.</div>';
@@ -1359,17 +1327,17 @@
         const itemEl = document.createElement('div');
         itemEl.className = 'cart-item';
         itemEl.innerHTML = `
-          <img src="${item.image || 'images/product-placeholder.svg'}" alt="${item.title}" class="cart-item-img">
+          <img src="${NTIT.escapeHTML(item.image || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(item.title)}" class="cart-item-img">
           <div class="cart-item-details">
-            <div class="cart-item-title">${item.title}</div>
-            <div class="cart-item-price">${(item.price * item.qty).toLocaleString('sv-SE')} kr</div>
+            <div class="cart-item-title">${NTIT.escapeHTML(item.title)}</div>
+            <div class="cart-item-price">${NTIT.money(item.price * item.qty)}</div>
             <div class="cart-qty-controls">
-              <button class="qty-btn" onclick="updateQty(${item.id}, -1)" title="Minska antal">-</button>
+              <button class="qty-btn" onclick="updateQty('${item.id}', -1)" title="Minska antal">-</button>
               <span class="qty-val">${item.qty}</span>
-              <button class="qty-btn" onclick="updateQty(${item.id}, 1)" title="Öka antal">+</button>
+              <button class="qty-btn" onclick="updateQty('${item.id}', 1)" title="Öka antal">+</button>
             </div>
           </div>
-          <button class="cart-item-remove" onclick="removeFromCart(${item.id})" title="Ta bort">
+          <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Ta bort">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         `;
@@ -1380,6 +1348,7 @@
     function openCart() { cartOverlay.classList.add('active'); }
     function closeCart() { cartOverlay.classList.remove('active'); }
     function goToCheckout() {
+      if (!requireSession()) return;
       if (cart.length) window.location.href = 'checkout.html';
     }
 
@@ -1390,8 +1359,6 @@
     });
 
     // HJÄLPFUNKTIONER
-    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
-
     function toggleFav(btn) {
       btn.classList.toggle('active');
       const icon = btn.querySelector('i');
@@ -1400,6 +1367,91 @@
       } else {
         icon.className = 'fa-regular fa-heart';
       }
+    }
+
+    // BESTÄLLNING: "KÖP DIREKT" (enstaka köp utan varukorg)
+    async function buyDirect(id) {
+      if (!requireSession()) return;
+      const listing = listings.find(l => l.id === id);
+      if (!listing) return;
+      try {
+        const data = await NTIT.api('/orders/direct', { method: 'POST', body: { listing_id: id, quantity: 1 } });
+        showOrderModal(data.order, null);
+        if (await loadListings()) {
+          renderLatest();
+          if (productPageView.style.display !== 'none' && currentListingId) {
+            const stillThere = listings.find(l => l.id === currentListingId);
+            if (stillThere) openProductPage(currentListingId);
+            else showHomeView(false);
+          } else {
+            applyFilters(false);
+          }
+        }
+      } catch (error) {
+        showOrderModal(null, error.message);
+      }
+    }
+
+    function showOrderModal(order, errorMessage) {
+      const overlay = document.getElementById('orderModal');
+      const icon = document.getElementById('orderModalIcon');
+      const title = document.getElementById('orderModalTitle');
+      const body = document.getElementById('orderModalBody');
+      if (order) {
+        icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        icon.classList.remove('error');
+        title.textContent = 'Tack för ditt köp!';
+        const session = NTIT.getSession();
+        const recipient = session && session.school ? session.school.contact_email : '';
+        const emailNote = order.email_sent
+          ? (order.email_delivery === 'outbox'
+            ? `En bekräftelse med faktura ${NTIT.escapeHTML(order.invoice_number)} har sparats i demo-mappen backend/mail-outbox/ (med SMTP skickas den till ${NTIT.escapeHTML(recipient || 'skolans kontaktadress')}).`
+            : `En bekräftelse med faktura har skickats till ${NTIT.escapeHTML(recipient || 'skolans kontaktadress')}.`)
+          : 'Bekräftelsemailet kunde inte skickas, men ordern är registrerad.';
+        body.innerHTML = `
+          <p>Ordern är registrerad och fakturan är klar.</p>
+          <div class="order-modal-total">Totalt: ${NTIT.money(order.total_sek)}</div>
+          <p>Fakturanummer: <strong>${NTIT.escapeHTML(order.invoice_number)}</strong></p>
+          <p>${emailNote}</p>
+        `;
+      } else {
+        icon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+        icon.classList.add('error');
+        title.textContent = 'Köpet kunde inte slutföras';
+        body.innerHTML = `<p>${NTIT.escapeHTML(errorMessage || 'Något gick fel. Försök igen.')}</p>`;
+      }
+      overlay.classList.add('active');
+    }
+
+    document.getElementById('orderModalClose').addEventListener('click', () => {
+      document.getElementById('orderModal').classList.remove('active');
+    });
+    document.getElementById('orderModal').addEventListener('click', (e) => {
+      if (e.target.id === 'orderModal') e.target.classList.remove('active');
+    });
+
+    // HÄMTA ANNONSER FRÅN API:ET (senaste först)
+    async function loadListings() {
+      try {
+        const data = await NTIT.api('/listings', { auth: false });
+        listings = Array.isArray(data.listings) ? data.listings : [];
+      } catch (error) {
+        listings = [];
+        return false;
+      }
+      populateLocationFilter();
+      return true;
+    }
+
+    function populateLocationFilter() {
+      const select = document.getElementById('filterLocation');
+      const current = select.value;
+      const cities = [...new Set(listings.map(l => l.city).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'sv'));
+      select.innerHTML = '<option value="alla">Hela Sverige</option>' + cities
+        .map(city => `<option value="${NTIT.escapeHTML(city)}">${NTIT.escapeHTML(city)}</option>`)
+        .join('');
+      if ([...select.options].some(option => option.value === current)) select.value = current;
     }
 
     // FILTRERING OCH HERO-SÖKNING (Behåller exakt scrollposition när man filtrerar)
@@ -1422,10 +1474,10 @@
         filterSectionWrapper.style.display = 'block';
       }
 
-      let filtered = productDatabase.filter(p => !p.featured).filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(searchVal);
+      let filtered = listings.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(searchVal) || (p.description || '').toLowerCase().includes(searchVal);
         const matchesCat = catVal === 'alla' || p.category === catVal;
-        const matchesLoc = locVal === 'alla' || p.location === locVal;
+        const matchesLoc = locVal === 'alla' || p.city === locVal;
 
         let matchesPrice = true;
         if(priceVal === 'low') matchesPrice = p.price < 2000;
@@ -1463,9 +1515,16 @@
     document.getElementById('filterSort').addEventListener('change', () => applyFilters(false));
 
     // INITIALISERING
-    renderLatest();
-    renderProducts(productDatabase.filter(product => !product.featured));
-    updateCartUI();
+    (async () => {
+      const ok = await loadListings();
+      if (ok) {
+        renderLatest();
+        applyFilters(false);
+      } else {
+        feedContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Det gick inte att hämta annonserna. Kontrollera att servern körs och ladda om sidan.</p>';
+      }
+      updateCartUI();
+    })();
   </script>
 </body>
 </html>

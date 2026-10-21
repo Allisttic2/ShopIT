@@ -20,7 +20,20 @@ Databasen körs på **Neon (molnbaserad PostgreSQL)** i projektet `sweet-sky-056
 
 Anton och Rasmus ansvarar för databasdelen: SQL-schema, relationer, ER-diagram, testdata och Neon-konfiguration. Backendteamet ansvarar för Node.js/Express, anslutningen till databasen, API, behörigheter och köptransaktioner.
 
-Databasfiler, ER-diagram, installationssteg och överlämning finns i [database/README.md](database/README.md). De fem tabeller som uppgiften kräver och sex dummy-annonser är nu installerade i Neon och verifierade via Node.js-databasverktygen. Schema och seed testades först på en isolerad Neon-branch. Backendteamet behöver fortfarande koppla in API och autentisering. Kör `npm install` och `npm run db:status` efter att anslutningsuppgifterna har konfigurerats privat. Ingen ny webbserver eller app-build har lagts till i detta databasarbete.
+Databasfiler, ER-diagram, installationssteg och överlämning finns i [database/README.md](database/README.md). De fem tabeller som uppgiften kräver och sex dummy-annonser är nu installerade i Neon och verifierade via Node.js-databasverktygen. Schema och seed testades först på en isolerad Neon-branch. Kör `npm install` och `npm run db:status` efter att anslutningsuppgifterna har konfigurerats privat.
+
+## Backend – API (körs lokalt)
+
+Backend körs lokalt med Node.js/Express och servar både API:et (`/api`) och den statiska frontenden på samma origin. Den kan prata med antingen en lokal PostgreSQL (Docker: `docker compose up -d db`) eller den befintliga Neon-installationen – enda skillnaden är `DATABASE_URL` i `.env`.
+
+```bash
+npm install
+cp .env.example .env   # fyll i DATABASE_URL, AUTH_SECRET (och SMTP_* om riktiga mail önskas)
+npm run db:migrate && npm run db:seed   # bara mot lokal PostgreSQL
+npm start               # http://localhost:3000
+```
+
+API:t täcker hela specifikationen: aktiva annonser (förstasidan), detaljsida, inloggning/registrering (demonivå), ”Min sida” (skolinfo, egna annonser med redigering/tagning, inventarie), bilduppladdning (filväljare och mobilkamera), ”Köp direkt” och varukorgsköp med transaktionsskyddat lagersaldo, fakturagenerering och orderbekräftelsemail samt automatisk utgång av annonser efter 30 dagar (hanteras av databasvyn, ingen schemalagd job behövs). Fullständig endpointlista, exempel och dokumenterade gränser finns i [backend/README.md](backend/README.md).
 
 Underlag: [databaskortet i Trello](https://trello.com/c/kcTl3R5z), [planeringsmötet](https://trello.com/c/lmzzXC1y) och [projektspecifikationen](https://docs.google.com/document/d/1954j7vGA32ExfJ2vr5VcZzSdrLb0nRkv/edit). Befintlig plan är publicering 3 november och slutpresentation 6 november 2026.
 
