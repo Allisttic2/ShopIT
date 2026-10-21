@@ -1,12 +1,14 @@
 {
-  "name": "shopit-database",
+  "name": "shopit",
   "version": "0.1.0",
   "private": true,
-  "description": "ShopIT database setup and verification tools",
+  "description": "ShopIT – backend (Express), static frontend and database tools",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
+    "start": "node backend/server.mjs",
+    "dev": "node --watch backend/server.mjs",
     "db:status": "node database/manage.mjs status",
     "db:migrate": "node database/manage.mjs migrate",
     "db:seed": "node database/manage.mjs seed",
@@ -16,6 +18,9 @@
     "@neon/config": "^1.9.2",
     "@neon/env": "^1.6.3",
     "dotenv": "^18.0.8",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.5",
     "pg": "^8.23.1"
   }
 }
