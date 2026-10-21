@@ -14,7 +14,9 @@ Databas – två alternativ:
 1. **Lokalt (Docker)**:
    ```bash
    docker compose up -d db
-   DATABASE_URL=postgresql://shopit:shopit@localhost:5432/shopit
+   # .env (port 5433 – 5432 är ofta upptagen av en lokal PostgreSQL):
+   DATABASE_URL=postgresql://shopit:shopit@localhost:5433/shopit
+   DATABASE_URL_UNPOOLED=postgresql://shopit:shopit@localhost:5433/shopit
    npm run db:migrate
    npm run db:seed
    ```

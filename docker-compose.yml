@@ -9,7 +9,8 @@ services:
       POSTGRES_USER: shopit
       POSTGRES_PASSWORD: shopit
     ports:
-      - "5432:5432"
+      # 5433: 5432 is often taken by a locally installed PostgreSQL.
+      - "5433:5432"
     volumes:
       - shopit_db:/var/lib/postgresql/data
     healthcheck:
