@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Logga in eller skapa konto på NTI-T Shopp.">
   <title>Logga in - NTI-T Shopp</title>
+  <script src="api.js"></script>
   <script src="auth.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="main.css">
@@ -85,16 +86,18 @@
           <button class="auth-submit" id="authSubmit" type="submit">Logga in <i class="fa-solid fa-arrow-right"></i></button>
         </form>
 
+        <div class="auth-demo-hint" id="authDemoHint">
+          <i class="fa-solid fa-flask"></i> Demo: logga in med <code>stockholm@example.test</code> och lösenordet <code>demo1234</code> (samma lösenord gäller för alla inlagda skolor).
+        </div>
+
         <p class="auth-legal" id="authLegal">Genom att logga in fortsätter du till NTI-T Shopp.</p>
-        <div class="auth-local-note"><i class="fa-solid fa-lock"></i><span>Detta konto sparas lokalt i den här webbläsaren.</span></div>
+        <div class="auth-local-note"><i class="fa-solid fa-lock"></i><span>Kontot sparas på servern. Inloggningssessionen sparas lokalt i den här webbläsaren.</span></div>
       </div>
     </section>
   </main>
 
   <script>
     (() => {
-      const USERS_KEY = 'ntit_users';
-      const SESSION_KEY = 'ntit_session';
       const form = document.getElementById('authForm');
       const loginTab = document.getElementById('loginTab');
       const registerTab = document.getElementById('registerTab');
@@ -131,24 +134,10 @@
           ? 'Skapa konto <i class="fa-solid fa-arrow-right"></i>'
           : 'Logga in <i class="fa-solid fa-arrow-right"></i>';
         document.getElementById('authLegal').textContent = registering
-          ? 'Kontot används för att komma åt NTI-T Shopp på den här enheten.'
+          ? 'Kontot används för att komma åt NTI-T Shopp.'
           : 'Genom att logga in fortsätter du till NTI-T Shopp.';
+        document.getElementById('authDemoHint').hidden = registering;
         setMessage('');
-      }
-
-      function bytesToBase64(bytes) {
-        return btoa(String.fromCharCode(...new Uint8Array(bytes)));
-      }
-
-      async function hashPassword(value, salt) {
-        const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, keyMaterial, 256);
-        return bytesToBase64(bits);
-      }
-
-      function getUsers() {
-        try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-        catch { return []; }
       }
 
       loginTab.addEventListener('click', () => setMode('login'));
@@ -167,7 +156,6 @@
         setMessage('');
         const email = document.getElementById('email').value.trim().toLowerCase();
         const passwordValue = password.value;
-        const users = getUsers();
         const submit = document.getElementById('authSubmit');
         submit.disabled = true;
 
@@ -178,24 +166,20 @@
             if (!name) throw new Error('Fyll i namn eller skolans namn.');
             if (passwordValue.length < 8) throw new Error('Lösenordet måste innehålla minst 8 tecken.');
             if (passwordValue !== confirmPassword) throw new Error('Lösenorden matchar inte.');
-            if (users.some(user => user.email === email)) throw new Error('Det finns redan ett konto med den e-postadressen. Logga in i stället.');
-
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            users.push({ email, name, salt: bytesToBase64(salt), passwordHash: await hashPassword(passwordValue, salt) });
-            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            const data = await NTIT.api('/auth/register', { method: 'POST', auth: false, body: { name, email, password: passwordValue } });
+            NTIT.setSession(data.token, data.school);
           } else {
-            const user = users.find(entry => entry.email === email);
-            if (!user) throw new Error('Kontot hittades inte. Skapa ett konto först.');
-            const salt = Uint8Array.from(atob(user.salt), character => character.charCodeAt(0));
-            if (await hashPassword(passwordValue, salt) !== user.passwordHash) throw new Error('E-postadressen eller lösenordet stämmer inte.');
+            if (!email) throw new Error('Ange en e-postadress.');
+            if (!passwordValue) throw new Error('Ange ett lösenord.');
+            const data = await NTIT.api('/auth/login', { method: 'POST', auth: false, body: { email, password: passwordValue } });
+            NTIT.setSession(data.token, data.school);
           }
 
-          localStorage.setItem(SESSION_KEY, JSON.stringify({ email, createdAt: Date.now() }));
           const next = new URLSearchParams(location.search).get('next');
           const allowedPages = ['index.html', 'profil.html', 'checkout.html', 'help.html'];
           location.replace(allowedPages.includes(next) ? next : 'index.html');
         } catch (error) {
-          setMessage(error.message || 'Det gick inte att spara kontot. Kontrollera webbläsarens lagring och försök igen.', true);
+          setMessage(error.message || 'Det gick inte att nå servern. Försök igen.', true);
         } finally {
           submit.disabled = false;
         }

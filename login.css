@@ -236,6 +236,24 @@
 
 .auth-local-note i { margin-top: 0.15rem; color: #a5b9aa; }
 
+.auth-demo-hint {
+  margin-top: 1.2rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.auth-demo-hint code {
+  color: var(--text-main);
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.auth-demo-hint[hidden] { display: none; }
+
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
