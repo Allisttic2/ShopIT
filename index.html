@@ -1,1445 +1,1526 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fenrac AB</title>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Permanent+Marker&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f4eee4; 
-            --bg-dark: #1a1816;
-            --accent-yellow: #f3c614;
-            --accent-gold: #d89f00;
-            --text-main: #1a1816;
-            --text-muted: #6c665c;
-            --text-light: #f4eee4;
-            --text-light-muted: #b0a99e;
-            --border-color: rgba(26, 24, 22, 0.12);
-        }
-
-        html {
-            scroll-behavior: smooth;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-            position: relative;
-            width: 100%;
-        }
-
-        body.menu-open {
-            overflow: hidden;
-        }
-
-        /* Grit/Noise texture overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        /* STICKY HEADER */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 4rem;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            background-color: rgba(244, 238, 228, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 1000;
-        }
-
-        .logo {
-            font-family: 'Courier Prime', monospace;
-            font-weight: 700;
-            font-size: 1.8rem;
-            letter-spacing: -1px;
-            color: var(--text-main);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            z-index: 1002;
-        }
-
-        .logo img {
-            max-width: 155px;
-            height: auto;
-            display: block;
-        }
-
-        .logo span {
-            color: var(--accent-gold);
-        }
-
-        nav ul {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
-
-        nav a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: color 0.3s ease;
-            position: relative;
-            padding: 0.4rem 0;
-        }
-
-        nav a:hover {
-            color: var(--text-main);
-        }
-
-        nav a::after {
-            content: "";
-            position: absolute;
-            bottom: -1.1rem;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background-color: var(--accent-gold);
-            transition: width 0.3s ease, left 0.3s ease;
-            transform: translateX(-50%);
-        }
-
-        nav a:hover::after {
-            width: 100%;
-        }
-
-        /* MOBILMENY KNAPP */
-        .mobile-menu-btn {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 32px;
-            height: 22px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            z-index: 1002;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .mobile-menu-btn span {
-            width: 100%;
-            height: 2.5px;
-            background-color: var(--text-main);
-            border-radius: 2px;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            transform-origin: center;
-        }
-
-        .mobile-menu-btn.active span:nth-child(1) {
-            transform: translateY(9.5px) rotate(45deg);
-        }
-
-        .mobile-menu-btn.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .mobile-menu-btn.active span:nth-child(3) {
-            transform: translateY(-9.5px) rotate(-45deg);
-        }
-
-        /* MOBIL MENY OVERLAY BAKGRUND */
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: rgba(26, 24, 22, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 1000;
-        }
-
-        .menu-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* HERO SECTION */
-        .hero {
-            min-height: calc(100vh - 85px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 4rem 1.5rem;
-            position: relative;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        /* Ambient Glow behind Hero Animation */
-        .hero-glow {
-            position: absolute;
-            top: 42%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: min(700px, 90vw);
-            height: 280px;
-            background: radial-gradient(circle, rgba(216, 159, 0, 0.18) 0%, rgba(244, 238, 228, 0) 70%);
-            pointer-events: none;
-            filter: blur(40px);
-            z-index: 0;
-        }
-
-        /* PROJEKT VYKORT I HERO */
-        .hero-postcard {
-            position: absolute;
-            width: 210px;
-            background: #ffffff;
-            padding: 12px 12px 16px 12px;
-            border-radius: 6px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-            border: 1px solid rgba(26, 24, 22, 0.15);
-            text-decoration: none;
-            color: var(--text-main);
-            z-index: 2;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(40px) scale(0.9);
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .hero-postcard.loaded.postcard-1 {
-            opacity: 1;
-            transform: rotate(-7deg) translateY(0) scale(1);
-        }
-        .hero-postcard.loaded.postcard-2 {
-            opacity: 1;
-            transform: rotate(6deg) translateY(0) scale(1);
-        }
-        .hero-postcard.loaded.postcard-3 {
-            opacity: 1;
-            transform: rotate(-4deg) translateY(0) scale(1);
-        }
-
-        .hero-postcard img {
-            width: 100%;
-            height: 130px;
-            object-fit: cover;
-            border-radius: 3px;
-            display: block;
-            margin-bottom: 10px;
-            filter: contrast(1.03) brightness(0.98);
-        }
-
-        .postcard-caption {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Courier Prime', monospace;
-        }
-
-        .postcard-title {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .postcard-tag {
-            font-size: 0.72rem;
-            color: var(--accent-gold);
-            font-weight: 700;
-        }
-
-        .postcard-1 {
-            top: 14%;
-            left: 5%;
-        }
-
-        .postcard-2 {
-            top: 18%;
-            right: 6%;
-        }
-
-        .postcard-3 {
-            bottom: 6%;
-            right: 10%;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            background: rgba(26, 24, 22, 0.05);
-            border: 1px solid rgba(216, 159, 0, 0.35);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.8rem;
-            letter-spacing: 1.5px;
-            color: var(--text-main);
-            margin-bottom: 2rem;
-            z-index: 3;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        }
-
-        .badge-dot {
-            width: 7px;
-            height: 7px;
-            background-color: var(--accent-gold);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-gold);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.4; transform: scale(0.9); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0.4; transform: scale(0.9); }
-        }
-
-        .hero-animation-container {
-            width: 100%;
-            max-width: 1000px;
-            min-height: 110px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            perspective: 1000px;
-            z-index: 3;
-            overflow: hidden;
-        }
-
-        .morph-stage {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            flex-wrap: nowrap;
-        }
-
-        .letter-char {
-            display: inline-block;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-main);
-            font-size: clamp(2rem, 7.5vw, 7rem);
-            letter-spacing: clamp(1px, 1vw, 6px);
-            transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease, filter 0.85s ease;
-            transform-style: preserve-3d;
-            will-change: transform, opacity, filter;
-        }
-
-        .letter-char.accent {
-            color: var(--accent-gold);
-            text-shadow: 0 0 25px rgba(216, 159, 0, 0.35);
-        }
-
-        .hero-title {
-            font-size: clamp(1.8rem, 4.5vw, 3.5rem);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            line-height: 1.15;
-            margin-bottom: 1.2rem;
-            z-index: 3;
-        }
-
-        .hero-title .highlight {
-            color: var(--accent-gold);
-            position: relative;
-            display: inline-block;
-        }
-
-        .hero-subtitle {
-            font-family: 'Courier Prime', monospace;
-            font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-            color: var(--text-muted);
-            max-width: 620px;
-            line-height: 1.6;
-            margin-bottom: 2.5rem;
-            z-index: 3;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            z-index: 3;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .btn-primary {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            padding: 1.1rem 2.2rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-decoration: none;
-            border-radius: 4px;
-            border: 2px solid var(--bg-dark);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            cursor: pointer;
-            min-height: 48px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-            background-color: #2e2a27;
-        }
-
-        .btn-primary .btn-arrow {
-            color: var(--accent-yellow);
-            transition: transform 0.3s ease;
-        }
-
-        .btn-primary:hover .btn-arrow {
-            transform: translateX(4px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-main);
-            padding: 1.1rem 2.2rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-decoration: none;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 48px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--text-main);
-            background: rgba(26, 24, 22, 0.05);
-        }
-
-        /* FULL WIDTH SECTION (ABOUT + PROJECTS) */
-        .full-width-section {
-            width: 100%;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            border-top: 2px solid var(--accent-yellow);
-            border-bottom: 2px solid var(--accent-yellow);
-            padding: 6rem 4rem;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-            margin: 3rem 0;
-        }
-
-        .full-width-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .about-content h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-            color: var(--accent-yellow);
-        }
-
-        .about-content p {
-            font-family: 'Courier Prime', monospace;
-            color: var(--text-light-muted);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            font-size: 1.05rem;
-        }
-
-        .projects-box {
-            border: 2px dashed var(--accent-yellow);
-            padding: 2.5rem;
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 6px;
-        }
-
-        .projects-box-title {
-            font-family: 'Courier Prime', monospace;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--accent-yellow);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .track-list {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .track-item {
-            display: grid;
-            grid-template-columns: 40px 1fr auto;
-            align-items: center;
-            padding: 1rem 0.5rem;
-            border-bottom: 1px solid rgba(244, 238, 228, 0.15);
-            transition: padding-left 0.3s ease, background-color 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--text-light);
-            border-radius: 4px;
-        }
-
-        .track-item:hover, .track-item:active {
-            padding-left: 0.8rem;
-            background-color: rgba(243, 198, 20, 0.08);
-            border-color: var(--accent-yellow);
-        }
-
-        .track-num {
-            font-family: 'Courier Prime', monospace;
-            font-size: 1.1rem;
-            color: var(--accent-yellow);
-            font-weight: 700;
-        }
-
-        .track-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .track-desc {
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.8rem;
-            color: var(--text-light-muted);
-            text-align: right;
-            margin-right: 10px;
-        }
-
-        .arrow-indicator {
-            font-family: 'Permanent Marker', cursive;
-            color: var(--accent-yellow);
-            font-size: 1.3rem;
-            margin-left: 0.5rem;
-            display: inline-block;
-            transition: transform 0.2s ease;
-        }
-
-        .track-item:hover .arrow-indicator {
-            transform: translateX(-4px);
-        }
-
-        .highlight-track .track-name {
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1.35rem;
-            color: var(--accent-yellow);
-        }
-
-        /* PRICING SECTION */
-        .pricing-section {
-            padding: 5rem 4rem;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .pricing-header {
-            text-align: center;
-            margin-bottom: 3.5rem;
-        }
-
-        .pricing-header h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            margin-bottom: 1rem;
-        }
-
-        .pricing-header p {
-            font-family: 'Courier Prime', monospace;
-            color: var(--text-muted);
-            font-size: 1.05rem;
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            align-items: stretch;
-        }
-
-        .pricing-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 3rem 2.2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(26, 24, 22, 0.04);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-
-        .pricing-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(26, 24, 22, 0.08);
-            border-color: var(--accent-gold);
-        }
-
-        .pricing-card.featured {
-            background: var(--bg-dark);
-            color: var(--text-light);
-            border: 2px solid var(--accent-yellow);
-        }
-
-        .pricing-badge {
-            position: absolute;
-            top: -15px;
-            right: 25px;
-            background: var(--accent-yellow);
-            color: var(--bg-dark);
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 0.35rem 0.9rem;
-            border-radius: 50px;
-            letter-spacing: 1px;
-        }
-
-        .pricing-card h3 {
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            margin-bottom: 1rem;
-        }
-
-        .pricing-price {
-            font-family: 'Courier Prime', monospace;
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin-bottom: 1.5rem;
-        }
-
-        .pricing-card.featured .pricing-price {
-            color: var(--accent-yellow);
-        }
-
-        .pricing-desc {
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-            flex-grow: 1;
-        }
-
-        .pricing-card.featured .pricing-desc {
-            color: var(--text-light-muted);
-        }
-
-        .pricing-card .btn-primary, 
-        .pricing-card .btn-secondary {
-            width: 100%;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .pricing-card.featured .btn-primary {
-            background-color: var(--accent-yellow);
-            color: var(--bg-dark);
-            border-color: var(--accent-yellow);
-        }
-
-        .pricing-card.featured .btn-primary:hover {
-            background-color: #ffd838;
-        }
-
-        /* CONTACT SECTION */
-        .contact-section {
-            padding: 5rem 4rem 7rem 4rem;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .contact-section h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            margin-bottom: 1rem;
-        }
-
-        .contact-section p {
-            font-family: 'Courier Prime', monospace;
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-        }
-
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: left;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-gold);
-        }
-
-        /* Font-size: 16px förhindrar automatisk zoom i iOS Safari */
-        .form-control {
-            background: rgba(26, 24, 22, 0.03);
-            border: 1px solid var(--border-color);
-            padding: 0.9rem 1rem;
-            color: var(--text-main);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            border-radius: 6px;
-            width: 100%;
-            -webkit-appearance: none;
-        }
-
-        .form-control:focus {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 0 3px rgba(216, 159, 0, 0.15);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        select.form-control {
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23d89f00' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 2.5rem;
-        }
-
-        /* FOOTER */
-        footer {
-            background-color: var(--bg-dark);
-            border-top: 2px solid var(--accent-yellow);
-            padding: 4rem 4rem 2rem 4rem;
-            color: var(--text-light-muted);
-            font-family: 'Courier Prime', monospace;
-        }
-
-        .footer-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 3rem;
-            padding-bottom: 3rem;
-            border-bottom: 1px solid rgba(244, 238, 228, 0.15);
-        }
-
-        .footer-brand .footer-logo {
-            font-family: 'Courier Prime', monospace;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-light);
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-brand .footer-logo img {
-            max-width: 180px;
-            height: auto;
-            display: block;
-        }
-
-        .footer-brand p {
-            color: var(--text-light-muted);
-            font-size: 0.9rem;
-            max-width: 320px;
-            line-height: 1.5;
-        }
-
-        .footer-column h4 {
-            color: var(--accent-yellow);
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 1.2rem;
-        }
-
-        .footer-column ul {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .footer-column a {
-            color: var(--text-light-muted);
-            text-decoration: none;
-            font-size: 0.88rem;
-            transition: color 0.2s, padding-left 0.2s;
-            display: inline-block;
-            padding: 0.2rem 0;
-        }
-
-        .footer-column a:hover {
-            color: var(--accent-yellow);
-            padding-left: 4px;
-        }
-
-        .footer-bottom {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-        }
-
-        .footer-bottom .back-to-top {
-            color: var(--accent-yellow);
-            text-decoration: none;
-            transition: opacity 0.2s;
-            padding: 0.5rem 0;
-        }
-
-        .footer-bottom .back-to-top:hover {
-            text-decoration: underline;
-        }
-
-        /* =========================================================
-           RESPONSIVE BREAKPOINTS (MEDIA QUERIES)
-           ========================================================= */
-
-        /* Bärbara / Mindre skärmar & Tablets i liggande läge */
-        @media(max-width: 1100px) {
-            .hero-postcard {
-                display: none; /* Dölj vykort tidigt så att de inte täcker rubriktexten */
-            }
-
-            .full-width-section {
-                padding: 5rem 2.5rem;
-            }
-
-            .pricing-section {
-                padding: 4rem 2rem;
-            }
-
-            footer {
-                padding: 3.5rem 2.5rem 2rem 2.5rem;
-            }
-        }
-
-        /* Tablets & Stora Mobiler */
-        @media(max-width: 950px) {
-            header { 
-                padding: 1rem 1.5rem; 
-            }
-            
-            .mobile-menu-btn {
-                display: flex;
-            }
-
-            nav {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 80%;
-                max-width: 320px;
-                height: 100vh;
-                height: 100dvh;
-                background-color: var(--bg-color);
-                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
-                padding: 5.5rem 2rem 2rem 2rem;
-                transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-                z-index: 1001;
-                display: flex;
-                flex-direction: column;
-            }
-
-            nav.nav-open {
-                right: 0;
-            }
-
-            nav ul {
-                flex-direction: column;
-                gap: 1.5rem;
-                width: 100%;
-            }
-
-            nav a {
-                font-size: 1.15rem;
-                display: block;
-                padding: 0.6rem 0;
-            }
-
-            nav a::after {
-                display: none;
-            }
-
-            .hero {
-                padding: 3.5rem 1.25rem 2.5rem 1.25rem;
-                min-height: auto;
-            }
-
-            .full-width-section { 
-                padding: 4rem 1.5rem; 
-                margin: 2rem 0; 
-            }
-
-            .full-width-container { 
-                grid-template-columns: 1fr; 
-                gap: 2.5rem; 
-            }
-
-            .pricing-section { 
-                padding: 3.5rem 1.25rem; 
-            }
-
-            .pricing-grid { 
-                grid-template-columns: 1fr; 
-                gap: 1.5rem;
-            }
-
-            .footer-container { 
-                grid-template-columns: 1fr; 
-                gap: 2.5rem; 
-            }
-
-            .footer-bottom { 
-                flex-direction: column; 
-                gap: 1rem; 
-                align-items: flex-start; 
-            }
-
-            .track-desc { 
-                display: none; 
-            }
-
-            .track-item { 
-                grid-template-columns: 35px 1fr auto; 
-            }
-
-            .contact-section { 
-                padding: 3.5rem 1.25rem 4.5rem 1.25rem; 
-            }
-
-            footer { 
-                padding: 3rem 1.25rem 1.5rem 1.25rem; 
-            }
-        }
-
-        /* Små Mobiler (iPhone SE, Galaxy m.fl.) */
-        @media(max-width: 600px) {
-            header {
-                padding: 0.85rem 1.25rem;
-            }
-
-            .logo img {
-                max-width: 130px;
-            }
-
-            .hero-animation-container {
-                min-height: 70px;
-                margin-bottom: 1rem;
-            }
-
-            .letter-char {
-                letter-spacing: 1px;
-            }
-
-            .hero-title {
-                font-size: 1.75rem;
-                letter-spacing: -0.5px;
-            }
-
-            .hero-subtitle {
-                font-size: 0.95rem;
-                margin-bottom: 2rem;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .hero-actions .btn-primary,
-            .hero-actions .btn-secondary {
-                width: 100%;
-            }
-
-            .projects-box {
-                padding: 1.5rem 1rem;
-            }
-
-            .pricing-card {
-                padding: 2.2rem 1.25rem;
-            }
-
-            .pricing-header {
-                margin-bottom: 2rem;
-            }
-
-            .contact-section p {
-                margin-bottom: 1.8rem;
-            }
-
-            .footer-brand .footer-logo img {
-                max-width: 150px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTI-T Shopp</title>
+  <script src="api.js"></script>
+  <script src="auth.js"></script>
+  <!-- Font Awesome Ikoner -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="main.css">
+  <style>
+    :root {
+      --bg-glass: rgba(9, 14, 23, 0.88);
+      --header-bg: var(--bg-glass);
+      --shadow-elevated: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- HERO --- */
+    .hero {
+      background: linear-gradient(rgba(9, 14, 23, 0.88), rgba(9, 14, 23, 0.95)), url('images/hero.png') center/cover no-repeat;
+      border-bottom: 1px solid var(--border-color);
+      padding: 5rem 1.5rem;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+    }
+
+    .hero-search-box {
+      display: flex;
+      background: var(--bg-card);
+      padding: 0.35rem;
+      border-radius: 10px;
+      box-shadow: var(--shadow-elevated);
+      border: 1px solid var(--border-color);
+      gap: 0.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .hero-search-box:focus-within {
+      border-color: var(--border-hover);
+    }
+
+    .hero-search-box input {
+      flex: 2;
+      min-width: 200px;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+    }
+
+    .hero-search-box input::placeholder {
+      color: #64748b;
+    }
+
+    .hero-search-box select {
+      flex: 1;
+      min-width: 160px;
+      border: none;
+      border-left: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      outline: none;
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .hero-search-box select option {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .hero-search-box button {
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+    }
+
+    .hero-search-box button:hover {
+      background: var(--accent-hover);
+    }
+
+    /* --- CONTAINER & VARVADE SEKTIONER --- */
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    .section-wrapper {
+      padding: 3.5rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-wrapper:nth-child(odd) {
+      background-color: var(--bg-main);
+    }
+
+    .section-wrapper:nth-child(even) {
+      background-color: var(--bg-alt);
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.2px;
+    }
+
+    .section-title i {
+      color: var(--text-main);
+      font-size: 1rem;
+    }
+
+    /* --- FÄRGKODAD SKICK-PILL --- */
+    .condition-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      letter-spacing: 0.2px;
+    }
+
+    /* --- LAGER-PILL --- */
+    .stock-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(9, 14, 23, 0.88);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stock-badge i {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    /* --- SENASTE ANNONSER --- */
+    .latest-section {
+      transition: all 0.3s ease;
+    }
+
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .latest-grid .stock-badge,
+    .latest-grid .fav-btn,
+    .latest-grid .product-location {
+      display: none;
+    }
+
+    .latest-grid .product-img-wrap { height: 150px; }
+
+    .latest-grid .product-info {
+      padding: 1rem;
+      justify-content: space-between;
+      gap: 0.8rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .latest-grid .product-meta { justify-content: flex-start; margin-bottom: 0; }
+
+    .latest-grid .product-title {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .latest-grid .product-footer { margin-top: 0; padding-top: 0; border-top: 0; }
+    .latest-grid .product-price { font-size: 1rem; }
+    .latest-grid .btn-add-cart { width: 32px; height: 32px; padding: 0; justify-content: center; font-size: 0.85rem; }
+    .latest-grid .btn-add-cart span { display: none; }
+
+    .latest-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .latest-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .latest-card-img-wrap {
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .latest-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+    }
+
+    .latest-card:hover .latest-card-img {
+      opacity: 1;
+    }
+
+    .latest-card-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      gap: 0.8rem;
+    }
+
+    .latest-card-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .latest-card-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-cart-icon {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+
+    .btn-cart-icon:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s ease;
+      min-width: 150px;
+    }
+
+    .filter-select:hover, .filter-select:focus {
+      border-color: var(--border-hover);
+    }
+
+    /* --- PRODUKTFLÖDE --- */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .fav-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(9, 14, 23, 0.85);
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      z-index: 2;
+      font-size: 0.85rem;
+    }
+
+    .fav-btn:hover, .fav-btn.active {
+      color: #f87171;
+      border-color: #f87171;
+    }
+
+    .product-img-wrap {
+      width: 100%;
+      height: 170px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.2s ease;
+    }
+
+    .product-card:hover .product-img {
+      opacity: 1;
+    }
+
+    .product-info {
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.4rem;
+    }
+
+    .product-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .product-footer {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .product-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-add-cart {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.45rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-add-cart:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.05);
+    }
+
+    /* --- DEDIKERAD PRODUKTSIDA (FULL VIEW) --- */
+    .product-page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+      min-height: 70vh;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 2.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: rgba(248, 246, 240, 0.03);
+    }
+
+    .product-page-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-elevated);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 868px) {
+      .product-page-card {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 2rem;
+      }
+    }
+
+    .product-page-img-wrap {
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .product-page-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-page-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .product-page-price {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1.5rem;
+    }
+
+    .product-page-spec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1.25rem 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    .spec-item strong {
+      color: var(--text-main);
+    }
+
+    .product-page-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      flex-grow: 1;
+    }
+
+    .product-page-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto;
+    }
+
+    .btn-page-buy {
+      flex: 1;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: background 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-page-buy:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-page-buy-direct {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-page-buy-direct:hover {
+      background: rgba(248, 246, 240, 0.05);
+      border-color: var(--border-hover);
+    }
+
+    /* --- BESTÄLLNINGSMODAL (KÖP DIREKT) --- */
+    .order-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 1.5rem;
+    }
+
+    .order-modal-overlay.active { display: flex; }
+
+    .order-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-elevated);
+      max-width: 460px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .order-modal-icon { font-size: 2.6rem; color: #10b981; margin-bottom: 1rem; }
+    .order-modal-icon.error { color: #ef4444; }
+
+    .order-modal-card h3 { margin: 0 0 0.75rem; font-size: 1.25rem; color: var(--text-main); }
+    .order-modal-card p { margin: 0.25rem 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+    .order-modal-total {
+      margin: 0.75rem 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .order-modal-actions { margin-top: 1.5rem; }
+
+    .order-modal-btn {
+      width: 100%;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .order-modal-btn:hover { background: var(--accent-hover); }
+
+    /* --- VARUKORG SIDEBAR (DRAWER) --- */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .cart-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 201;
+      transition: right 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-overlay.active .cart-drawer {
+      right: 0;
+    }
+
+    .cart-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-main);
+    }
+
+    .cart-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .close-cart-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .close-cart-btn:hover {
+      color: var(--text-main);
+    }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cart-empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cart-item-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--bg-main);
+    }
+
+    .cart-item-details {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .cart-item-price {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .cart-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .qty-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+    }
+
+    .qty-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+    }
+
+    .qty-val {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .cart-item-remove {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+      padding: 0.3rem;
+    }
+
+    .cart-item-remove:hover {
+      color: #f87171;
+    }
+
+    .cart-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-main);
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background: var(--accent-main);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .checkout-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.6rem; }
+      .hero-search-box { flex-direction: column; padding: 0.5rem; }
+      .hero-search-box select { border-left: none; border-top: 1px solid var(--border-color); }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <a href="#" class="logo"><img src="logo.png" alt="Fenrac Logo"></a>
-        
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Öppna meny" aria-expanded="false" aria-controls="navMenu">
-            <span></span>
-            <span></span>
-            <span></span>
+  <!-- HEADER / NAVBAR -->
+  <header>
+    <div class="header-container">
+      <a onclick="showHomeView(true)" class="logo">
+        <img src="images/logo.png" alt="NTI-T Shopp Logo" class="logo-img">
+        <span>NTI-T SHOPP</span>
+      </a>
+      
+      <!-- Navigationslänkar utan ikoner och med hover-border -->
+      <nav class="nav-links">
+        <a href="#products.html" class="nav-link">Produkter</a>
+        <a href="profil.html" class="nav-link">Profil</a>
+        <a href="help.html" class="nav-link">Hjälp</a>
+      </nav>
+
+      <!-- Högersektion -->
+      <div class="header-actions">
+        <button class="cart-btn" id="openCartBtn" title="Varukorg">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cartBadge">0</span>
         </button>
 
-        <div class="menu-overlay" id="menuOverlay"></div>
+        <a href="profil.html" class="settings-btn" title="Inställningar">
+          <i class="fa-solid fa-gear"></i>
+        </a>
+      </div>
+    </div>
+  </header>
 
-        <nav id="navMenu">
-            <ul>
-                <li><a href="#om-oss">Om oss</a></li>
-                <li><a href="#priser">Priser</a></li>
-                <li><a href="#kontakt">Kontakt</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- HERO SECTION -->
+  <!-- VYN 1: STARTSIDA (HOME VIEW) -->
+  <div id="homeView">
+    <!-- HERO -->
     <section class="hero">
-        <div class="hero-glow"></div>
-
-        <a href="https://jobbvio.se" target="_blank" rel="noopener noreferrer" class="hero-postcard postcard-1" style="transition-delay: 0.1s;">
-            <img src="Images/jobbvio-logo.png" alt="Jobbvio">
-            <div class="postcard-caption">
-                <span class="postcard-title">Jobbvio</span>
-                <span class="postcard-tag">#01</span>
-            </div>
-        </a>
-
-        <a href="https://fornoleon.se" target="_blank" rel="noopener noreferrer" class="hero-postcard postcard-2" style="transition-delay: 0.25s;">
-            <img src="Images/fornoleon-logo.png" alt="Fornoleon">
-            <div class="postcard-caption">
-                <span class="postcard-title">Fornoleon</span>
-                <span class="postcard-tag">#02</span>
-            </div>
-        </a>
-
-        <a href="https://meyerfoo20.github.io/Portfolio-Neo/" target="_blank" rel="noopener noreferrer" class="hero-postcard postcard-3" style="transition-delay: 0.4s;">
-            <img src="Images/porfolio-logo.png" alt="VD Portfolio">
-            <div class="postcard-caption">
-                <span class="postcard-title">VD Portfolio</span>
-                <span class="postcard-tag">#03</span>
-            </div>
-        </a>
+      <div class="hero-content">
+        <h1>NTI-T SHOPP</h1>
+        <p>Köp och sälj it utrustning, mellan skolor på ett säkert sätt.</p>
         
-        <div class="hero-animation-container" id="heroAnimationBox" title="Klicka för att spela om animationen">
-            <div class="morph-stage" id="morphStage"></div>
+        <div class="hero-search-box">
+          <input type="text" id="searchInput" placeholder="Sök hårdvara, modell eller specifikation...">
+          <select id="categorySelect">
+            <option value="alla">Alla kategorier</option>
+            <option value="Datorer">Datorer</option>
+            <option value="Laddare">Laddare</option>
+            <option value="Kablar">Kablar</option>
+            <option value="Skärmar">Skärmar</option>
+            <option value="Switchar">Switchar</option>
+            <option value="Router">Router</option>
+          </select>
+          <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> Sök</button>
         </div>
-
-        <h1 class="hero-title">Där idéer blir till <span class="highlight">verklighet.</span></h1>
-        <p class="hero-subtitle">Vi bygger skräddarsydda hemsidor, appar och digitala varumärkeskoncept som skiljer dig från mängden.</p>
-        
-        <div class="hero-actions">
-            <a href="#kontakt" class="btn-primary">Starta projekt <span class="btn-arrow">→</span></a>
-            <a href="#projekt" class="btn-secondary">Se våra arbeten</a>
-        </div>
+      </div>
     </section>
 
-    <!-- ABOUT & PROJECTS SECTION -->
-    <section id="om-oss" class="full-width-section">
-        <div class="full-width-container">
-            <div class="about-content">
-                <h2>Vi gör det bättre.</h2>
-                <p>Fenrac AB är till för dig. Vi är noga med tydlig kommunikation, för att kunderna ska få den bästa möjliga produkt.</p>
-                <p>Inte samma AI-hemsida som syns överallt, utan vi blandar in den mänskliga faktorn för en unik design. Trots det, nästan lika kort produktionstid som de icke-mänskliga tjänsterna.</p>
-                <p>Vi utvecklar också våra egna ideer, vilket hjälper dig som kund, att få en ännu tydligare inblick i våra projekt.</p>
+    <!-- HUVUDINNEHÅLL -->
+    <main class="container">
+      <!-- SEKTION 1: SENASTE ANNONSER -->
+      <div class="section-wrapper" id="latestSectionWrapper">
+        <div class="section-inner">
+          <section class="latest-section" id="latestSection">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Senast inkommet</h2>
             </div>
-
-            <div id="projekt" class="projects-box">
-                <div class="projects-box-title">Våra Projekt //</div>
-                <div class="track-list">
-                    <a href="https://jobbvio.se" target="_blank" rel="noopener noreferrer" class="track-item">
-                        <div class="track-num">01</div>
-                        <div class="track-name">Jobbvio</div>
-                        <div class="track-desc">jobbvio.se</div>
-                        <div class="arrow-indicator">←</div>
-                    </a>
-                    
-                    <a href="https://fornoleon.se" target="_blank" rel="noopener noreferrer" class="track-item">
-                        <div class="track-num">02</div>
-                        <div class="track-name">Fornoleon</div>
-                        <div class="track-desc">fornoleon.se</div>
-                        <div class="arrow-indicator">←</div>
-                    </a>
-                    
-                    <a href="https://neocarlsson.fenrac.se" target="_blank" rel="noopener noreferrer" class="track-item">
-                        <div class="track-num">03</div>
-                        <div class="track-name">VD. Portfolio</div>
-                        <div class="track-desc">neocarlsson.fenrac.se</div>
-                        <div class="arrow-indicator">←</div>
-                    </a>
-                    
-                    <a href="https://roottheme.fenrac.se" target="_blank" rel="noopener noreferrer" class="track-item">
-                        <div class="track-num">04</div>
-                        <div class="track-name">RootTheme</div>
-                        <div class="track-desc">roottheme.fenrac.se</div>
-                        <div class="arrow-indicator">←</div>
-                    </a>
-                    
-                    <a href="#kontakt" class="track-item highlight-track" style="border-bottom: none;">
-                        <div class="track-num" style="color: var(--text-light);">05</div>
-                        <div class="track-name">Ditt nästa projekt</div>
-                        <div class="track-desc">Din idé till verklighet</div>
-                        <div class="arrow-indicator">←</div>
-                    </a>
-                </div>
+            <div class="latest-grid" id="latestGrid">
+              <!-- Genereras dynamiskt via JS -->
             </div>
+          </section>
         </div>
-    </section>
+      </div>
 
-    <!-- PRICING SECTION -->
-    <section id="priser" class="pricing-section">
-        <div class="pricing-header">
-            <h2>Prisplaner</h2>
-            <p>Välj den modell som passar bäst för ditt nästa digitala projekt.</p>
-        </div>
-
-        <div class="pricing-grid">
-            <!-- Basic Plan -->
-            <div class="pricing-card">
-                <div>
-                    <h3>Basic</h3>
-                    <div class="pricing-price">Från 10 000 kr</div>
-                    <p class="pricing-desc">Vi bygger och formar hemsidan efter kundens förfrågan, men då endast fram tills lanseringen.</p>
-                </div>
-                <button type="button" class="btn-secondary select-plan-btn" data-plan="Basic">Välj Basic</button>
-            </div>
-
-            <!-- Pro Plan -->
-            <div class="pricing-card featured">
-                <div class="pricing-badge">Populärast</div>
-                <div>
-                    <h3>Pro</h3>
-                    <div class="pricing-price">3 000 kr / mån</div>
-                    <p class="pricing-desc" style="margin-bottom: 1rem;"><strong style="color: var(--text-light);">Startavgift:</strong> 10 000 kr</p>
-                    <p class="pricing-desc">Vi bygger och skräddarsyr hemsidan/appen tillsammans med kunden. Utvecklar projektet under en längre tid med tydlig kommunikation och kontinuerligt underhåll även efter lansering.</p>
-                </div>
-                <button type="button" class="btn-primary select-plan-btn" data-plan="Mile">Välj Pro <span class="btn-arrow">→</span></button>
-            </div>
-
-            <!-- Custom Plan -->
-            <div class="pricing-card">
-                <div>
-                    <h3>Custom</h3>
-                    <div class="pricing-price">Varierande</div>
-                    <p class="pricing-desc">Denna plan kan variera både projektmässigt och prismässigt. Används för projekt som inte stämmer in på någon av de andra planer.</p>
-                </div>
-                <button type="button" class="btn-secondary select-plan-btn" data-plan="Custom">Kontakta oss</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTACT SECTION -->
-    <section id="kontakt" class="contact-section">
-        <h2>Hör av dig</h2>
-        <p>Har du ett projekt i åtanke eller vill du förbättra något nuvarande? Skriv!</p>
-        
-        <form class="contact-form" onsubmit="event.preventDefault(); alert('Tack för ditt meddelande! Fenrac AB återkommer inom kort.');">
-            <div class="form-group">
-                <label for="plan-select">Välj Prisplan *</label>
-                <select id="plan-select" class="form-control" required>
-                    <option value="" disabled selected>-- Välj en prisplan --</option>
-                    <option value="Basic">Basic (Från 10 000 kr)</option>
-                    <option value="Mile">Pro (3 000 kr / mån + startavgift)</option>
-                    <option value="Custom">Custom (Varierande)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="name">Ditt Namn</label>
-                <input type="text" id="name" class="form-control" placeholder="Namn" required>
-            </div>
-            <div class="form-group">
-                <label for="email">E-postadress</label>
-                <input type="email" id="email" class="form-control" placeholder="namn@foretag.se" required>
-            </div>
-            <div class="form-group">
-                <label for="message">Meddelande</label>
-                <textarea id="message" class="form-control" placeholder="Berätta om din idé..." required></textarea>
-            </div>
-            <button type="submit" class="btn-primary" style="margin-top: 0.5rem; width: 100%; justify-content: center;">Skicka meddelande</button>
-        </form>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-brand">
-                <a href="#" class="footer-logo"><img src="logo-white.png" alt="Fenrac Logo White"></a>
-                <p>Vi bygger digitala hemsidor, appar och koncept som sticker ut från mängden.</p>
-            </div>
+      <!-- SEKTION 2: FILTER BAR -->
+      <div class="section-wrapper" id="filterSectionWrapper">
+        <div class="section-inner">
+          <section class="filter-section" id="filterSection">
+            <div class="filter-label"><i class="fa-solid fa-sliders"></i> Filtrera:</div>
             
-            <div class="footer-column">
-                <h4>Navigering</h4>
-                <ul>
-                    <li><a href="#om-oss">Om Oss</a></li>
-                    <li><a href="#projekt">Våra Projekt</a></li>
-                    <li><a href="#priser">Priser</a></li>
-                    <li><a href="#kontakt">Kontakt</a></li>
-                </ul>
-            </div>
+            <select class="filter-select" id="filterLocation">
+              <option value="alla">Hela Sverige</option>
+            </select>
 
-            <div class="footer-column">
-                <h4>Kontakt & Info</h4>
-                <ul>
-                    <li><a href="#kontakt">Starta ett projekt</a></li>
-                    <li><a href="mailto:info@fenrac.se">info@fenrac.se</a></li>
-                    <li><span style="color: var(--accent-yellow);">Est. 2026 // Sweden</span></li>
-                </ul>
-            </div>
+            <select class="filter-select" id="filterPrice">
+              <option value="alla">Alla priser</option>
+              <option value="low">Under 2 000 kr</option>
+              <option value="mid">2 000 - 10 000 kr</option>
+              <option value="high">Över 10 000 kr</option>
+            </select>
+
+            <select class="filter-select" id="filterSort">
+              <option value="newest">Sortera: Senaste</option>
+              <option value="price-asc">Pris: Lågt till Högt</option>
+              <option value="price-desc">Pris: Högt till Lågt</option>
+            </select>
+          </section>
         </div>
+      </div>
 
-        <div class="footer-bottom">
-            <div>© 2026 Fenrac AB. Alla rättigheter förbehållna.</div>
-            <a href="#" class="back-to-top">↑ Till toppen</a>
+      <!-- SEKTION 3: PRODUKTFLÖDE -->
+      <div class="section-wrapper" id="productSectionWrapper">
+        <div class="section-inner">
+          <section id="productSection">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-server"></i> Utforska hårdvara</h2>
+            </div>
+            <div class="feed-grid" id="productFeed">
+              <!-- Genereras dynamiskt via JS -->
+            </div>
+          </section>
         </div>
-    </footer>
+      </div>
+    </main>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Mobile Menu Drawer & Overlay Logic
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const navMenu = document.getElementById('navMenu');
-            const menuOverlay = document.getElementById('menuOverlay');
+  <!-- VYN 2: DEDIKERAD PRODUKTSIDA (PRODUCT PAGE VIEW) -->
+  <div id="productPageView" style="display: none;">
+    <div class="product-page-wrapper">
+      <button class="btn-back" onclick="showHomeView(true)">
+        <i class="fa-solid fa-arrow-left"></i> Tillbaka till alla produkter
+      </button>
 
-            function toggleMenu(open) {
-                const isOpen = open !== undefined ? open : !navMenu.classList.contains('nav-open');
-                
-                if (isOpen) {
-                    mobileMenuBtn.classList.add('active');
-                    navMenu.classList.add('nav-open');
-                    menuOverlay.classList.add('active');
-                    document.body.classList.add('menu-open');
-                    mobileMenuBtn.setAttribute('aria-expanded', 'true');
-                } else {
-                    mobileMenuBtn.classList.remove('active');
-                    navMenu.classList.remove('nav-open');
-                    menuOverlay.classList.remove('active');
-                    document.body.classList.remove('menu-open');
-                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                }
-            }
+      <div class="product-page-card" id="productPageContent">
+        <!-- Genereras dynamiskt när användaren klickar på en produkt -->
+      </div>
+    </div>
+  </div>
 
-            if (mobileMenuBtn && navMenu) {
-                mobileMenuBtn.addEventListener('click', () => toggleMenu());
-                
-                if (menuOverlay) {
-                    menuOverlay.addEventListener('click', () => toggleMenu(false));
-                }
+  <!-- VARUKORG SIDEBAR / MODAL -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3><i class="fa-solid fa-cart-shopping"></i> Din varukorg</h3>
+        <button class="close-cart-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="cart-body" id="cartBody">
+        <!-- Produkterna hamnar här -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span>Totalt:</span>
+          <span id="cartTotal">0 kr</span>
+        </div>
+        <button class="checkout-btn" onclick="goToCheckout()" id="checkoutBtn" disabled>
+          Gå till kassan <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
-                // Stäng menyn när en navigationslänk klickas
-                navMenu.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', () => toggleMenu(false));
-                });
-            }
+  <!-- ORDERMOTAL (BEKRÄFTELSE EFTER "KÖP DIREKT") -->
+  <div class="order-modal-overlay" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+    <div class="order-modal-card">
+      <div class="order-modal-icon" id="orderModalIcon"><i class="fa-solid fa-circle-check"></i></div>
+      <h3 id="orderModalTitle">Tack för ditt köp!</h3>
+      <div id="orderModalBody"></div>
+      <div class="order-modal-actions">
+        <button class="order-modal-btn" id="orderModalClose" type="button">Tillbaka till butiken</button>
+      </div>
+    </div>
+  </div>
 
-            // Morph Text Animation (Responsivt anpassad för mobiler)
-            const stage = document.getElementById('morphStage');
-            const box = document.getElementById('heroAnimationBox');
-            let isAnimating = false;
+  <!-- FOOTER -->
+  <footer></footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>Om plattformen</h3>
+        <ul>
+          <li><a href="#">Om NTI-T Shopp</a></li>
+          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
+          <li><a href="#">Karriär</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Säkerhet</h3>
+        <ul>
+          <li><a href="#">Verifierade säljare</a></li>
+          <li><a href="#">Köpskydd & Frakt</a></li>
+          <li><a href="#">Kundservice</a></li>
+          <li><a href="#">Villkor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Kategorier</h3>
+        <ul>
+          <li><a href="#">Laptops & Datorer</a></li>
+          <li><a href="#">Grafikkort & Komponenter</a></li>
+          <li><a href="#">Servrar & Nätverk</a></li>
+          <li><a href="#">Mobiler & Surfplattor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
+      <div>
+        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
+        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
+      </div>
+    </div>
+  </footer>
 
-            const targetText = "FENRAC AB";
+  <script>
+    // DATA LAGER: annonserna hämtas från backend-API:et (GET /api/listings)
+    let listings = [];
+    let currentListingId = null;
 
-            function runAnimation() {
-                if (isAnimating) return;
-                isAnimating = true;
+    // VARUKORG TILLSTÅND (lokal; rader pekar på listings via uuid)
+    const CART_KEY = 'ntit_cart';
+    let cart = NTIT.readCart();
 
-                stage.innerHTML = '';
+    // ELEMENT REFERENSER
+    const feedContainer = document.getElementById('productFeed');
+    const latestGrid = document.getElementById('latestGrid');
+    const latestSectionWrapper = document.getElementById('latestSectionWrapper');
+    const filterSectionWrapper = document.getElementById('filterSectionWrapper');
+    const filterSection = document.getElementById('filterSection');
+    const cartOverlay = document.getElementById('cartOverlay');
+    const openCartBtn = document.getElementById('openCartBtn');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+    const cartBody = document.getElementById('cartBody');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.getElementById('cartBadge');
 
-                // Skala spridningsområdet efter skärmens bredd
-                const isMobile = window.innerWidth <= 600;
-                const spreadX = isMobile ? 220 : 700;
-                const spreadY = isMobile ? 200 : 500;
+    const homeView = document.getElementById('homeView');
+    const productPageView = document.getElementById('productPageView');
+    const productPageContent = document.getElementById('productPageContent');
 
-                targetText.split('').forEach((char, index) => {
-                    const span = document.createElement('span');
-                    
-                    const isAccent = index >= 7;
-                    span.className = 'letter-char' + (isAccent ? ' accent' : '');
-                    span.textContent = char === ' ' ? '\u00A0' : char;
+    // NEUTRAL KATEGORIPILL
+    function categoryPill(category) {
+      return `<span class="condition-pill" style="background:rgba(96,165,250,0.12); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">
+                <i class="fa-solid fa-tag"></i> ${NTIT.escapeHTML(category || 'Övrigt')}
+              </span>`;
+    }
 
-                    const startX = (Math.random() - 0.5) * spreadX;
-                    const startY = (Math.random() - 0.5) * spreadY;
-                    const startZ = Math.random() * (isMobile ? 150 : 300) + 100;
-                    const startRotX = (Math.random() - 0.5) * 540;
-                    const startRotY = (Math.random() - 0.5) * 540;
+    function createListingCard(listing) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.onclick = () => openProductPage(listing.id);
+      card.innerHTML = `
+        <div class="stock-badge"><i class="fa-solid fa-boxes-stacked"></i> ${listing.quantity} i lager</div>
+        <button class="fav-btn" title="Spara som favorit">
+          <i class="fa-regular fa-heart"></i>
+        </button>
+        <div class="product-img-wrap"><img src="${NTIT.escapeHTML(listing.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(listing.title)}" class="product-img" loading="lazy"></div>
+        <div class="product-info">
+          <div class="product-meta">
+            <span class="product-location"><i class="fa-solid fa-location-dot"></i> ${NTIT.escapeHTML(listing.city || 'Anges senare')}</span>
+            ${categoryPill(listing.category)}
+          </div>
+          <div class="product-title">${NTIT.escapeHTML(listing.title)}</div>
+          <div class="product-footer">
+            <div class="product-price">${NTIT.money(listing.price)}</div>
+            <button class="btn-add-cart" title="Lägg i varukorg">
+              <i class="fa-solid fa-cart-plus"></i><span> Köp</span>
+            </button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.fav-btn').addEventListener('click', event => {
+        event.stopPropagation();
+        toggleFav(event.currentTarget);
+      });
+      card.querySelector('.btn-add-cart').addEventListener('click', event => {
+        event.stopPropagation();
+        addToCart(listing.id);
+      });
+      return card;
+    }
 
-                    span.style.transform = `translate3d(${startX}px, ${startY}px, ${startZ}px) rotateX(${startRotX}deg) rotateY(${startRotY}deg) scale(1.5)`;
-                    span.style.opacity = '0';
-                    span.style.filter = 'blur(12px)';
+    function renderLatest() {
+      latestGrid.innerHTML = '';
+      listings.slice(0, 4).forEach(listing => {
+        latestGrid.appendChild(createListingCard(listing));
+      });
+    }
 
-                    stage.appendChild(span);
+    function renderProducts(listingList) {
+      feedContainer.innerHTML = '';
+      if(listingList.length === 0) {
+        feedContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Inga produkter matchar dina sökkriterier.</p>';
+        return;
+      }
+      listingList.forEach(listing => feedContainer.appendChild(createListingCard(listing)));
+    }
 
-                    setTimeout(() => {
-                        span.style.transform = 'translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1)';
-                        span.style.opacity = '1';
-                        span.style.filter = 'blur(0px)';
-                    }, 70 + index * 60);
-                });
+    // VY-NAVIGERING: ÖPPNA PRODUKTSIDA (HELTÄCKANDE VY)
+    function openProductPage(id) {
+      const listing = listings.find(l => l.id === id);
+      if (!listing) return;
+      currentListingId = id;
 
-                setTimeout(() => {
-                    isAnimating = false;
-                }, 70 + targetText.length * 60 + 850);
-            }
+      productPageContent.innerHTML = `
+        <div class="product-page-img-wrap"><img src="${NTIT.escapeHTML(listing.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(listing.title)}" class="product-page-img"></div>
+        <div class="product-page-info">
+          <div class="product-page-title">${NTIT.escapeHTML(listing.title)}</div>
+          <div class="product-page-price">${NTIT.money(listing.price)}</div>
 
-            box.addEventListener('click', runAnimation);
-            runAnimation();
+          <div class="product-page-spec-list">
+            <div class="spec-item">
+              <span>Lagerstatus:</span>
+              <strong style="color:var(--text-main);"><i class="fa-solid fa-boxes-stacked"></i> ${listing.quantity} st tillgängliga</strong>
+            </div>
+            <div class="spec-item">
+              <span>Kategori:</span>
+              ${categoryPill(listing.category)}
+            </div>
+            <div class="spec-item">
+              <span>Plats / Ort:</span>
+              <strong><i class="fa-solid fa-location-dot"></i> ${NTIT.escapeHTML(listing.city || 'Anges senare')}</strong>
+            </div>
+            <div class="spec-item">
+              <span>Säljare:</span>
+              <strong><i class="fa-solid fa-graduation-cap"></i> ${NTIT.escapeHTML(listing.school_name || 'Okänd skola')}</strong>
+            </div>
+          </div>
 
-            // Ladda in vykort (om de visas)
-            setTimeout(() => {
-                const postcards = document.querySelectorAll('.hero-postcard');
-                postcards.forEach(card => {
-                    card.classList.add('loaded');
-                });
-            }, 200);
+          <div class="product-page-desc">
+            <h4 style="color:var(--text-main); margin-bottom: 0.5rem; font-weight:600;">Produktbeskrivning</h4>
+            ${NTIT.escapeHTML(listing.description || 'Ingen ytterligare beskrivning angiven.').replace(/\n/g, '<br>')}
+          </div>
 
-            // Mjuk rullning (Smooth Scroll)
-            function smoothScrollTo(targetY, duration = 800) {
-                const startY = window.pageYOffset;
-                const distance = targetY - startY;
-                let startTime = null;
+          <div class="product-page-actions">
+            <button class="btn-page-buy" onclick="addToCart('${listing.id}')">
+              <i class="fa-solid fa-cart-plus"></i> Lägg i varukorg
+            </button>
+            <button class="btn-page-buy btn-page-buy-direct" onclick="buyDirect('${listing.id}')">
+              <i class="fa-solid fa-bolt"></i> Köp direkt
+            </button>
+          </div>
+        </div>
+      `;
 
-                function animation(currentTime) {
-                    if (!startTime) startTime = currentTime;
-                    const timeElapsed = currentTime - startTime;
-                    
-                    let progress = timeElapsed / duration;
-                    if (progress > 1) progress = 1;
-                    const ease = progress < 0.5 
-                        ? 4 * progress * progress * progress 
-                        : (progress - 1) * (2 * progress - 2) * (2 * progress - 2) + 1;
+      homeView.style.display = 'none';
+      productPageView.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
 
-                    window.scrollTo(0, startY + distance * ease);
+    // VISA STARTSIDAN IGEN
+    function showHomeView(scrollToTop = false) {
+      if (productPageView.style.display !== 'none') {
+        productPageView.style.display = 'none';
+        homeView.style.display = 'block';
+      }
+      if (scrollToTop) {
+        window.scrollTo(0, 0);
+      }
+    }
 
-                    if (timeElapsed < duration) {
-                        requestAnimationFrame(animation);
-                    }
-                }
+    // KÖPÅTGÄRDER KRÄVER INLOGGNAD SESSION (annars till inloggning)
+    function requireSession() {
+      if (NTIT.getSession()) return true;
+      location.replace('login.html?next=index.html');
+      return false;
+    }
 
-                requestAnimationFrame(animation);
-            }
+    // VARUKORG LOGIK
+    function addToCart(id) {
+      if (!requireSession()) return;
+      const listing = listings.find(l => l.id === id);
+      if (!listing || listing.quantity <= 0) return;
 
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    
-                    if (targetId === '#') {
-                        smoothScrollTo(0, 800);
-                        return;
-                    }
-
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-                        smoothScrollTo(targetPosition - 20, 850);
-                    }
-                });
-            });
-
-            // Välj prisplan i formuläret
-            const planButtons = document.querySelectorAll('.select-plan-btn');
-            const planSelect = document.getElementById('plan-select');
-
-            planButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const planName = button.getAttribute('data-plan');
-                    if (planSelect && planName) {
-                        planSelect.value = planName;
-                    }
-                    
-                    const contactSection = document.getElementById('kontakt');
-                    if (contactSection) {
-                        const targetPosition = contactSection.getBoundingClientRect().top + window.pageYOffset;
-                        smoothScrollTo(targetPosition - 20, 850);
-                    }
-                });
-            });
+      const existing = cart.find(item => item.id === id);
+      if(existing) {
+        if (existing.qty < (existing.max || listing.quantity)) existing.qty += 1;
+      } else {
+        cart.push({
+          id: listing.id,
+          title: listing.title,
+          price: listing.price,
+          image: listing.image_url,
+          qty: 1,
+          max: listing.quantity
         });
-    </script>
+      }
+      updateCartUI();
+      openCart();
+    }
+
+    function updateQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      const max = item.max || Number.MAX_SAFE_INTEGER;
+      item.qty += delta;
+      if (item.qty > max) item.qty = max;
+      if (item.qty <= 0) {
+        removeFromCart(id);
+      } else {
+        updateCartUI();
+      }
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(item => item.id !== id);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      cartBadge.textContent = totalCount;
+      document.getElementById('checkoutBtn').disabled = cart.length === 0;
+
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      cartTotal.textContent = NTIT.money(totalPrice);
+
+      if(cart.length === 0) {
+        cartBody.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-cart-flatbed" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity:0.5;"></i><br>Din varukorg är tom.</div>';
+        return;
+      }
+
+      cartBody.innerHTML = '';
+      cart.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'cart-item';
+        itemEl.innerHTML = `
+          <img src="${NTIT.escapeHTML(item.image || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(item.title)}" class="cart-item-img">
+          <div class="cart-item-details">
+            <div class="cart-item-title">${NTIT.escapeHTML(item.title)}</div>
+            <div class="cart-item-price">${NTIT.money(item.price * item.qty)}</div>
+            <div class="cart-qty-controls">
+              <button class="qty-btn" onclick="updateQty('${item.id}', -1)" title="Minska antal">-</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="updateQty('${item.id}', 1)" title="Öka antal">+</button>
+            </div>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Ta bort">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        cartBody.appendChild(itemEl);
+      });
+    }
+
+    function openCart() { cartOverlay.classList.add('active'); }
+    function closeCart() { cartOverlay.classList.remove('active'); }
+    function goToCheckout() {
+      if (!requireSession()) return;
+      if (cart.length) window.location.href = 'checkout.html';
+    }
+
+    openCartBtn.addEventListener('click', openCart);
+    closeCartBtn.addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', (e) => {
+      if(e.target === cartOverlay) closeCart();
+    });
+
+    // HJÄLPFUNKTIONER
+    function toggleFav(btn) {
+      btn.classList.toggle('active');
+      const icon = btn.querySelector('i');
+      if(btn.classList.contains('active')) {
+        icon.className = 'fa-solid fa-heart';
+      } else {
+        icon.className = 'fa-regular fa-heart';
+      }
+    }
+
+    // BESTÄLLNING: "KÖP DIREKT" (enstaka köp utan varukorg)
+    async function buyDirect(id) {
+      if (!requireSession()) return;
+      const listing = listings.find(l => l.id === id);
+      if (!listing) return;
+      try {
+        const data = await NTIT.api('/orders/direct', { method: 'POST', body: { listing_id: id, quantity: 1 } });
+        showOrderModal(data.order, null);
+        if (await loadListings()) {
+          renderLatest();
+          if (productPageView.style.display !== 'none' && currentListingId) {
+            const stillThere = listings.find(l => l.id === currentListingId);
+            if (stillThere) openProductPage(currentListingId);
+            else showHomeView(false);
+          } else {
+            applyFilters(false);
+          }
+        }
+      } catch (error) {
+        showOrderModal(null, error.message);
+      }
+    }
+
+    function showOrderModal(order, errorMessage) {
+      const overlay = document.getElementById('orderModal');
+      const icon = document.getElementById('orderModalIcon');
+      const title = document.getElementById('orderModalTitle');
+      const body = document.getElementById('orderModalBody');
+      if (order) {
+        icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        icon.classList.remove('error');
+        title.textContent = 'Tack för ditt köp!';
+        const session = NTIT.getSession();
+        const recipient = session && session.school ? session.school.contact_email : '';
+        const emailNote = order.email_sent
+          ? (order.email_delivery === 'outbox'
+            ? `En bekräftelse med faktura ${NTIT.escapeHTML(order.invoice_number)} har sparats i demo-mappen backend/mail-outbox/ (med SMTP skickas den till ${NTIT.escapeHTML(recipient || 'skolans kontaktadress')}).`
+            : `En bekräftelse med faktura har skickats till ${NTIT.escapeHTML(recipient || 'skolans kontaktadress')}.`)
+          : 'Bekräftelsemailet kunde inte skickas, men ordern är registrerad.';
+        body.innerHTML = `
+          <p>Ordern är registrerad och fakturan är klar.</p>
+          <div class="order-modal-total">Totalt: ${NTIT.money(order.total_sek)}</div>
+          <p>Fakturanummer: <strong>${NTIT.escapeHTML(order.invoice_number)}</strong></p>
+          <p>${emailNote}</p>
+        `;
+      } else {
+        icon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+        icon.classList.add('error');
+        title.textContent = 'Köpet kunde inte slutföras';
+        body.innerHTML = `<p>${NTIT.escapeHTML(errorMessage || 'Något gick fel. Försök igen.')}</p>`;
+      }
+      overlay.classList.add('active');
+    }
+
+    document.getElementById('orderModalClose').addEventListener('click', () => {
+      document.getElementById('orderModal').classList.remove('active');
+    });
+    document.getElementById('orderModal').addEventListener('click', (e) => {
+      if (e.target.id === 'orderModal') e.target.classList.remove('active');
+    });
+
+    // HÄMTA ANNONSER FRÅN API:ET (senaste först)
+    async function loadListings() {
+      try {
+        const data = await NTIT.api('/listings');
+        listings = Array.isArray(data.listings) ? data.listings : [];
+      } catch (error) {
+        listings = [];
+        return false;
+      }
+      populateLocationFilter();
+      return true;
+    }
+
+    function populateLocationFilter() {
+      const select = document.getElementById('filterLocation');
+      const current = select.value;
+      const cities = [...new Set(listings.map(l => l.city).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'sv'));
+      select.innerHTML = '<option value="alla">Hela Sverige</option>' + cities
+        .map(city => `<option value="${NTIT.escapeHTML(city)}">${NTIT.escapeHTML(city)}</option>`)
+        .join('');
+      if ([...select.options].some(option => option.value === current)) select.value = current;
+    }
+
+    // FILTRERING OCH HERO-SÖKNING (Behåller exakt scrollposition när man filtrerar)
+    function applyFilters(shouldScroll = false) {
+      showHomeView(false);
+
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+      const catVal = document.getElementById('categorySelect').value;
+      const locVal = document.getElementById('filterLocation').value;
+      const priceVal = document.getElementById('filterPrice').value;
+      const sortVal = document.getElementById('filterSort').value;
+
+      const isHeroFiltering = searchVal !== '' || catVal !== 'alla';
+
+      if (isHeroFiltering) {
+        latestSectionWrapper.style.display = 'none';
+        filterSectionWrapper.style.display = 'none';
+      } else {
+        latestSectionWrapper.style.display = 'block';
+        filterSectionWrapper.style.display = 'block';
+      }
+
+      let filtered = listings.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(searchVal) || (p.description || '').toLowerCase().includes(searchVal);
+        const matchesCat = catVal === 'alla' || p.category === catVal;
+        const matchesLoc = locVal === 'alla' || p.city === locVal;
+
+        let matchesPrice = true;
+        if(priceVal === 'low') matchesPrice = p.price < 2000;
+        else if(priceVal === 'mid') matchesPrice = p.price >= 2000 && p.price <= 10000;
+        else if(priceVal === 'high') matchesPrice = p.price > 10000;
+
+        return matchesSearch && matchesCat && matchesLoc && matchesPrice;
+      });
+
+      if(sortVal === 'price-asc') {
+        filtered.sort((a,b) => a.price - b.price);
+      } else if(sortVal === 'price-desc') {
+        filtered.sort((a,b) => b.price - a.price);
+      }
+
+      renderProducts(filtered);
+
+      if (shouldScroll) {
+        document.getElementById('productSectionWrapper').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // EVENT LISTENERS
+    document.getElementById('searchBtn').addEventListener('click', () => applyFilters(true));
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+      if(e.key === 'Enter') {
+        applyFilters(true);
+      } else {
+        applyFilters(false);
+      }
+    });
+    document.getElementById('categorySelect').addEventListener('change', () => applyFilters(true));
+    document.getElementById('filterLocation').addEventListener('change', () => applyFilters(false));
+    document.getElementById('filterPrice').addEventListener('change', () => applyFilters(false));
+    document.getElementById('filterSort').addEventListener('change', () => applyFilters(false));
+
+    // INITIALISERING
+    (async () => {
+      const ok = await loadListings();
+      if (ok) {
+        renderLatest();
+        applyFilters(false);
+      } else {
+        feedContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Det gick inte att hämta annonserna. Kontrollera att servern körs och ladda om sidan.</p>';
+      }
+      updateCartUI();
+    })();
+  </script>
 </body>
 </html>
