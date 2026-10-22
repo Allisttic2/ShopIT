@@ -3,6 +3,7 @@
 !.env.example
 node_modules/
 .database-validation/
+output/pdf/
 .neon
 backend/uploads/
 backend/mail-outbox/

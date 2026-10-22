@@ -6,9 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { mkdir } from 'node:fs/promises';
 import multer from 'multer';
 import { query, withTransaction } from './db.mjs';
-import { signToken, requireAuth } from './auth.mjs';
+import { signToken, requireAuth, requireSameOrigin, setSessionCookie, clearSessionCookie } from './auth.mjs';
 import { buildInvoiceHtml, invoiceNumber } from './invoices.mjs';
+import { buildInvoicePdf } from './invoice-pdf.mjs';
 import { sendMail, mailDeliveryMode } from './mail.mjs';
+import { positiveInt, nonNegativeInt, priceValue, MAX_QUANTITY } from './validation.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ['Datorer', 'Laddare', 'Kablar', 'Skärmar', 'Switchar', 'Router'];
@@ -21,7 +23,17 @@ export class HttpError extends Error {
 }
 
 function demoPassword() {
-  return process.env.DEMO_PASSWORD || 'demo1234';
+  return process.env.DEMO_PASSWORD || '';
+}
+
+function requireDemoMode(_req, res, next) {
+  if (process.env.DEMO_AUTH_ENABLED !== 'true' || process.env.NODE_ENV === 'production') {
+    return res.status(503).json({ error: 'SchoolSoft-inloggningen är inte konfigurerad. Demo-inloggning är avstängd.' });
+  }
+  if (demoPassword().length < 8) {
+    return res.status(503).json({ error: 'Demo-inloggningen saknar ett konfigurerat lösenord.' });
+  }
+  next();
 }
 
 function matchesDemoPassword(password) {
@@ -34,24 +46,7 @@ function isUuid(value) {
   return typeof value === 'string' && UUID.test(value);
 }
 
-function positiveInt(value) {
-  const n = Number(value);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
-
-function nonNegativeInt(value) {
-  const n = Number(value);
-  return Number.isInteger(n) && n >= 0 ? n : null;
-}
-
-function priceValue(value) {
-  if (typeof value === 'string' && value.trim() === '') return null;
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return null;
-  return Math.round(n * 100) / 100;
-}
-
-// Public listing data (home grid). The view handles the 30-day expiry.
+// Authenticated listing feed. The view handles the 30-day expiry.
 const ACTIVE_LISTING_SQL = `SELECT id, product_id, title, description, category, image_url,
        quantity, price, created_at, expires_at, school_name, city
 FROM shopit.active_listings`;
@@ -82,7 +77,7 @@ function schoolSummary(school) {
 }
 
 async function fetchSchoolByContactEmail(email) {
-  const rows = await query('SELECT * FROM shopit.schools WHERE lower(contact_email) = lower($1) ORDER BY created_at', [email]);
+  const rows = await query('SELECT * FROM shopit.schools WHERE lower(btrim(contact_email)) = lower(btrim($1)) ORDER BY created_at', [email]);
   return rows[0] || null;
 }
 
@@ -102,6 +97,7 @@ async function placeOrder(buyer, items) {
       const res = await client.query(
         `SELECT l.id, l.status, l.price, l.created_at,
                 l.created_at + interval '720 hours' AS expires_at,
+                l.created_at <= now() AND l.created_at + interval '720 hours' > now() AS within_window,
                 p.id AS product_id, p.school_id AS seller_school_id, p.title, p.quantity,
                 s.name AS seller_name, s.billing_address AS seller_billing_address,
                 s.billing_reference AS seller_billing_reference
@@ -114,7 +110,7 @@ async function placeOrder(buyer, items) {
       );
       const row = res.rows[0];
       if (!row) throw new HttpError(400, `Annonsen ${item.listing_id} finns inte.`);
-      const available = row.status === 'active' && row.expires_at > new Date() && row.quantity > 0;
+      const available = row.status === 'active' && row.within_window && row.quantity > 0;
       if (!available || row.quantity < item.quantity) {
         throw new HttpError(409, `'${row.title}' är inte tillgänglig i den valda mängden.`);
       }
@@ -140,22 +136,41 @@ async function placeOrder(buyer, items) {
 // Generates the invoice and sends the confirmation e-mail. Failures here are
 // logged and reported in the response, but the order itself stays committed.
 async function deliverOrderConfirmation({ order, items, buyer }) {
-  const html = buildInvoiceHtml({ order, items });
+  const number = invoiceNumber(order.id, order.created_at);
   try {
+    const html = buildInvoiceHtml({ order, items });
+    const pdf = await buildInvoicePdf({ order, items });
     const delivery = await sendMail({
       to: buyer.contact_email,
-      subject: `Ordern är genomförd – faktura ${invoiceNumber(order.id)} (NTI-T Shopp)`,
+      subject: `Ordern är genomförd – faktura ${number} (NTI-T Shopp)`,
       html,
+      attachments: [{ filename: `${number}.pdf`, content: pdf, contentType: 'application/pdf' }],
     });
-    return { invoice_number: invoiceNumber(order.id), email_sent: true, email_delivery: delivery };
+    return { invoice_number: number, invoice_url: `/api/orders/${order.id}/invoice.pdf`, email_sent: true, email_delivery: delivery };
   } catch (error) {
     console.error('[orders] Kunde inte skicka orderbekräftelse:', error.message);
-    return { invoice_number: invoiceNumber(order.id), email_sent: false, email_delivery: mailDeliveryMode() };
+    return { invoice_number: number, invoice_url: `/api/orders/${order.id}/invoice.pdf`, email_sent: false, email_delivery: mailDeliveryMode() };
   }
 }
 
 export function createApiRouter() {
   const router = Router();
+
+  router.use((_req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+  router.use(requireSameOrigin);
+  // Only the sign-in entry points are public. New API routes are protected by default.
+  router.use((req, res, next) => {
+    if (req.method === 'POST' && ['/auth/login', '/auth/register', '/auth/logout'].includes(req.path)) return next();
+    return requireAuth(req, res, next);
+  });
+
+  router.post('/auth/logout', (req, res) => {
+    clearSessionCookie(req, res);
+    res.json({ ok: true });
+  });
 
   // --- Health -------------------------------------------------------------
   router.get('/health', async (_req, res) => {
@@ -163,10 +178,43 @@ export function createApiRouter() {
     res.json({ ok: true, mail_delivery: mailDeliveryMode() });
   });
 
-  // --- Public listings ----------------------------------------------------
-  router.get('/listings', async (_req, res, next) => {
+  // --- Listings for authenticated schools ---------------------------------
+  router.get('/listings', async (req, res, next) => {
     try {
-      res.json({ listings: await query(`${ACTIVE_LISTING_SQL} ORDER BY created_at DESC`) });
+      const conditions = [], params = [];
+      const parameter = value => { params.push(value); return `$${params.length}`; };
+      const input = key => {
+        const value = req.query[key];
+        if (value === undefined) return '';
+        if (typeof value !== 'string' || value.length > 200) throw new HttpError(400, 'Ogiltigt sökfilter.');
+        return value.trim();
+      };
+      const pattern = value => `%${value.replace(/[\\%_]/g, '\\$&')}%`;
+      const search = input('q');
+      if (search) { const p = parameter(pattern(search)); conditions.push(`(title ILIKE ${p} OR description ILIKE ${p})`); }
+      const category = input('category');
+      if (category) {
+        if (!CATEGORIES.includes(category)) throw new HttpError(400, 'Ogiltig kategori.');
+        conditions.push(`category = ${parameter(category)}`);
+      }
+      const city = input('city');
+      if (city) conditions.push(`lower(city) = lower(${parameter(city)})`);
+      const location = input('location');
+      if (location) { const p = parameter(pattern(location)); conditions.push(`(city ILIKE ${p} OR school_name ILIKE ${p})`); }
+      const schoolId = input('school_id');
+      if (schoolId) {
+        if (!isUuid(schoolId)) throw new HttpError(400, 'Ogiltigt skol-ID.');
+        conditions.push(`school_id = ${parameter(schoolId)}`);
+      }
+      const min = input('min_price'), max = input('max_price');
+      if (min && priceValue(min) === null || max && priceValue(max) === null) throw new HttpError(400, 'Ogiltigt prisfilter.');
+      if (min && max && priceValue(min) > priceValue(max)) throw new HttpError(400, 'Lägsta pris får inte vara högre än högsta pris.');
+      if (min) conditions.push(`price >= ${parameter(priceValue(min))}`);
+      if (max) conditions.push(`price <= ${parameter(priceValue(max))}`);
+      const sorts = { newest: 'created_at DESC', oldest: 'created_at ASC', 'date-desc': 'created_at DESC', 'date-asc': 'created_at ASC', 'price-asc': 'price ASC', 'price-desc': 'price DESC', price_asc: 'price ASC', price_desc: 'price DESC' };
+      const sort = input('sort') || 'newest';
+      if (!Object.hasOwn(sorts, sort)) throw new HttpError(400, 'Ogiltig sortering.');
+      res.json({ listings: await query(`${ACTIVE_LISTING_SQL}${conditions.length ? ` WHERE ${conditions.join(' AND ')}` : ''} ORDER BY ${sorts[sort]}, id ASC`, params) });
     } catch (error) { next(error); }
   });
 
@@ -180,24 +228,26 @@ export function createApiRouter() {
   });
 
   // --- Auth (demo: school contact e-mail + shared demo password) ----------
-  router.post('/auth/login', async (req, res, next) => {
+  router.post('/auth/login', requireDemoMode, async (req, res, next) => {
     try {
-      const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+      const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
       const password = typeof req.body?.password === 'string' ? req.body.password : '';
       const school = await fetchSchoolByContactEmail(email);
       const ok = school && matchesDemoPassword(password);
       if (!ok) throw new HttpError(401, 'E-postadressen eller lösenordet stämmer inte.');
-      res.json({ token: signToken(school.id), school: schoolSummary(school) });
+      const token = signToken(school.id);
+      setSessionCookie(req, res, token);
+      res.json({ token, school: schoolSummary(school) });
     } catch (error) { next(error); }
   });
 
-  router.post('/auth/register', async (req, res, next) => {
+  router.post('/auth/register', requireDemoMode, async (req, res, next) => {
     try {
       const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
-      const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+      const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
       const password = typeof req.body?.password === 'string' ? req.body.password : '';
-      if (!name) throw new HttpError(400, 'Ange ett namn eller skolans namn.');
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, 'Ange en giltig e-postadress.');
+      if (!name || name.length > 200) throw new HttpError(400, 'Ange skolans namn (högst 200 tecken).');
+      if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, 'Ange en giltig e-postadress.');
       if (password.length < 8) throw new HttpError(400, 'Lösenordet måste innehålla minst 8 tecken.');
       if (!matchesDemoPassword(password)) {
         throw new HttpError(400, 'Alla skolor använder projektets gemensamma demolösenord, även vid registrering. Ange demolösenordet och försök igen.');
@@ -210,20 +260,40 @@ export function createApiRouter() {
          VALUES ($1, $2, $3, $4, '', $5) RETURNING *`,
         [name, 'Anges senare', 'Anges senare', 'Anges senare', email]
       );
-      res.status(201).json({ token: signToken(rows[0].id), school: schoolSummary(rows[0]) });
+      const token = signToken(rows[0].id);
+      setSessionCookie(req, res, token);
+      res.status(201).json({ token, school: schoolSummary(rows[0]) });
     } catch (error) { next(error); }
   });
 
-  router.get('/auth/me', requireAuth, (req, res) => {
+  router.get('/auth/me', (req, res) => {
     res.json({ school: schoolSummary(req.school) });
   });
 
   // --- Min sida: school info, own listings, inventory ---------------------
-  router.get('/school/me', requireAuth, (req, res) => {
+  router.get('/school/me', (req, res) => {
     res.json({ school: schoolSummary(req.school) });
   });
 
-  router.get('/school/me/inventory', requireAuth, async (req, res, next) => {
+  router.patch('/school/me', async (req, res, next) => {
+    try {
+      const allowed = { name: 200, city: 120, visiting_address: 1000, billing_address: 1000, billing_reference: 200, contact_email: 254 };
+      const body = req.body || {}, values = [], sets = [];
+      for (const [key, value] of Object.entries(body)) {
+        if (!Object.hasOwn(allowed, key) || typeof value !== 'string' || value.trim().length > allowed[key]) throw new HttpError(400, 'Ogiltiga skoluppgifter.');
+        const text = key === 'contact_email' ? value.trim().toLowerCase() : value.trim();
+        if (['name', 'city', 'contact_email'].includes(key) && !text) throw new HttpError(400, 'Namn, ort och e-post får inte vara tomma.');
+        if (key === 'contact_email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(text)) throw new HttpError(400, 'Ange en giltig e-postadress.');
+        values.push(text); sets.push(`${key} = $${values.length}`);
+      }
+      if (!sets.length) throw new HttpError(400, 'Inga skoluppgifter att uppdatera.');
+      values.push(req.school.id);
+      const rows = await query(`UPDATE shopit.schools SET ${sets.join(', ')} WHERE id = $${values.length} RETURNING *`, values);
+      res.json({ school: schoolSummary(rows[0]) });
+    } catch (error) { next(error); }
+  });
+
+  router.get('/school/me/inventory', async (req, res, next) => {
     try {
       const rows = await query(
         `SELECT p.id, p.title, p.description, p.category, p.image_url, p.quantity, p.created_at,
@@ -238,7 +308,48 @@ export function createApiRouter() {
     } catch (error) { next(error); }
   });
 
-  router.get('/school/me/listings', requireAuth, async (req, res, next) => {
+  function productInput(body) {
+    const title = typeof body.title === 'string' ? body.title.trim() : '';
+    const description = typeof body.description === 'string' ? body.description.trim() : '';
+    if (!title || title.length > 200) throw new HttpError(400, 'Ange en titel (högst 200 tecken).');
+    if (description.length > 5000) throw new HttpError(400, 'Beskrivningen får vara högst 5000 tecken.');
+    if (!CATEGORIES.includes(body.category)) throw new HttpError(400, 'Ogiltig kategori.');
+    const quantity = nonNegativeInt(body.quantity);
+    if (quantity === null) throw new HttpError(400, 'Ange ett antal (heltal, minst 0).');
+    return { title, description, category: body.category, quantity, image_url: typeof body.image_url === 'string' ? body.image_url.trim() : '' };
+  }
+
+  router.post('/school/me/inventory', async (req, res, next) => {
+    try {
+      const product = productInput(req.body || {});
+      const rows = await query(`INSERT INTO shopit.products (school_id,title,description,category,quantity,image_url)
+        VALUES ($1,$2,$3,$4,$5,NULLIF($6,'')) RETURNING *`,
+      [req.school.id, product.title, product.description, product.category, product.quantity, product.image_url]);
+      res.status(201).json({ product: rows[0] });
+    } catch (error) { next(error); }
+  });
+
+  async function publishInventory(req, res, next) {
+    try {
+      const productId = req.params.id || req.body?.product_id;
+      if (!isUuid(productId)) throw new HttpError(404, 'Inventariet hittades inte.');
+      const price = priceValue(req.body?.price);
+      if (price === null) throw new HttpError(400, 'Ange ett giltigt pris (0 eller högre).');
+      const listingId = await withTransaction(async client => {
+        const products = await client.query('SELECT id,quantity FROM shopit.products WHERE id=$1 AND school_id=$2 FOR UPDATE', [productId, req.school.id]);
+        if (!products.rows.length) throw new HttpError(404, 'Inventariet hittades inte.');
+        if (products.rows[0].quantity < 1) throw new HttpError(409, 'Det finns inga exemplar att sälja.');
+        const existing = await client.query('SELECT id FROM shopit.listings WHERE product_id=$1', [productId]);
+        if (existing.rows.length) throw new HttpError(409, 'Inventariet har redan en annons.');
+        const result = await client.query('INSERT INTO shopit.listings (product_id,price) VALUES ($1,$2) RETURNING id', [productId, price]);
+        return result.rows[0].id;
+      });
+      res.status(201).json({ listing: (await query(LISTING_BY_ID_SQL, [listingId]))[0] });
+    } catch (error) { next(error); }
+  }
+  router.post('/school/me/inventory/:id/listing', publishInventory);
+
+  router.get('/school/me/listings', async (req, res, next) => {
     try {
       const rows = await query(
         `SELECT l.id, l.price, l.created_at, l.created_at + interval '720 hours' AS expires_at,
@@ -257,24 +368,19 @@ export function createApiRouter() {
 
   // New listing = new inventory product + active listing (demo rule: one
   // listing per product, offered at the given price for all remaining stock).
-  router.post('/school/me/listings', requireAuth, async (req, res, next) => {
+  router.post('/school/me/listings', async (req, res, next) => {
+    if (req.body?.product_id !== undefined) return publishInventory(req, res, next);
     try {
       const body = req.body || {};
-      const title = typeof body.title === 'string' ? body.title.trim() : '';
-      const description = typeof body.description === 'string' ? body.description.trim() : '';
-      const category = body.category;
-      const quantity = nonNegativeInt(body.quantity);
+      const { title, description, category, quantity, image_url } = productInput(body);
       const price = priceValue(body.price);
-      if (!title) throw new HttpError(400, 'Ange en titel.');
-      if (!CATEGORIES.includes(category)) throw new HttpError(400, `Kategorin måste vara en av: ${CATEGORIES.join(', ')}.`);
-      if (quantity === null) throw new HttpError(400, 'Ange ett antal (heltal, minst 0).');
       if (price === null) throw new HttpError(400, 'Ange ett pris (0 eller högre).');
 
       const created = await withTransaction(async (client) => {
         const productRes = await client.query(
           `INSERT INTO shopit.products (school_id, title, description, category, image_url, quantity)
            VALUES ($1, $2, $3, $4, NULLIF($5, ''), $6) RETURNING id`,
-          [req.school.id, title, description, category, typeof body.image_url === 'string' ? body.image_url : '', quantity]
+          [req.school.id, title, description, category, image_url, quantity]
         );
         const listingRes = await client.query(
           `INSERT INTO shopit.listings (product_id, price) VALUES ($1, $2) RETURNING id`,
@@ -289,16 +395,19 @@ export function createApiRouter() {
   });
 
   // Edit one of the school's own listings (and its product).
-  router.patch('/listings/:id', requireAuth, async (req, res, next) => {
+  router.patch('/listings/:id', async (req, res, next) => {
     try {
       if (!isUuid(req.params.id)) throw new HttpError(404, 'Annonsen hittades inte.');
       const body = req.body || {};
       const fields = {};
       if (typeof body.title === 'string') {
-        if (!body.title.trim()) throw new HttpError(400, 'Titeln får inte vara tom.');
+        if (!body.title.trim() || body.title.trim().length > 200) throw new HttpError(400, 'Ange en titel (högst 200 tecken).');
         fields.title = body.title.trim();
       }
-      if (typeof body.description === 'string') fields.description = body.description.trim();
+      if (typeof body.description === 'string') {
+        if (body.description.length > 5000) throw new HttpError(400, 'Beskrivningen får vara högst 5000 tecken.');
+        fields.description = body.description.trim();
+      }
       if (body.category !== undefined) {
         if (!CATEGORIES.includes(body.category)) throw new HttpError(400, `Kategorin måste vara en av: ${CATEGORIES.join(', ')}.`);
         fields.category = body.category;
@@ -347,7 +456,7 @@ export function createApiRouter() {
   });
 
   // "Radera" = ta ner: the listing is withdrawn so order history stays intact.
-  router.delete('/listings/:id', requireAuth, async (req, res, next) => {
+  router.delete('/listings/:id', async (req, res, next) => {
     try {
       if (!isUuid(req.params.id)) throw new HttpError(404, 'Annonsen hittades inte.');
       const result = await query(
@@ -383,7 +492,7 @@ export function createApiRouter() {
     },
   });
 
-  router.post('/uploads', requireAuth, (req, res, next) => {
+  router.post('/uploads', (req, res, next) => {
     upload.single('image')(req, res, (err) => {
       if (err) return next(err);
       if (!req.file) return next(new HttpError(400, 'Bilda en bildfil med fältnamnet "image".'));
@@ -395,13 +504,15 @@ export function createApiRouter() {
   // "Köp direkt" = en rad; varukorgen = flera rader (eventuellt flera säljare).
   async function handlePlaceOrder(req, res, next) {
     try {
-      const rawItems = Array.isArray(req.body?.items) ? req.body.items : (req.body?.listing_id ? [{ listing_id: req.body.listing_id, quantity: req.body.quantity ?? 1 }] : []);
+      const rawItems = Array.isArray(req.body?.items) ? req.body.items : (req.body?.listing_id ? [{ listing_id: req.body.listing_id, quantity: req.body.quantity === undefined ? 1 : req.body.quantity }] : []);
       const byListing = new Map();
       for (const raw of rawItems) {
         if (!raw || !isUuid(raw.listing_id)) throw new HttpError(400, 'Varje varukorgsrad behöver en giltig listing_id.');
-        const quantity = positiveInt(raw.quantity ?? 1);
+        const quantity = positiveInt(raw.quantity === undefined ? 1 : raw.quantity);
         if (quantity === null) throw new HttpError(400, 'Antalet måste vara ett positivt heltal.');
-        byListing.set(raw.listing_id, (byListing.get(raw.listing_id) || 0) + quantity);
+        const merged = (byListing.get(raw.listing_id) || 0) + quantity;
+        if (merged > MAX_QUANTITY) throw new HttpError(400, 'För stort antal i varukorgen.');
+        byListing.set(raw.listing_id, merged);
       }
       if (!byListing.size) throw new HttpError(400, 'Inga produkter att köpa.');
       const items = [...byListing].map(([listing_id, quantity]) => ({ listing_id, quantity }))
@@ -429,11 +540,22 @@ export function createApiRouter() {
     } catch (error) { next(error); }
   }
 
-  router.post('/orders', requireAuth, handlePlaceOrder);
-  router.post('/orders/direct', requireAuth, handlePlaceOrder);
-  router.post('/orders/checkout', requireAuth, handlePlaceOrder);
+  router.post('/orders', handlePlaceOrder);
+  router.post('/orders/direct', handlePlaceOrder);
+  router.post('/orders/checkout', handlePlaceOrder);
 
-  router.get('/school/me/orders', requireAuth, async (req, res, next) => {
+  router.get('/orders/:id/invoice.pdf', async (req, res, next) => {
+    try {
+      if (!isUuid(req.params.id)) throw new HttpError(404, 'Beställningen hittades inte.');
+      const orders = await query('SELECT * FROM shopit.orders WHERE id=$1 AND buyer_school_id=$2', [req.params.id, req.school.id]);
+      if (!orders.length) throw new HttpError(404, 'Beställningen hittades inte.');
+      const items = await query('SELECT * FROM shopit.order_items WHERE order_id=$1 ORDER BY seller_school_id, product_title', [req.params.id]);
+      const pdf = await buildInvoicePdf({ order: orders[0], items });
+      res.type('pdf').attachment(`${invoiceNumber(orders[0].id, orders[0].created_at)}.pdf`).send(pdf);
+    } catch (error) { next(error); }
+  });
+
+  router.get('/school/me/orders', async (req, res, next) => {
     try {
       const orders = await query(
         `SELECT o.id, o.created_at, COALESCE(t.total_sek, 0) AS total_sek

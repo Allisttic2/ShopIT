@@ -591,7 +591,10 @@
     // Rader i varukorgen pekar på listings via uuid; äldre mock-rader kastas.
     const cart = NTIT.readCart();
     // Beställaren snapshottas av servern från skolraden – formfälten är informativa.
-    const school = (NTIT.getSession() || {}).school || {};
+    let school = (NTIT.getSession() || {}).school || {};
+    NTIT.sessionReady.then(currentSchool => {
+      if (currentSchool) { school = currentSchool; loadCustomerInfo(); }
+    });
     const money = value => NTIT.money(value);
 
     function readJSON(key, fallback) {

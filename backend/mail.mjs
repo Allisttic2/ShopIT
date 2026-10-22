@@ -13,35 +13,39 @@ export function mailDeliveryMode() {
   return process.env.SMTP_HOST ? 'smtp' : 'outbox';
 }
 
-let transporter = null;
-
 function getTransporter() {
-  if (!transporter) {
     const port = Number(process.env.SMTP_PORT || 587);
-    transporter = nodemailer.createTransport({
+    return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port,
       secure: port === 465,
       auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS || '' } : undefined,
+      requireTLS: process.env.NODE_ENV === 'production' && port !== 465,
+      connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
+      disableFileAccess: true, disableUrlAccess: true,
     });
-  }
-  return transporter;
 }
 
-export async function sendMail({ to, subject, html }) {
+export async function sendMail({ to, subject, html, attachments = [] }) {
+  const message = { from: process.env.SMTP_FROM || 'NTI-T Shopp <no-reply@ntitshopp.local>', to, subject, html, attachments };
   if (process.env.SMTP_HOST) {
-    await getTransporter().sendMail({
-      from: process.env.SMTP_FROM || 'NTI-T Shopp <no-reply@ntitshopp.local>',
-      to,
-      subject,
-      html,
-    });
+    const result = await getTransporter().sendMail(message);
+    if (!result.accepted?.length || result.rejected?.length) throw new Error('E-postservern tog inte emot mottagaren.');
     return 'smtp';
   }
   await mkdir(OUTBOX_DIR, { recursive: true });
-  const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${crypto.randomUUID().slice(0, 8)}.html`;
+  const base = `${new Date().toISOString().replace(/[:.]/g, '-')}-${crypto.randomUUID().slice(0, 8)}`;
+  const name = `${base}.html`;
   const envelope = `<!-- To: ${to}\n     Subject: ${subject} -->\n${html}`;
   await writeFile(path.join(OUTBOX_DIR, name), envelope, 'utf8');
+  // A complete MIME message lets the local demo verify the actual attachment.
+  const local = nodemailer.createTransport({ streamTransport: true, buffer: true });
+  const rendered = await local.sendMail(message);
+  await writeFile(path.join(OUTBOX_DIR, `${base}.eml`), rendered.message);
+  for (const attachment of attachments) {
+    const filename = path.basename(attachment.filename).replace(/[^a-zA-Z0-9._-]/g, '_');
+    await writeFile(path.join(OUTBOX_DIR, `${base}-${filename}`), attachment.content);
+  }
   console.log(`[mail] SMTP ej konfigurerad – mailet till ${to} sparas i backend/mail-outbox/${name}`);
   return 'outbox';
 }
