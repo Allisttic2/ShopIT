@@ -38,7 +38,8 @@ function sessionGuard({ protocol = 'http:', session = { token: 'test' }, status,
     NTIT: {
       getSession: () => session,
       clearSession: () => { result.cleared = true; },
-      api: () => status ? Promise.reject(Object.assign(new Error('Test response'), { status })) : Promise.resolve({})
+      setSession() {},
+      api: () => status ? Promise.reject(Object.assign(new Error('Test response'), { status })) : Promise.resolve({ school: {} })
     },
     document: { addEventListener() {} }
   };

@@ -1,5 +1,14 @@
 # ShopIT
 
+## Demo-inloggning (lokalt)
+
+Öppna [http://localhost:3000](http://localhost:3000) efter att backend har startats.
+
+- **E-post:** `stockholm@example.test`
+- **Lösenord:** `demo1234`
+
+För att använda dessa uppgifter, ange `DEMO_AUTH_ENABLED=true` och `DEMO_PASSWORD=demo1234` i din privata `.env.local` och starta om backend. Neon-anslutningen och `AUTH_SECRET` behöver också vara konfigurerade enligt startinstruktionerna nedan. Detta är en lokal testinloggning; den fungerar inte med `NODE_ENV=production`. SchoolSoft är ännu inte anslutet.
+
 ## Teknikstack
 
 Vi använder **JavaScript i både frontend och backend** samt **SQL för databasen**.
@@ -33,7 +42,7 @@ npm run db:status       # kontrollera anslutningen; befintlig Neon-databas är r
 npm start               # http://localhost:3000
 ```
 
-API:t täcker hela specifikationen: aktiva annonser (förstasidan), detaljsida, inloggning/registrering (demonivå), ”Min sida” (skolinfo, egna annonser med redigering/tagning, inventarie), bilduppladdning (filväljare och mobilkamera), ”Köp direkt” och varukorgsköp med transaktionsskyddat lagersaldo, fakturagenerering och orderbekräftelsemail samt automatisk utgång av annonser efter 30 dagar (hanteras av databasvyn, ingen schemalagd job behövs). Fullständig endpointlista, exempel och dokumenterade gränser finns i [backend/README.md](backend/README.md).
+API:t stöder aktiva annonser (förstasidan), detaljsida, ”Min sida” (skolinfo, egna annonser med redigering/tagning, inventarie), bilduppladdning (filväljare och mobilkamera), ”Köp direkt” och varukorgsköp med transaktionsskyddat lagersaldo, fakturagenerering och orderbekräftelsemail samt automatisk utgång av annonser efter 30 dagar (hanteras av databasvyn, ingen schemalagd job behövs). Marknadsplatssidor, API och uppladdade bilder kräver verifierad session på servern. SchoolSoft-inloggning återstår; lokal demo-inloggning kräver `DEMO_AUTH_ENABLED=true` och är alltid avstängd i produktion. Fullständig endpointlista, exempel och dokumenterade gränser finns i [backend/README.md](backend/README.md). Se [SchoolSoft-utredningen](backend/SCHOOLSOFT.md) för vad skolans IT behöver tillhandahålla.
 
 Underlag: [databaskortet i Trello](https://trello.com/c/kcTl3R5z), [planeringsmötet](https://trello.com/c/lmzzXC1y) och [projektspecifikationen](https://docs.google.com/document/d/1954j7vGA32ExfJ2vr5VcZzSdrLb0nRkv/edit). Befintlig plan är publicering 3 november och slutpresentation 6 november 2026.
 

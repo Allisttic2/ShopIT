@@ -5,22 +5,35 @@
   const API_BASE = '/api';
   const CATEGORIES = ['Datorer', 'Laddare', 'Kablar', 'Skärmar', 'Switchar', 'Router'];
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  let cachedSession = null;
 
   function getSession() {
     try {
+      if (cachedSession) return cachedSession;
       const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      return session && typeof session.token === 'string' && session.token ? session : null;
+      // Credentials now live in an HttpOnly cookie. Remove legacy bearer tokens.
+      if (session?.token) localStorage.removeItem(SESSION_KEY);
+      return session && !session.token && UUID.test(session.school?.id || '') ? session : null;
     } catch {
       return null;
     }
   }
 
-  function setSession(token, school) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ token, school, createdAt: Date.now() }));
+  function setSession(_token, school) {
+    cachedSession = { school, createdAt: Date.now() };
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(cachedSession)); } catch { /* cookie still works */ }
   }
 
   function clearSession() {
-    localStorage.removeItem(SESSION_KEY);
+    cachedSession = null;
+    try {
+      for (const key of [SESSION_KEY, 'ntit_cart', 'ntit_last_invoice']) localStorage.removeItem(key);
+    } catch { /* storage may be unavailable */ }
+  }
+
+  async function logout() {
+    await request('/auth/logout', { method: 'POST' });
+    clearSession();
   }
 
   function readCart() {
@@ -36,13 +49,13 @@
 
   async function request(path, options = {}) {
     const headers = { Accept: 'application/json' };
-    const session = getSession();
-    if (options.auth !== false && session) headers.Authorization = `Bearer ${session.token}`;
+    if (options.method && !['GET', 'HEAD'].includes(options.method)) headers['X-ShopIT-Request'] = '1';
     const hasBody = options.body !== undefined;
     // Utan Content-Type parsar inte express.json() kroppen – alla POST/PATCH skulle komma in tomma.
     if (hasBody) headers['Content-Type'] = 'application/json';
     const response = await fetch(`${API_BASE}${path}`, {
       method: options.method || 'GET',
+      credentials: 'same-origin',
       headers,
       body: hasBody ? JSON.stringify(options.body) : undefined,
     });
@@ -62,13 +75,12 @@
 
   // Multipart-uppladdning av en bildfil -> /uploads/... URL.
   async function uploadImage(file) {
-    const session = getSession();
-    if (!session) throw new Error('Logga in först.');
     const form = new FormData();
     form.append('image', file);
     const response = await fetch(`${API_BASE}/uploads`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${session.token}` },
+      credentials: 'same-origin',
+      headers: { 'X-ShopIT-Request': '1' },
       body: form,
     });
     let payload = null;
@@ -101,6 +113,7 @@
     getSession,
     setSession,
     clearSession,
+    logout,
     api,
     uploadImage,
     escapeHTML,
@@ -109,7 +122,7 @@
     readCart,
   };
 
-  // Every HTML page loads api.js, including the public homepage.
+  // Every HTML page loads api.js, including the login page.
   if (window.location?.protocol === 'file:') {
     const pages = ['login.html', 'index.html', 'profil.html', 'checkout.html', 'help.html'];
     const name = window.location.pathname.split('/').pop();

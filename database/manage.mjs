@@ -2,8 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { createDatabasePool } from './connection.mjs';
 
 const action = process.argv[2];
-if (!['status', 'migrate', 'seed', 'verify'].includes(action)) {
-  console.error('Usage: node database/manage.mjs status|migrate|seed|verify');
+if (!['status', 'migrate', 'upgrade', 'seed', 'verify'].includes(action)) {
+  console.error('Usage: node database/manage.mjs status|migrate|upgrade|seed|verify');
   process.exit(1);
 }
 
@@ -38,7 +38,7 @@ try {
           throw new Error('Schema shopit already exists. Preserved it; inspect before applying further migrations.');
         }
       }
-      const file = { migrate: '001_schema.sql', seed: '002_seed.sql', verify: '003_verify.sql' }[action];
+      const file = { migrate: '001_schema.sql', upgrade: '004_unique_school_email.sql', seed: '002_seed.sql', verify: '003_verify.sql' }[action];
       await client.query(await readFile(new URL(file, import.meta.url), 'utf8'));
       console.log(`${file}: OK (branch ${process.env.NEON_BRANCH ?? 'unspecified'})`);
     }
@@ -49,6 +49,10 @@ try {
     client.release();
   }
 } catch (error) {
+  if (action === 'upgrade' && error.code === '23505') {
+    console.error('Upgrade stopped: duplicate school email addresses must be reviewed first. No accounts were changed.');
+    process.exitCode = 1;
+  } else {
   // Connection failures can embed credentials/hostnames: only print known safe text.
   if (error.message.startsWith('Schema shopit') || error.message.startsWith('Run verification') ||
       error.message.startsWith('Migrations require') || error.message.startsWith('SHOPIT_ENV_FILE') ||
@@ -58,6 +62,7 @@ try {
     console.error(`Database ${action} failed (${error.code ?? error.name}). No credentials printed.`);
   }
   process.exitCode = 1;
+  }
 } finally {
   await pool?.end();
 }

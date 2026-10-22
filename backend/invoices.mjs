@@ -2,12 +2,12 @@
 // Mallen är en generell svensk fakturamall: fakturauppgifter, betalningsvillkor,
 // en sektion per säljare med postlista och totaler.
 
-export function invoiceNumber(orderId) {
-  return `DEMO-${new Date().getFullYear()}-${String(orderId).replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+export function invoiceNumber(orderId, createdAt = new Date()) {
+  return `DEMO-${new Date(createdAt).getUTCFullYear()}-${String(orderId).replace(/-/g, '').slice(0, 8).toUpperCase()}`;
 }
 
-function formatSek(value) {
-  return new Intl.NumberFormat('sv-SE', { minimumFractionDigits: 2 }).format(Number(value));
+export function formatSek(value) {
+  return new Intl.NumberFormat('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value));
 }
 
 function escapeHtml(value) {
@@ -15,21 +15,26 @@ function escapeHtml(value) {
 }
 
 // items: rows from shopit.order_items for one order.
-export function buildInvoiceHtml({ order, items }) {
-  // Group line items by seller: one invoice section per selling school.
+export function sellerGroups(items) {
   const sellers = new Map();
   for (const item of items) {
-    if (!sellers.has(item.seller_name)) {
-      sellers.set(item.seller_name, { seller_name: item.seller_name, billing_address: item.seller_billing_address, billing_reference: item.seller_billing_reference, items: [] });
+    const key = item.seller_school_id || item.seller_name;
+    if (!sellers.has(key)) {
+      sellers.set(key, { seller_name: item.seller_name, billing_address: item.seller_billing_address, billing_reference: item.seller_billing_reference, items: [] });
     }
-    sellers.get(item.seller_name).items.push(item);
+    sellers.get(key).items.push(item);
   }
+  return [...sellers.values()];
+}
+
+export function buildInvoiceHtml({ order, items }) {
+  const sellers = sellerGroups(items);
 
   const total = [...items].reduce((sum, item) => sum + Number(item.line_total), 0);
-  const date = new Intl.DateTimeFormat('sv-SE').format(new Date(order.created_at));
-  const number = invoiceNumber(order.id);
+  const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm' }).format(new Date(order.created_at));
+  const number = invoiceNumber(order.id, order.created_at);
 
-  const sections = [...sellers.values()].map(group => {
+  const sections = sellers.map(group => {
     const groupTotal = group.items.reduce((sum, item) => sum + Number(item.line_total), 0);
     const rows = group.items.map(item => `
           <tr>
