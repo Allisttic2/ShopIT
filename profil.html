@@ -1096,7 +1096,7 @@
             <i class="fa-solid fa-vault"></i>
           </div>
           <div class="stat-dock-details">
-            <span class="stat-dock-value" id="statTotalValue">23 150 kr</span>
+            <span class="stat-dock-value" id="statTotalValue">0 kr</span>
             <span class="stat-dock-label">Inventariets Värde</span>
           </div>
         </div>
@@ -1106,7 +1106,7 @@
             <i class="fa-solid fa-boxes-stacked"></i>
           </div>
           <div class="stat-dock-details">
-            <span class="stat-dock-value" id="statInventoryCount">5 st</span>
+            <span class="stat-dock-value" id="statInventoryCount">0 st</span>
             <span class="stat-dock-label">Inventarieenheter</span>
           </div>
         </div>
@@ -1116,7 +1116,7 @@
             <i class="fa-solid fa-bullhorn"></i>
           </div>
           <div class="stat-dock-details">
-            <span class="stat-dock-value" id="statAdsCount">3 st</span>
+            <span class="stat-dock-value" id="statAdsCount">0 st</span>
             <span class="stat-dock-label">Aktiva Annonser</span>
           </div>
         </div>
@@ -1275,7 +1275,7 @@
 
             <div class="form-group">
               <label for="adPrice">Pris (kr)</label>
-              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" min="0" step="1" required>
+              <input type="number" id="adPrice" class="form-input no-icon" placeholder="3500" min="0" step="0.01" required>
             </div>
           </div>
 
@@ -1424,6 +1424,7 @@
 
       const activeCount = myAds.filter(ad => ad.status === 'active').length;
       countLabel.textContent = `${myAds.length} publicerade annonser (${activeCount} aktiva)`;
+      updateStats();
 
       if (myAds.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga annonser just nu. Klicka på "Lägg upp ny annons" för att publicera din första.</p>';
@@ -1483,6 +1484,7 @@
     function renderInventory(items = inventory) {
       const tbody = document.getElementById('inventoryTableBody');
       tbody.innerHTML = '';
+      updateStats();
 
       if (items.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Inga inventarier hittades.</td></tr>';
@@ -1686,12 +1688,7 @@
 
     // --- VARUKORG (lokal; rader pekar på listings via uuid) ---
     const CART_KEY = 'ntit_cart';
-    let cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]')
-      .filter(item => item && NTIT.UUID.test(String(item.id || '')))
-      .map(item => ({
-        ...item,
-        image: typeof item.image === 'string' && item.image ? item.image : ''
-      }));
+    let cart = NTIT.readCart();
 
     const cartOverlay = document.getElementById('cartOverlay');
     const openCartBtn = document.getElementById('openCartBtn');

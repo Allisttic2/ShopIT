@@ -24,12 +24,12 @@ Databasfiler, ER-diagram, installationssteg och överlämning finns i [database/
 
 ## Backend – API (körs lokalt)
 
-Backend körs lokalt med Node.js/Express och servar både API:et (`/api`) och den statiska frontenden på samma origin. Den kan prata med antingen en lokal PostgreSQL (Docker: `docker compose up -d db`) eller den befintliga Neon-installationen – enda skillnaden är `DATABASE_URL` i `.env`.
+Backend körs lokalt med Node.js/Express och servar både API:et (`/api`) och den statiska frontenden på samma origin. Databasen körs på Neon och anslutningen konfigureras med `DATABASE_URL` i `.env.local` eller `.env`.
 
 ```bash
 npm install
-cp .env.example .env   # fyll i DATABASE_URL, AUTH_SECRET (och SMTP_* om riktiga mail önskas)
-npm run db:migrate && npm run db:seed   # bara mot lokal PostgreSQL
+cp .env.example .env   # vid första installationen: fyll i Neon-anslutning och AUTH_SECRET
+npm run db:status       # kontrollera anslutningen; befintlig Neon-databas är redan installerad
 npm start               # http://localhost:3000
 ```
 

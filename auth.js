@@ -8,11 +8,20 @@
   const isLogin = currentPage === LOGIN_PAGE;
   const isProtected = PROTECTED_PAGES.includes(currentPage);
 
+  if (location.protocol === 'file:') {
+    // api.js has already moved this file URL to the shared backend origin.
+    return;
+  }
+
   const session = NTIT.getSession();
 
   if (isLogin && session) {
     const next = new URLSearchParams(location.search).get('next');
-    location.replace(allowedPages.includes(next) ? next : 'index.html');
+    NTIT.api('/auth/me').then(() => {
+      location.replace(allowedPages.includes(next) ? next : 'index.html');
+    }).catch(error => {
+      if (error.status === 401) NTIT.clearSession();
+    });
     return;
   }
 
@@ -24,7 +33,8 @@
 
   if (!isLogin) {
     // Tokenet kan vara utgånget eller ogiltigt – validera mot servern i bakgrunden.
-    NTIT.api('/auth/me').catch(() => {
+    NTIT.api('/auth/me').catch(error => {
+      if (error.status !== 401) return;
       NTIT.clearSession();
       const next = isProtected ? currentPage : 'index.html';
       location.replace(`${LOGIN_PAGE}?next=${encodeURIComponent(next)}`);
