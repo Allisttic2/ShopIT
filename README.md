@@ -1,5 +1,14 @@
 # ShopIT
 
+## Demo-inloggning (lokalt)
+
+Öppna [http://localhost:3000](http://localhost:3000) efter att backend har startats.
+
+- **E-post:** `stockholm@example.test`
+- **Lösenord:** `demo1234`
+
+För att använda dessa uppgifter, ange `DEMO_AUTH_ENABLED=true` och `DEMO_PASSWORD=demo1234` i din privata `.env.local` och starta om backend. Neon-anslutningen och `AUTH_SECRET` behöver också vara konfigurerade enligt startinstruktionerna nedan. Detta är en lokal testinloggning; den fungerar inte med `NODE_ENV=production`. SchoolSoft är ännu inte anslutet.
+
 ## Teknikstack
 
 Vi använder **JavaScript i både frontend och backend** samt **SQL för databasen**.
