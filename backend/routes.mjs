@@ -14,6 +14,7 @@ import { positiveInt, nonNegativeInt, priceValue, MAX_QUANTITY } from './validat
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ['Datorer', 'Laddare', 'Kablar', 'Skärmar', 'Switchar', 'Router'];
+const COUNTY_CODE = /^(01|0[3-9]|1[0234789]|2[0-5])$/;
 
 export class HttpError extends Error {
   constructor(status, message) {
@@ -46,9 +47,16 @@ function isUuid(value) {
   return typeof value === 'string' && UUID.test(value);
 }
 
+function conditionScore(value) {
+  if (value == null) return null;
+  const score = positiveInt(value);
+  if (score === null || score > 10) throw new HttpError(400, 'Skicket ska vara ett heltal mellan 1 och 10.');
+  return score;
+}
+
 // Authenticated listing feed. The view handles the 30-day expiry.
 const ACTIVE_LISTING_SQL = `SELECT id, product_id, title, description, category, image_url,
-       quantity, price, created_at, expires_at, school_name, city
+       quantity, price, created_at, expires_at, school_name, city, county_code, condition_score
 FROM shopit.active_listings`;
 
 // Fetches a listing with product and school; computes a display status so the
@@ -57,8 +65,8 @@ const LISTING_BY_ID_SQL = `SELECT l.id, l.price, l.created_at,
        l.created_at + interval '720 hours' AS expires_at,
        CASE WHEN l.status = 'active' AND l.created_at + interval '720 hours' <= now()
             THEN 'expired' ELSE l.status END AS status,
-       p.id AS product_id, p.title, p.description, p.category, p.image_url, p.quantity,
-       s.name AS school_name, s.city, s.id AS school_id
+       p.id AS product_id, p.title, p.description, p.category, p.image_url, p.quantity, p.condition_score,
+       s.name AS school_name, s.city, s.id AS school_id, s.county_code
 FROM shopit.listings l
 JOIN shopit.products p ON p.id = l.product_id
 JOIN shopit.schools s ON s.id = p.school_id
@@ -69,6 +77,7 @@ function schoolSummary(school) {
     id: school.id,
     name: school.name,
     city: school.city,
+    county_code: school.county_code,
     visiting_address: school.visiting_address,
     billing_address: school.billing_address,
     billing_reference: school.billing_reference,
@@ -277,14 +286,16 @@ export function createApiRouter() {
 
   router.patch('/school/me', async (req, res, next) => {
     try {
-      const allowed = { name: 200, city: 120, visiting_address: 1000, billing_address: 1000, billing_reference: 200, contact_email: 254 };
+      const allowed = { name: 200, city: 120, county_code: 2, visiting_address: 1000, billing_address: 1000, billing_reference: 200, contact_email: 254 };
       const body = req.body || {}, values = [], sets = [];
       for (const [key, value] of Object.entries(body)) {
         if (!Object.hasOwn(allowed, key) || typeof value !== 'string' || value.trim().length > allowed[key]) throw new HttpError(400, 'Ogiltiga skoluppgifter.');
         const text = key === 'contact_email' ? value.trim().toLowerCase() : value.trim();
         if (['name', 'city', 'contact_email'].includes(key) && !text) throw new HttpError(400, 'Namn, ort och e-post får inte vara tomma.');
         if (key === 'contact_email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(text)) throw new HttpError(400, 'Ange en giltig e-postadress.');
-        values.push(text); sets.push(`${key} = $${values.length}`);
+        if (key === 'county_code' && text && !COUNTY_CODE.test(text)) throw new HttpError(400, 'Välj ett giltigt län.');
+        values.push(key === 'county_code' ? text || null : text);
+        sets.push(`${key} = $${values.length}`);
       }
       if (!sets.length) throw new HttpError(400, 'Inga skoluppgifter att uppdatera.');
       values.push(req.school.id);
@@ -296,7 +307,7 @@ export function createApiRouter() {
   router.get('/school/me/inventory', async (req, res, next) => {
     try {
       const rows = await query(
-        `SELECT p.id, p.title, p.description, p.category, p.image_url, p.quantity, p.created_at,
+        `SELECT p.id, p.title, p.description, p.category, p.image_url, p.quantity, p.created_at, p.condition_score,
                 l.id AS listing_id, l.price, l.status AS listing_status
          FROM shopit.products p
          LEFT JOIN shopit.listings l ON l.product_id = p.id
@@ -316,15 +327,15 @@ export function createApiRouter() {
     if (!CATEGORIES.includes(body.category)) throw new HttpError(400, 'Ogiltig kategori.');
     const quantity = nonNegativeInt(body.quantity);
     if (quantity === null) throw new HttpError(400, 'Ange ett antal (heltal, minst 0).');
-    return { title, description, category: body.category, quantity, image_url: typeof body.image_url === 'string' ? body.image_url.trim() : '' };
+    return { title, description, category: body.category, quantity, condition_score: conditionScore(body.condition_score), image_url: typeof body.image_url === 'string' ? body.image_url.trim() : '' };
   }
 
   router.post('/school/me/inventory', async (req, res, next) => {
     try {
       const product = productInput(req.body || {});
-      const rows = await query(`INSERT INTO shopit.products (school_id,title,description,category,quantity,image_url)
-        VALUES ($1,$2,$3,$4,$5,NULLIF($6,'')) RETURNING *`,
-      [req.school.id, product.title, product.description, product.category, product.quantity, product.image_url]);
+      const rows = await query(`INSERT INTO shopit.products (school_id,title,description,category,quantity,image_url,condition_score)
+        VALUES ($1,$2,$3,$4,$5,NULLIF($6,''),$7) RETURNING *`,
+      [req.school.id, product.title, product.description, product.category, product.quantity, product.image_url, product.condition_score]);
       res.status(201).json({ product: rows[0] });
     } catch (error) { next(error); }
   });
@@ -335,12 +346,16 @@ export function createApiRouter() {
       if (!isUuid(productId)) throw new HttpError(404, 'Inventariet hittades inte.');
       const price = priceValue(req.body?.price);
       if (price === null) throw new HttpError(400, 'Ange ett giltigt pris (0 eller högre).');
+      const score = req.body?.condition_score === undefined ? undefined : conditionScore(req.body.condition_score);
       const listingId = await withTransaction(async client => {
         const products = await client.query('SELECT id,quantity FROM shopit.products WHERE id=$1 AND school_id=$2 FOR UPDATE', [productId, req.school.id]);
         if (!products.rows.length) throw new HttpError(404, 'Inventariet hittades inte.');
         if (products.rows[0].quantity < 1) throw new HttpError(409, 'Det finns inga exemplar att sälja.');
         const existing = await client.query('SELECT id FROM shopit.listings WHERE product_id=$1', [productId]);
         if (existing.rows.length) throw new HttpError(409, 'Inventariet har redan en annons.');
+        if (score !== undefined) {
+          await client.query('UPDATE shopit.products SET condition_score=$1 WHERE id=$2', [score, productId]);
+        }
         const result = await client.query('INSERT INTO shopit.listings (product_id,price) VALUES ($1,$2) RETURNING id', [productId, price]);
         return result.rows[0].id;
       });
@@ -372,15 +387,15 @@ export function createApiRouter() {
     if (req.body?.product_id !== undefined) return publishInventory(req, res, next);
     try {
       const body = req.body || {};
-      const { title, description, category, quantity, image_url } = productInput(body);
+      const { title, description, category, quantity, image_url, condition_score } = productInput(body);
       const price = priceValue(body.price);
       if (price === null) throw new HttpError(400, 'Ange ett pris (0 eller högre).');
 
       const created = await withTransaction(async (client) => {
         const productRes = await client.query(
-          `INSERT INTO shopit.products (school_id, title, description, category, image_url, quantity)
-           VALUES ($1, $2, $3, $4, NULLIF($5, ''), $6) RETURNING id`,
-          [req.school.id, title, description, category, image_url, quantity]
+          `INSERT INTO shopit.products (school_id, title, description, category, image_url, quantity, condition_score)
+           VALUES ($1, $2, $3, $4, NULLIF($5, ''), $6, $7) RETURNING id`,
+          [req.school.id, title, description, category, image_url, quantity, condition_score]
         );
         const listingRes = await client.query(
           `INSERT INTO shopit.listings (product_id, price) VALUES ($1, $2) RETURNING id`,
@@ -425,6 +440,7 @@ export function createApiRouter() {
       if (body.image_url !== undefined) {
         fields.image_url = typeof body.image_url === 'string' && body.image_url.trim() ? body.image_url.trim() : null;
       }
+      if (body.condition_score !== undefined) fields.condition_score = conditionScore(body.condition_score);
       if (!Object.keys(fields).length) throw new HttpError(400, 'Inga fält att uppdatera.');
 
       await withTransaction(async (client) => {
@@ -436,7 +452,7 @@ export function createApiRouter() {
         if (!res2.rows.length) throw new HttpError(404, 'Annonsen hittades inte eller tillhör inte din skola.');
         const productId = res2.rows[0].id;
 
-        const productSets = ['title', 'description', 'category', 'quantity', 'image_url'].filter(key => key in fields);
+        const productSets = ['title', 'description', 'category', 'quantity', 'image_url', 'condition_score'].filter(key => key in fields);
         if (productSets.length) {
           const params = productSets.map(key => fields[key]);
           params.push(productId);

@@ -17,14 +17,16 @@ const { getPool, closePool } = await import('../backend/db.mjs');
 const { createApp } = await import('../backend/app.mjs');
 const { signToken, verifyToken, validateAuthConfig, setSessionCookie } = await import('../backend/auth.mjs');
 const schools = [
-  { id: '10000000-0000-4000-8000-000000000001', name: 'School A', contact_email: 'a@example.test' },
+  { id: '10000000-0000-4000-8000-000000000001', name: 'School A', county_code: '01', contact_email: 'a@example.test' },
   { id: '10000000-0000-4000-8000-000000000002', name: 'School B', contact_email: 'b@example.test' },
 ];
 const calls = [];
 mock.method(getPool(), 'query', async (sql, params = []) => {
   calls.push({ sql, params });
   if (sql.includes('WHERE lower(btrim(contact_email))')) return { rows: schools.filter(s => s.contact_email === params[0].toLowerCase()) };
-  if (sql.includes('FROM shopit.schools WHERE id')) return { rows: schools.filter(s => s.id === params[0]) };
+  if (sql.includes('FROM shopit.schools WHERE id')) {
+    return { rows: schools.filter(s => s.id === params[0]).map(s => ({ ...s, county_code: sql.includes('county_code') ? s.county_code : undefined })) };
+  }
   if (sql === 'SELECT 1') return { rows: [{}] };
   if (sql.includes('FROM shopit.active_listings')) return { rows: [{ id: '30000000-0000-4000-8000-000000000001', title: 'Laptop' }] };
   if (sql.includes('FROM shopit.products') || sql.includes('FROM shopit.listings') || sql.includes('FROM shopit.orders')) return { rows: [] };
@@ -100,7 +102,9 @@ test('login establishes an HttpOnly cookie that serves pages, images and school 
   assert.equal((await request('/uploads/missing.png', { cookie })).status, 404);
   assert.equal((await request('/api/listings', { cookie })).status, 200);
   assert.equal((await request('/api/listings', { token: data.token })).status, 200);
-  assert.equal((await (await request('/api/auth/me', { cookie })).json()).school.id, schools[0].id);
+  const { school } = await (await request('/api/auth/me', { cookie })).json();
+  assert.equal(school.id, schools[0].id);
+  assert.equal(school.county_code, '01');
 });
 
 test('the verified identity determines the school, never client supplied IDs', async () => {
