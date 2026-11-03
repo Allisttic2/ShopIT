@@ -94,7 +94,7 @@ export function requireSameOrigin(req, res, next) {
 async function authenticate(req, res, next, redirect) {
   try {
     const schoolId = verifyToken(tokenFromRequest(req));
-    const rows = schoolId ? await query('SELECT id, name, city, visiting_address, billing_address, billing_reference, contact_email FROM shopit.schools WHERE id = $1', [schoolId]) : [];
+    const rows = schoolId ? await query('SELECT id, name, city, county_code, visiting_address, billing_address, billing_reference, contact_email FROM shopit.schools WHERE id = $1', [schoolId]) : [];
     if (!rows.length) {
       if (!redirect) return res.status(401).json({ error: 'Ingen eller ogiltig session. Logga in först.' });
       clearSessionCookie(req, res);

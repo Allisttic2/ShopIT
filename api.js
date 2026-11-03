@@ -7,6 +7,45 @@
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   let cachedSession = null;
 
+  // SCB, Kommuner i kodnummerordning 2026:
+  // https://www.scb.se/contentassets/7a89e48960f741e08918e489ea36354a/kommunlankod-2026.pdf
+  const countyData = [
+    ['01', 'Stockholms län', 'Upplands Väsby|Vallentuna|Österåker|Värmdö|Järfälla|Ekerö|Huddinge|Botkyrka|Salem|Haninge|Tyresö|Upplands-Bro|Nykvarn|Täby|Danderyd|Sollentuna|Stockholm|Södertälje|Nacka|Sundbyberg|Solna|Lidingö|Vaxholm|Norrtälje|Sigtuna|Nynäshamn'],
+    ['03', 'Uppsala län', 'Håbo|Älvkarleby|Knivsta|Heby|Tierp|Uppsala|Enköping|Östhammar'],
+    ['04', 'Södermanlands län', 'Vingåker|Gnesta|Nyköping|Oxelösund|Flen|Katrineholm|Eskilstuna|Strängnäs|Trosa'],
+    ['05', 'Östergötlands län', 'Ödeshög|Ydre|Kinda|Boxholm|Åtvidaberg|Finspång|Valdemarsvik|Linköping|Norrköping|Söderköping|Motala|Vadstena|Mjölby'],
+    ['06', 'Jönköpings län', 'Aneby|Gnosjö|Mullsjö|Habo|Gislaved|Vaggeryd|Jönköping|Nässjö|Värnamo|Sävsjö|Vetlanda|Eksjö|Tranås'],
+    ['07', 'Kronobergs län', 'Uppvidinge|Lessebo|Tingsryd|Alvesta|Älmhult|Markaryd|Växjö|Ljungby'],
+    ['08', 'Kalmar län', 'Högsby|Torsås|Mörbylånga|Hultsfred|Mönsterås|Emmaboda|Kalmar|Nybro|Oskarshamn|Västervik|Vimmerby|Borgholm'],
+    ['09', 'Gotlands län', 'Gotland'],
+    ['10', 'Blekinge län', 'Olofström|Karlskrona|Ronneby|Karlshamn|Sölvesborg'],
+    ['12', 'Skåne län', 'Svalöv|Staffanstorp|Burlöv|Vellinge|Östra Göinge|Örkelljunga|Bjuv|Kävlinge|Lomma|Svedala|Skurup|Sjöbo|Hörby|Höör|Tomelilla|Bromölla|Osby|Perstorp|Klippan|Åstorp|Båstad|Malmö|Lund|Landskrona|Helsingborg|Höganäs|Eslöv|Ystad|Trelleborg|Kristianstad|Simrishamn|Ängelholm|Hässleholm'],
+    ['13', 'Hallands län', 'Hylte|Halmstad|Laholm|Falkenberg|Varberg|Kungsbacka'],
+    ['14', 'Västra Götalands län', 'Härryda|Partille|Öckerö|Stenungsund|Tjörn|Orust|Sotenäs|Munkedal|Tanum|Dals-Ed|Färgelanda|Ale|Lerum|Vårgårda|Bollebygd|Grästorp|Essunga|Karlsborg|Gullspång|Tranemo|Bengtsfors|Mellerud|Lilla Edet|Mark|Svenljunga|Herrljunga|Vara|Götene|Tibro|Töreboda|Göteborg|Mölndal|Kungälv|Lysekil|Uddevalla|Strömstad|Vänersborg|Trollhättan|Alingsås|Borås|Ulricehamn|Åmål|Mariestad|Lidköping|Skara|Skövde|Hjo|Tidaholm|Falköping'],
+    ['17', 'Värmlands län', 'Kil|Eda|Torsby|Storfors|Hammarö|Munkfors|Forshaga|Grums|Årjäng|Sunne|Karlstad|Kristinehamn|Filipstad|Hagfors|Arvika|Säffle'],
+    ['18', 'Örebro län', 'Lekeberg|Laxå|Hallsberg|Degerfors|Hällefors|Ljusnarsberg|Örebro|Kumla|Askersund|Karlskoga|Nora|Lindesberg'],
+    ['19', 'Västmanlands län', 'Skinnskatteberg|Surahammar|Kungsör|Hallstahammar|Norberg|Västerås|Sala|Fagersta|Köping|Arboga'],
+    ['20', 'Dalarnas län', 'Vansbro|Malung-Sälen|Gagnef|Leksand|Rättvik|Orsa|Älvdalen|Smedjebacken|Mora|Falun|Borlänge|Säter|Hedemora|Avesta|Ludvika'],
+    ['21', 'Gävleborgs län', 'Ockelbo|Hofors|Ovanåker|Nordanstig|Ljusdal|Gävle|Sandviken|Söderhamn|Bollnäs|Hudiksvall'],
+    ['22', 'Västernorrlands län', 'Ånge|Timrå|Härnösand|Sundsvall|Kramfors|Sollefteå|Örnsköldsvik'],
+    ['23', 'Jämtlands län', 'Ragunda|Bräcke|Krokom|Strömsund|Åre|Berg|Härjedalen|Östersund'],
+    ['24', 'Västerbottens län', 'Nordmaling|Bjurholm|Vindeln|Robertsfors|Norsjö|Malå|Storuman|Sorsele|Dorotea|Vännäs|Vilhelmina|Åsele|Umeå|Lycksele|Skellefteå'],
+    ['25', 'Norrbottens län', 'Arvidsjaur|Arjeplog|Jokkmokk|Överkalix|Kalix|Övertorneå|Pajala|Gällivare|Älvsbyn|Luleå|Piteå|Boden|Haparanda|Kiruna'],
+  ];
+
+  const counties = countyData.map(([code, name]) => ({ code, name }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+  const normalizePlace = value => (value || '').trim().normalize('NFC').toLocaleLowerCase('sv-SE');
+  const countyByPlace = new Map(countyData.flatMap(([code, name, municipalities]) =>
+    [name, ...municipalities.split('|')].map(place => [normalizePlace(place), code])
+  ));
+  // Visby is the postal town for Gotland's municipal seat.
+  countyByPlace.set('visby', '09');
+
+  function countyForListing(listing) {
+    return listing.county_code || countyByPlace.get(normalizePlace(listing.city));
+  }
+
   function getSession() {
     try {
       if (cachedSession) return cachedSession;
@@ -109,6 +148,9 @@
 
   window.NTIT = {
     CATEGORIES,
+    counties,
+    normalizePlace,
+    countyForListing,
     UUID,
     getSession,
     setSession,

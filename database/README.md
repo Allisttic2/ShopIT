@@ -2,6 +2,8 @@
 
 Databasteamet ansvarar för PostgreSQL, ER-diagram, tabeller, constraints, seed-data och överlämning. Backendteamet ansvarar för Node.js/Express, databasanslutningen, API, autentisering, behörigheter och köptransaktionerna i applikationen.
 
+För en första genomgång med en klasskompis: [visa hur databasen fungerar på 10–15 minuter](KLASSKOMPIS-GUIDE.md). Till guiden finns [SQL-frågor som bara läser data](demo-readonly.sql).
+
 ## Underlag och status
 
 - [Uppgiftens specifikation](https://docs.google.com/document/d/1954j7vGA32ExfJ2vr5VcZzSdrLb0nRkv/edit): skolor, produkter, annonser, order, orderrader, inventarie, minst fem annonser och 30 dagars livslängd.

@@ -38,9 +38,16 @@ try {
           throw new Error('Schema shopit already exists. Preserved it; inspect before applying further migrations.');
         }
       }
-      const file = { migrate: '001_schema.sql', upgrade: '004_unique_school_email.sql', seed: '002_seed.sql', verify: '003_verify.sql' }[action];
-      await client.query(await readFile(new URL(file, import.meta.url), 'utf8'));
-      console.log(`${file}: OK (branch ${process.env.NEON_BRANCH ?? 'unspecified'})`);
+      const files = {
+        migrate: ['001_schema.sql', '005_listing_filters.sql'],
+        upgrade: ['004_unique_school_email.sql', '005_listing_filters.sql'],
+        seed: ['002_seed.sql'],
+        verify: ['003_verify.sql'],
+      }[action];
+      for (const file of files) {
+        await client.query(await readFile(new URL(file, import.meta.url), 'utf8'));
+        console.log(`${file}: OK (branch ${process.env.NEON_BRANCH ?? 'unspecified'})`);
+      }
     }
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {});

@@ -545,51 +545,16 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="no-print">
-    <div class="footer-container">
-      <div class="footer-col">
-        <h3>Om plattformen</h3>
-        <ul>
-          <li><a href="#">Om NTI-T Shopp</a></li>
-          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
-          <li><a href="#">Karriär</a></li>
-          <li><a href="#">Press</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Säkerhet</h3>
-        <ul>
-          <li><a href="#">Verifierade säljare</a></li>
-          <li><a href="#">Köpskydd & Frakt</a></li>
-          <li><a href="#">Kundservice</a></li>
-          <li><a href="#">Villkor</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Kategorier</h3>
-        <ul>
-          <li><a href="#">Laptops & Datorer</a></li>
-          <li><a href="#">Grafikkort & Komponenter</a></li>
-          <li><a href="#">Servrar & Nätverk</a></li>
-          <li><a href="#">Mobiler & Surfplattor</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
-      <div>
-        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
-        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
-        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
-      </div>
-    </div>
+  <footer class="shop-footer no-print">
+    <p class="footer-bottom">&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</p>
   </footer>
 
   <script>
     const CART_KEY = 'ntit_cart';
     const INVOICE_KEY = 'ntit_last_invoice';
-    // Rader i varukorgen pekar på listings via uuid; äldre mock-rader kastas.
-    const cart = NTIT.readCart();
+    const params = new URLSearchParams(location.search);
+    const directListingId = params.get('produkt');
+    let checkoutItems = directListingId === null ? NTIT.readCart() : [];
     // Beställaren snapshottas av servern från skolraden – formfälten är informativa.
     let school = (NTIT.getSession() || {}).school || {};
     NTIT.sessionReady.then(currentSchool => {
@@ -615,14 +580,11 @@
     }
 
     function renderCheckout() {
-      const validCart = cart.filter(item => item && item.qty > 0 && Number(item.price) >= 0);
-      if (!validCart.length) {
-        document.getElementById('checkoutContent').hidden = true;
-        document.getElementById('emptyCart').hidden = false;
-        return;
-      }
-      const total = validCart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
-      document.getElementById('checkoutItems').innerHTML = validCart.map(item => `
+      document.getElementById('checkoutContent').hidden = checkoutItems.length === 0;
+      document.getElementById('emptyCart').hidden = checkoutItems.length > 0;
+      if (!checkoutItems.length) return;
+      const total = checkoutItems.reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+      document.getElementById('checkoutItems').innerHTML = checkoutItems.map(item => `
         <div class="summary-item">
           <img src="${escapeHTML(item.image || 'images/product-placeholder.svg')}" alt="">
           <div>
@@ -637,10 +599,26 @@
       document.getElementById('taxNote').textContent = `Varav moms 25 %: ${money(total - total / 1.25)}. Priserna inkluderar moms.`;
     }
 
+    async function loadDirectListing() {
+      document.getElementById('checkoutContent').hidden = true;
+      try {
+        const unavailable = 'Annonsen är inte längre tillgänglig för köp.';
+        if (!NTIT.UUID.test(directListingId)) throw new Error(unavailable);
+        const { listing } = await NTIT.api(`/listings/${directListingId}`);
+        if (listing.status !== 'active' || listing.quantity < 1) throw new Error(unavailable);
+        checkoutItems = [{ id: listing.id, title: listing.title, image: listing.image_url, price: listing.price, qty: 1 }];
+      } catch (error) {
+        const empty = document.getElementById('emptyCart');
+        empty.querySelector('h2').textContent = 'Varan kunde inte öppnas i kassan';
+        empty.querySelector('p').textContent = error.message;
+      }
+      renderCheckout();
+    }
+
     async function createOrder(event) {
       event.preventDefault();
-      if (!cart.length) return;
       const submit = document.getElementById('checkoutSubmit');
+      if (!checkoutItems.length || submit.disabled) return;
       const errorBox = document.getElementById('orderError');
       errorBox.hidden = true;
       submit.disabled = true;
@@ -648,10 +626,13 @@
       try {
         const data = await NTIT.api('/orders/checkout', {
           method: 'POST',
-          body: { items: cart.map(item => ({ listing_id: item.id, quantity: item.qty })) }
+          body: { items: checkoutItems.map(item => ({ listing_id: item.id, quantity: item.qty })) }
         });
-        localStorage.setItem(INVOICE_KEY, JSON.stringify(data.order));
-        localStorage.removeItem(CART_KEY);
+        checkoutItems = [];
+        try { localStorage.setItem(INVOICE_KEY, JSON.stringify(data.order)); } catch { /* Fakturan visas även utan lokal lagring. */ }
+        if (directListingId === null) {
+          try { localStorage.removeItem(CART_KEY); } catch { /* Ordern är redan registrerad. */ }
+        }
         showInvoice(data.order);
         history.replaceState(null, '', `checkout.html?faktura=${encodeURIComponent(data.order.id)}`);
       } catch (error) {
@@ -741,11 +722,15 @@
     }
 
     loadCustomerInfo();
-    renderCheckout();
     document.getElementById('checkoutForm').addEventListener('submit', createOrder);
     const savedInvoice = readJSON(INVOICE_KEY, null);
-    const invoiceQuery = new URLSearchParams(location.search).get('faktura');
-    if (savedInvoice && savedInvoice.id && invoiceQuery === String(savedInvoice.id)) showInvoice(savedInvoice);
+    if (savedInvoice && savedInvoice.id && params.get('faktura') === String(savedInvoice.id)) {
+      showInvoice(savedInvoice);
+    } else if (directListingId !== null) {
+      loadDirectListing();
+    } else {
+      renderCheckout();
+    }
   </script>
 </body>
 </html>

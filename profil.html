@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Min Profil - NTI-T Shopp</title>
-  <script src="api.js"></script>
+  <script src="api.js?v=filters"></script>
   <script src="auth.js"></script>
   <!-- Font Awesome Ikoner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -235,6 +235,10 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+    }
+
+    .form-group[hidden] {
+      display: none;
     }
 
     .form-group.full-width {
@@ -1215,6 +1219,13 @@
                 </div>
               </div>
 
+              <div class="form-group" id="schoolCountyGroup" hidden>
+                <label for="inputSchoolCounty">Län</label>
+                <select id="inputSchoolCounty" class="form-input no-icon" style="background:var(--bg-main);" disabled>
+                  <option value="">Bestäm från ort</option>
+                </select>
+              </div>
+
               <div class="form-group">
                 <label for="inputInvoiceReference">Faktura-/referens-ID</label>
                 <div class="input-wrapper">
@@ -1352,6 +1363,11 @@
             </div>
           </div>
 
+          <div class="form-group" id="adConditionGroup" hidden>
+            <label for="adCondition">Skick (1–10)</label>
+            <input type="number" id="adCondition" class="form-input no-icon" min="1" max="10" step="1" placeholder="Ej angivet" disabled>
+          </div>
+
           <div class="form-group">
             <label for="adDescription">Beskrivning</label>
             <textarea id="adDescription" class="form-input no-icon" rows="3" placeholder="Beskriv hårdvarans skick, specifikationer..." maxlength="5000" style="resize:vertical;"></textarea>
@@ -1392,44 +1408,8 @@
   </div>
 
   <!-- FOOTER -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-col">
-        <h3>Om plattformen</h3>
-        <ul>
-          <li><a href="#">Om NTI-T Shopp</a></li>
-          <li><a href="#">Hållbar IT & Cirkulär ekonomi</a></li>
-          <li><a href="#">Karriär</a></li>
-          <li><a href="#">Press</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Säkerhet</h3>
-        <ul>
-          <li><a href="#">Verifierade säljare</a></li>
-          <li><a href="#">Köpskydd & Frakt</a></li>
-          <li><a href="#">Kundservice</a></li>
-          <li><a href="#">Villkor</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Kategorier</h3>
-        <ul>
-          <li><a href="#">Laptops & Datorer</a></li>
-          <li><a href="#">Grafikkort & Komponenter</a></li>
-          <li><a href="#">Servrar & Nätverk</a></li>
-          <li><a href="#">Mobiler & Surfplattor</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div>&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</div>
-      <div>
-        <i class="fa-brands fa-github fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
-        <i class="fa-brands fa-linkedin fa-lg" style="margin-right: 15px; cursor: pointer;"></i>
-        <i class="fa-brands fa-x-twitter fa-lg" style="cursor: pointer;"></i>
-      </div>
-    </div>
+  <footer class="shop-footer">
+    <p class="footer-bottom">&copy; 2026 NTI-T Shopp AB. Alla rättigheter förbehållna.</p>
   </footer>
 
   <script>
@@ -1456,8 +1436,11 @@
     const schoolFields = {
       name: 'inputSchoolName', contact_email: 'inputSchoolEmail',
       visiting_address: 'inputSchoolAddress', billing_address: 'inputInvoiceAddress',
-      city: 'inputSchoolCity', billing_reference: 'inputInvoiceReference',
+      city: 'inputSchoolCity', county_code: 'inputSchoolCounty', billing_reference: 'inputInvoiceReference',
     };
+    const schoolCounty = document.getElementById('inputSchoolCounty');
+    const adCondition = document.getElementById('adCondition');
+    for (const { code, name } of NTIT.counties) schoolCounty.add(new Option(name, code));
     let savedSchool = null;
     let schoolSaving = false;
 
@@ -1474,6 +1457,7 @@
       document.getElementById('saveSchoolChanges').disabled = schoolSaving || !dirty;
       document.getElementById('cancelSchoolChanges').disabled = schoolSaving || !dirty;
       for (const id of Object.values(schoolFields)) document.getElementById(id).disabled = schoolSaving || !savedSchool;
+      schoolCounty.disabled = schoolSaving || !savedSchool || !Object.hasOwn(savedSchool, 'county_code');
     }
 
     function showFeedback(id, message, error = false) {
@@ -1486,6 +1470,10 @@
     function loadSchoolInfo(school = NTIT.getSession()?.school) {
       if (!school) return;
       savedSchool = { ...school };
+      const supportsListingFilters = Object.hasOwn(school, 'county_code');
+      document.getElementById('schoolCountyGroup').hidden = !supportsListingFilters;
+      document.getElementById('adConditionGroup').hidden = !supportsListingFilters;
+      adCondition.disabled = !supportsListingFilters;
       document.getElementById('headerSchoolName').textContent = school.name || 'Min skola';
       document.getElementById('headerCity').textContent = school.city || '–';
       for (const [key, id] of Object.entries(schoolFields)) document.getElementById(id).value = school[key] || '';
@@ -1503,8 +1491,9 @@
     document.getElementById('schoolInfoForm').addEventListener('submit', async event => {
       event.preventDefault();
       if (schoolSaving || !savedSchool || !event.currentTarget.reportValidity()) return;
-      const body = schoolPayload();
-      if (Object.keys(schoolFields).every(key => body[key] === (savedSchool[key] || ''))) return;
+      const body = Object.fromEntries(Object.entries(schoolPayload())
+        .filter(([key, value]) => value !== (savedSchool[key] || '')));
+      if (!Object.keys(body).length) return;
       schoolSaving = true;
       updateSchoolActions();
       showFeedback('schoolFeedback', 'Sparar skoluppgifterna…');
@@ -1715,6 +1704,7 @@
       document.getElementById('adCategory').value = product.category;
       document.getElementById('adStock').value = product.quantity;
       document.getElementById('adDescription').value = product.description || '';
+      adCondition.value = product.condition_score ?? '';
       showAdModal();
     }
 
@@ -1732,6 +1722,7 @@
         document.getElementById('adPrice').value = ad.price != null ? ad.price : '';
         document.getElementById('adStock').value = ad.quantity != null ? ad.quantity : 0;
         document.getElementById('adDescription').value = ad.description || '';
+        adCondition.value = ad.condition_score ?? '';
         if (adImage.current) showImagePreview(adImage.current);
         showAdModal();
       } catch (error) {
@@ -1793,6 +1784,7 @@
 
       const mode = adFormMode;
       const body = mode === 'publish' ? { price } : { title, category, quantity, description, ...(mode === 'inventory' ? {} : { price }) };
+      if (!adCondition.disabled) body.condition_score = Number.isNaN(adCondition.valueAsNumber) ? null : adCondition.valueAsNumber;
       const submitBtn = document.getElementById('adSubmitBtn');
       adSaving = true;
       submitBtn.disabled = true;
