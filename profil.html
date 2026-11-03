@@ -374,13 +374,13 @@
     }
 
     /* --- MINA ANNONSER GRID --- */
-    .ads-grid {
+    .listings-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
       gap: 1.4rem;
     }
 
-    .ad-card {
+    .listing-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -391,13 +391,13 @@
       transition: all 0.2s ease;
     }
 
-    .ad-card:hover {
+    .listing-card:hover {
       border-color: var(--border-hover);
       transform: translateY(-3px);
       box-shadow: var(--shadow-elevated);
     }
 
-    .ad-status-badge {
+    .listing-status-badge {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -412,7 +412,7 @@
       z-index: 2;
     }
 
-    .ad-img-wrap {
+    .listing-img-wrap {
       width: 100%;
       height: 165px;
       overflow: hidden;
@@ -420,7 +420,7 @@
       position: relative;
     }
 
-    .ad-img {
+    .listing-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -428,11 +428,11 @@
       transition: opacity 0.2s ease;
     }
 
-    .ad-card:hover .ad-img {
+    .listing-card:hover .listing-img {
       opacity: 1;
     }
 
-    .ad-body {
+    .listing-body {
       padding: 1.15rem;
       display: flex;
       flex-direction: column;
@@ -440,27 +440,27 @@
       gap: 0.75rem;
     }
 
-    .ad-meta-row {
+    .listing-meta-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .ad-title {
+    .listing-title {
       font-weight: 600;
       font-size: 0.98rem;
       color: var(--text-main);
       line-height: 1.3;
     }
 
-    .ad-price {
+    .listing-price {
       font-size: 1.2rem;
       font-weight: 800;
       color: var(--text-main);
     }
 
-    .ad-actions {
+    .listing-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.6rem;
@@ -469,7 +469,7 @@
       border-top: 1px solid var(--border-color);
     }
 
-    .btn-ad-action {
+    .btn-listing-action {
       flex: 1;
       background: transparent;
       border: 1px solid var(--border-color);
@@ -486,13 +486,13 @@
       transition: all 0.2s ease;
     }
 
-    .btn-ad-action:hover {
+    .btn-listing-action:hover {
       border-color: var(--border-hover);
       color: var(--text-main);
       background: rgba(248, 246, 240, 0.05);
     }
 
-    .btn-ad-action.delete {
+    .btn-listing-action.delete {
       flex: 1.35;
       min-width: max-content;
       border-color: #744052;
@@ -500,7 +500,7 @@
       background: #301d28;
     }
 
-    .btn-ad-action.delete:hover {
+    .btn-listing-action.delete:hover {
       border-color: #ffadad;
       color: #ffd5d5;
       background: #452434;
@@ -508,7 +508,7 @@
 
     #myAdsFeedback { margin: 0 0 1rem; }
 
-    .remove-ad-dialog {
+    .remove-listing-dialog {
       margin: auto;
       width: min(28rem, calc(100% - 2rem));
       max-height: calc(100% - 2rem);
@@ -520,9 +520,9 @@
       box-shadow: var(--shadow-elevated);
     }
 
-    .remove-ad-dialog::backdrop { background: rgba(4, 7, 12, 0.72); }
+    .remove-listing-dialog::backdrop { background: rgba(4, 7, 12, 0.72); }
 
-    .remove-ad-dialog h2 {
+    .remove-listing-dialog h2 {
       display: flex;
       align-items: center;
       gap: 0.7rem;
@@ -530,7 +530,7 @@
       margin-bottom: 0.8rem;
     }
 
-    .remove-ad-dialog h2 i {
+    .remove-listing-dialog h2 i {
       padding: 0.6rem;
       border: 1px solid #744052;
       border-radius: 8px;
@@ -539,10 +539,10 @@
       font-size: 0.9rem;
     }
 
-    .remove-ad-dialog p { line-height: 1.5; overflow-wrap: anywhere; }
-    .remove-ad-note { margin-top: 0.25rem; color: var(--text-muted); }
+    .remove-listing-dialog p { line-height: 1.5; overflow-wrap: anywhere; }
+    .remove-listing-note { margin-top: 0.25rem; color: var(--text-muted); }
 
-    .remove-ad-actions {
+    .remove-listing-actions {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
@@ -552,8 +552,8 @@
       padding-top: 1rem;
     }
 
-    .remove-ad-actions .btn-primary { background: #fda4a4; color: #231821; }
-    .remove-ad-actions .btn-primary:hover { background: #fecaca; }
+    .remove-listing-actions .btn-primary { background: #fda4a4; color: #231821; }
+    .remove-listing-actions .btn-primary:hover { background: #fecaca; }
 
     /* --- INVENTARIE TABLE & CONTROLS --- */
     .inventory-controls {
@@ -1315,7 +1315,7 @@
         </div>
 
         <p class="save-alert" id="myAdsFeedback" role="status" hidden></p>
-        <div class="ads-grid" id="myAdsGrid">
+        <div class="listings-grid" id="myAdsGrid">
           <!-- Genereras dynamiskt via JS -->
         </div>
       </div>
@@ -1366,13 +1366,13 @@
 
   </main>
 
-  <dialog class="remove-ad-dialog" id="removeAdDialog" aria-labelledby="removeAdTitle" aria-describedby="removeAdDescription removeAdNote">
+  <dialog class="remove-listing-dialog" id="removeAdDialog" aria-labelledby="removeAdTitle" aria-describedby="removeAdDescription removeAdNote">
     <form id="removeAdForm">
       <h2 id="removeAdTitle"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annonsen?</h2>
       <p id="removeAdDescription"><strong id="removeAdName"></strong> tas bort från marknadsplatsen.</p>
-      <p class="remove-ad-note" id="removeAdNote">Produkten finns kvar i Mitt inventarie.</p>
+      <p class="remove-listing-note" id="removeAdNote">Produkten finns kvar i Mitt inventarie.</p>
       <p class="save-alert error" id="removeAdError" role="alert" hidden></p>
-      <div class="remove-ad-actions">
+      <div class="remove-listing-actions">
         <button type="button" class="btn-secondary" id="cancelRemoveAd" autofocus>Avbryt</button>
         <button type="submit" class="btn-primary" id="confirmRemoveAd">Ta bort annons</button>
       </div>
@@ -1609,20 +1609,20 @@
 
       myAds.forEach(ad => {
         const card = document.createElement('div');
-        card.className = 'ad-card';
+        card.className = 'listing-card';
         card.innerHTML = `
-          <div class="ad-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
-          <div class="ad-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="ad-img"></div>
-          <div class="ad-body">
-            <div class="ad-meta-row">
+          <div class="listing-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
+          <div class="listing-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="listing-img"></div>
+          <div class="listing-body">
+            <div class="listing-meta-row">
               <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-tag"></i> ${NTIT.escapeHTML(ad.category || 'Övrigt')}</span>
               <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.quantity} i lager</span>
             </div>
-            <div class="ad-title">${NTIT.escapeHTML(ad.title)}</div>
-            <div class="ad-price">${NTIT.money(ad.price)}</div>
-            <div class="ad-actions">
-              <button class="btn-ad-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
-              ${ad.status !== 'sold' ? '<button type="button" class="btn-ad-action delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annons</button>' : ''}
+            <div class="listing-title">${NTIT.escapeHTML(ad.title)}</div>
+            <div class="listing-price">${NTIT.money(ad.price)}</div>
+            <div class="listing-actions">
+              <button class="btn-listing-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
+              ${ad.status !== 'sold' ? '<button type="button" class="btn-listing-action delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annons</button>' : ''}
             </div>
           </div>
         `;
