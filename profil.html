@@ -374,13 +374,13 @@
     }
 
     /* --- MINA ANNONSER GRID --- */
-    .ads-grid {
+    .listings-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
       gap: 1.4rem;
     }
 
-    .ad-card {
+    .listing-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -391,13 +391,13 @@
       transition: all 0.2s ease;
     }
 
-    .ad-card:hover {
+    .listing-card:hover {
       border-color: var(--border-hover);
       transform: translateY(-3px);
       box-shadow: var(--shadow-elevated);
     }
 
-    .ad-status-badge {
+    .listing-status-badge {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -412,7 +412,7 @@
       z-index: 2;
     }
 
-    .ad-img-wrap {
+    .listing-img-wrap {
       width: 100%;
       height: 165px;
       overflow: hidden;
@@ -420,7 +420,7 @@
       position: relative;
     }
 
-    .ad-img {
+    .listing-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -428,11 +428,11 @@
       transition: opacity 0.2s ease;
     }
 
-    .ad-card:hover .ad-img {
+    .listing-card:hover .listing-img {
       opacity: 1;
     }
 
-    .ad-body {
+    .listing-body {
       padding: 1.15rem;
       display: flex;
       flex-direction: column;
@@ -440,27 +440,27 @@
       gap: 0.75rem;
     }
 
-    .ad-meta-row {
+    .listing-meta-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .ad-title {
+    .listing-title {
       font-weight: 600;
       font-size: 0.98rem;
       color: var(--text-main);
       line-height: 1.3;
     }
 
-    .ad-price {
+    .listing-price {
       font-size: 1.2rem;
       font-weight: 800;
       color: var(--text-main);
     }
 
-    .ad-actions {
+    .listing-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.6rem;
@@ -469,7 +469,7 @@
       border-top: 1px solid var(--border-color);
     }
 
-    .btn-ad-action {
+    .btn-listing-action {
       flex: 1;
       background: transparent;
       border: 1px solid var(--border-color);
@@ -486,17 +486,74 @@
       transition: all 0.2s ease;
     }
 
-    .btn-ad-action:hover {
+    .btn-listing-action:hover {
       border-color: var(--border-hover);
       color: var(--text-main);
       background: rgba(248, 246, 240, 0.05);
     }
 
-    .btn-ad-action.delete:hover {
-      border-color: var(--danger-color);
-      color: var(--danger-color);
-      background: rgba(239, 68, 68, 0.1);
+    .btn-listing-action.delete {
+      flex: 1.35;
+      min-width: max-content;
+      border-color: #744052;
+      color: #ffadad;
+      background: #301d28;
     }
+
+    .btn-listing-action.delete:hover {
+      border-color: #ffadad;
+      color: #ffd5d5;
+      background: #452434;
+    }
+
+    #myAdsFeedback { margin: 0 0 1rem; }
+
+    .remove-listing-dialog {
+      margin: auto;
+      width: min(28rem, calc(100% - 2rem));
+      max-height: calc(100% - 2rem);
+      padding: 1.4rem;
+      border: 1px solid var(--border-hover);
+      border-radius: 14px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .remove-listing-dialog::backdrop { background: rgba(4, 7, 12, 0.72); }
+
+    .remove-listing-dialog h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 1.25rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .remove-listing-dialog h2 i {
+      padding: 0.6rem;
+      border: 1px solid #744052;
+      border-radius: 8px;
+      background: #301d28;
+      color: #ffadad;
+      font-size: 0.9rem;
+    }
+
+    .remove-listing-dialog p { line-height: 1.5; overflow-wrap: anywhere; }
+    .remove-listing-note { margin-top: 0.25rem; color: var(--text-muted); }
+
+    .remove-listing-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+    }
+
+    .remove-listing-actions .btn-primary { background: #fda4a4; color: #231821; }
+    .remove-listing-actions .btn-primary:hover { background: #fecaca; }
 
     /* --- INVENTARIE TABLE & CONTROLS --- */
     .inventory-controls {
@@ -1251,13 +1308,14 @@
     <div class="section-wrapper">
       <div class="section-inner">
         <div class="section-header">
-          <h2 class="section-title">
+          <h2 class="section-title" id="myAdsTitle" tabindex="-1">
             <i class="fa-solid fa-tags"></i> Mina annonser
           </h2>
-          <span style="color: var(--text-muted); font-size: 0.9rem;" id="myAdsCount">0 publicerade annonser</span>
+          <span style="color: var(--text-muted); font-size: 0.9rem;" id="myAdsCount">0 annonser</span>
         </div>
 
-        <div class="ads-grid" id="myAdsGrid">
+        <p class="save-alert" id="myAdsFeedback" role="status" hidden></p>
+        <div class="listings-grid" id="myAdsGrid">
           <!-- Genereras dynamiskt via JS -->
         </div>
       </div>
@@ -1307,6 +1365,19 @@
     </div>
 
   </main>
+
+  <dialog class="remove-listing-dialog" id="removeAdDialog" aria-labelledby="removeAdTitle" aria-describedby="removeAdDescription removeAdNote">
+    <form id="removeAdForm">
+      <h2 id="removeAdTitle"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annonsen?</h2>
+      <p id="removeAdDescription"><strong id="removeAdName"></strong> tas bort från marknadsplatsen.</p>
+      <p class="remove-listing-note" id="removeAdNote">Produkten finns kvar i Mitt inventarie.</p>
+      <p class="save-alert error" id="removeAdError" role="alert" hidden></p>
+      <div class="remove-listing-actions">
+        <button type="button" class="btn-secondary" id="cancelRemoveAd" autofocus>Avbryt</button>
+        <button type="submit" class="btn-primary" id="confirmRemoveAd">Ta bort annons</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- MODAL: SKAPA / REDIGERA ANNONS -->
   <div class="modal-overlay" id="newAdModal" aria-hidden="true">
@@ -1511,9 +1582,14 @@
     });
 
     // --- MINA ANNONSER (listings) ---
+    const removeAdDialog = document.getElementById('removeAdDialog');
+    const removeAdForm = document.getElementById('removeAdForm');
+    const cancelRemoveAd = document.getElementById('cancelRemoveAd');
+    const confirmRemoveAd = document.getElementById('confirmRemoveAd');
+
     async function loadMyAds() {
       const data = await NTIT.api('/school/me/listings');
-      myAds = data.listings || [];
+      myAds = (data.listings || []).filter(ad => ad.status !== 'withdrawn');
       renderMyAds();
     }
 
@@ -1523,48 +1599,81 @@
       grid.innerHTML = '';
 
       const activeCount = myAds.filter(ad => ad.status === 'active').length;
-      countLabel.textContent = `${myAds.length} publicerade annonser (${activeCount} aktiva)`;
+      countLabel.textContent = `${myAds.length} ${myAds.length === 1 ? 'annons' : 'annonser'} (${activeCount} aktiva)`;
       updateStats();
 
       if (myAds.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga annonser just nu. Klicka på "Lägg upp ny annons" för att publicera din första.</p>';
+        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">Du har inga annonser just nu. Klicka på "Lägg upp ny annons" för att publicera en annons.</p>';
         return;
       }
 
       myAds.forEach(ad => {
         const card = document.createElement('div');
-        card.className = 'ad-card';
+        card.className = 'listing-card';
         card.innerHTML = `
-          <div class="ad-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
-          <div class="ad-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="ad-img"></div>
-          <div class="ad-body">
-            <div class="ad-meta-row">
+          <div class="listing-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
+          <div class="listing-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="listing-img"></div>
+          <div class="listing-body">
+            <div class="listing-meta-row">
               <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-tag"></i> ${NTIT.escapeHTML(ad.category || 'Övrigt')}</span>
               <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-boxes-stacked"></i> ${ad.quantity} i lager</span>
             </div>
-            <div class="ad-title">${NTIT.escapeHTML(ad.title)}</div>
-            <div class="ad-price">${NTIT.money(ad.price)}</div>
-            <div class="ad-actions">
-              <button class="btn-ad-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
-              <button class="btn-ad-action delete" onclick="deleteAd('${ad.id}')"><i class="fa-solid fa-trash"></i> Ta bort</button>
+            <div class="listing-title">${NTIT.escapeHTML(ad.title)}</div>
+            <div class="listing-price">${NTIT.money(ad.price)}</div>
+            <div class="listing-actions">
+              <button class="btn-listing-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
+              ${ad.status !== 'sold' ? '<button type="button" class="btn-listing-action delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annons</button>' : ''}
             </div>
           </div>
         `;
+        card.querySelector('.delete')?.addEventListener('click', () => {
+          removeAdForm.dataset.listingId = ad.id;
+          document.getElementById('removeAdName').textContent = ad.title;
+          showFeedback('removeAdError', '');
+          removeAdDialog.showModal();
+        });
         grid.appendChild(card);
       });
 
       updateStats();
     }
 
-    async function deleteAd(id) {
-      if (!confirm('Vill du ta ner den här annonsen? Produkten behålls i inventariet och orderhistoriken påverkas inte.')) return;
+    cancelRemoveAd.addEventListener('click', () => removeAdDialog.close());
+    removeAdDialog.addEventListener('cancel', event => {
+      if (confirmRemoveAd.disabled) event.preventDefault();
+    });
+
+    removeAdForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!removeAdDialog.open || confirmRemoveAd.disabled) return;
+      const id = removeAdForm.dataset.listingId;
+      confirmRemoveAd.disabled = true;
+      cancelRemoveAd.disabled = true;
+      confirmRemoveAd.textContent = 'Tar bort…';
+      showFeedback('removeAdError', '');
       try {
         await NTIT.api(`/listings/${id}`, { method: 'DELETE' });
-        await Promise.all([loadMyAds(), loadInventory()]);
       } catch (error) {
-        alert(`Annonsen kunde inte tas bort: ${error.message}`);
+        showFeedback('removeAdError', `Annonsen kunde inte tas bort. ${error.message}`, true);
+        return;
+      } finally {
+        confirmRemoveAd.disabled = false;
+        cancelRemoveAd.disabled = false;
+        confirmRemoveAd.textContent = 'Ta bort annons';
+        confirmRemoveAd.focus();
       }
-    }
+
+      removeAdDialog.close();
+      myAds = myAds.filter(ad => ad.id !== id);
+      const product = inventory.find(item => item.listing_id === id);
+      if (product) {
+        product.listing_status = 'withdrawn';
+        filterInventory();
+      }
+      renderMyAds();
+      showFeedback('myAdsFeedback', 'Annonsen har tagits bort.');
+      document.getElementById('myAdsTitle').focus({ preventScroll: true });
+    });
 
     // --- MITT INVENTARIE (produkter) ---
     async function loadInventory() {
