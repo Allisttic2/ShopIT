@@ -1055,6 +1055,22 @@
               </span>`;
     }
 
+    // Annonsens publiceringsdatum samt dagar kvar till 30-dagarstiden går ut
+    function formatPublishedAt(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Ej känd';
+      return new Intl.DateTimeFormat('sv-SE', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    }
+
+    function expiryLabel(value) {
+      const timestamp = new Date(value).getTime();
+      if (Number.isNaN(timestamp)) return 'Ej känd';
+      const days = Math.ceil((timestamp - Date.now()) / 86400000);
+      if (days <= 0) return 'inom dygnet';
+      if (days === 1) return 'om 1 dag';
+      return `om ${days} dagar`;
+    }
+
     function createListingCard(listing) {
       const card = document.createElement('div');
       card.className = 'product-card';
@@ -1137,6 +1153,14 @@
             <div class="spec-item">
               <span>Säljare:</span>
               <strong><i class="fa-solid fa-graduation-cap"></i> ${NTIT.escapeHTML(listing.school_name || 'Okänd skola')}</strong>
+            </div>
+            <div class="spec-item">
+              <span>Publicerad:</span>
+              <strong><i class="fa-solid fa-calendar-days"></i> ${NTIT.escapeHTML(formatPublishedAt(listing.created_at))}</strong>
+            </div>
+            <div class="spec-item">
+              <span>Går ut:</span>
+              <strong><i class="fa-solid fa-hourglass-half"></i> ${NTIT.escapeHTML(expiryLabel(listing.expires_at))}</strong>
             </div>
           </div>
 

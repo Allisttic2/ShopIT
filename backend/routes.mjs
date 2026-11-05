@@ -487,6 +487,42 @@ export function createApiRouter() {
     } catch (error) { next(error); }
   });
 
+  // "Aktivera annons" (restock): add stock, or just re-activate when the product
+  // already has stock (quantity 0). A sold-out, withdrawn or expired listing goes
+  // back on sale with a fresh 30-day window (expiry is derived from created_at,
+  // so re-publishing resets it).
+  router.post('/listings/:id/restock', async (req, res, next) => {
+    try {
+      if (!isUuid(req.params.id)) throw new HttpError(404, 'Annonsen hittades inte.');
+      const amount = nonNegativeInt(req.body?.quantity ?? 1);
+      if (amount === null) throw new HttpError(400, 'Ange ett antal (heltal, minst 0).');
+      await withTransaction(async (client) => {
+        const res = await client.query(
+          `SELECT l.id, l.status, p.id AS product_id, p.quantity,
+                  (l.status = 'active' AND l.created_at + interval '720 hours' <= now()) AS expired
+           FROM shopit.listings l
+           JOIN shopit.products p ON p.id = l.product_id
+           WHERE l.id = $1 AND p.school_id = $2
+           FOR UPDATE OF l, p`,
+          [req.params.id, req.school.id]
+        );
+        const row = res.rows[0];
+        if (!row) throw new HttpError(404, 'Annonsen hittades inte eller tillhör inte din skola.');
+        const stock = amount > 0
+          ? (await client.query('UPDATE shopit.products SET quantity = quantity + $1 WHERE id = $2 RETURNING quantity', [amount, row.product_id])).rows[0].quantity
+          : row.quantity;
+        // En utgången annons ligger kvar med status 'active' i tabellen;
+        // härleds ur 720-timarsfönstret precis som övriga läsvägar gör.
+        if (row.status === 'sold' || row.status === 'withdrawn' || row.expired) {
+          if (Number(stock) < 1) throw new HttpError(400, 'Produkten har inga enheter i lager. Lägg till minst en enhet för att aktivera annonsen.');
+          await client.query(`UPDATE shopit.listings SET status = 'active', created_at = now() WHERE id = $1`, [row.id]);
+        }
+      });
+      const result = await query(LISTING_BY_ID_SQL, [req.params.id]);
+      res.json({ listing: result[0] });
+    } catch (error) { next(error); }
+  });
+
   // --- Image upload (file picker or mobile camera) -------------------------
   const uploadDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
   const storage = multer.diskStorage({
