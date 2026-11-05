@@ -412,6 +412,19 @@
       z-index: 2;
     }
 
+    .listing-status-badge.sold,
+    .listing-status-badge.expired {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+    }
+
+    .listing-status-badge.withdrawn {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+
     .listing-img-wrap {
       width: 100%;
       height: 165px;
@@ -668,15 +681,33 @@
     }
 
     .badge-storage {
-      color: var(--warning-color);
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
     .badge-for-sale {
       color: var(--success-color);
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-ad-sold {
+      color: var(--warning-color);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-ad-expired {
+      color: var(--warning-color);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-ad-withdrawn {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .status-dot {
@@ -918,6 +949,15 @@
 
     .btn-primary:hover {
       background: var(--accent-hover);
+    }
+
+    .btn-delete {
+      background: #fda4a4;
+      color: #231821;
+    }
+
+    .btn-delete:hover {
+      background: #fecaca;
     }
 
     /* --- VARUKORG SIDEBAR --- */
@@ -1418,6 +1458,12 @@
             <input type="number" id="adStock" class="form-input no-icon" value="1" min="0" max="2147483647" step="1" required>
           </div>
 
+          <div class="form-group" id="activateAdGroup" hidden>
+            <label for="restockQuantity">Antal att lägga till i lager</label>
+            <input type="number" id="restockQuantity" class="form-input no-icon" value="1" min="1" max="2147483647" step="1" required>
+            <p class="info-note" id="activateAdNote">Annonsen är såld ut. Lägg till i lager för att sätta tillbaka den i försäljning.</p>
+          </div>
+
           <!-- GALLERILADDNING -->
           <div class="form-group" id="adImageGroup">
             <label for="adFileInput">Produktbild (ladda upp från enhet/galleri)</label>
@@ -1449,6 +1495,8 @@
 
         <div class="modal-footer">
           <button type="button" class="btn-secondary" id="cancelAdModal" onclick="closeNewAdModal()">Avbryt</button>
+          <button type="button" class="btn-primary btn-delete" id="deleteAdBtn" onclick="deleteAdFromModal()" hidden><i class="fa-solid fa-trash"></i> Ta bort annons</button>
+          <button type="button" class="btn-primary" id="activateAdBtn" onclick="handleActivateAd()" hidden><i class="fa-solid fa-rotate-left"></i> Aktivera annons</button>
           <button type="submit" class="btn-primary" id="adSubmitBtn">Publicera annons</button>
         </div>
       </form>
@@ -1492,7 +1540,7 @@
       active: 'Aktiv',
       sold: 'Såld',
       expired: 'Utgången',
-      withdrawn: 'Tagen ner',
+      withdrawn: 'Avaktiverad',
     };
 
     // ANNONS-MODAL: samma formulär för skapande och redigering
@@ -1500,6 +1548,9 @@
     let publishingProductId = null;
     let adFormMode = 'new';
     let adSaving = false;
+    let editingAdStatus = null;
+    // Statuser där "Aktivera annons" visas: såld ut, avaktiverad eller utgången
+    const isActivatableStatus = status => status === 'sold' || status === 'withdrawn' || status === 'expired';
     let modalTrigger = null;
     let adImage = { current: null, file: null, removed: false };
 
@@ -1589,7 +1640,7 @@
 
     async function loadMyAds() {
       const data = await NTIT.api('/school/me/listings');
-      myAds = (data.listings || []).filter(ad => ad.status !== 'withdrawn');
+      myAds = data.listings || [];
       renderMyAds();
     }
 
@@ -1611,7 +1662,7 @@
         const card = document.createElement('div');
         card.className = 'listing-card';
         card.innerHTML = `
-          <div class="listing-status-badge">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
+          <div class="listing-status-badge ${NTIT.escapeHTML(ad.status)}">${NTIT.escapeHTML(AD_STATUS_LABELS[ad.status] || ad.status)}</div>
           <div class="listing-img-wrap"><img src="${NTIT.escapeHTML(ad.image_url || 'images/product-placeholder.svg')}" alt="${NTIT.escapeHTML(ad.title)}" class="listing-img"></div>
           <div class="listing-body">
             <div class="listing-meta-row">
@@ -1622,16 +1673,9 @@
             <div class="listing-price">${NTIT.money(ad.price)}</div>
             <div class="listing-actions">
               <button class="btn-listing-action" onclick="openEditAd('${ad.id}')"><i class="fa-solid fa-pen"></i> Redigera</button>
-              ${ad.status !== 'sold' ? '<button type="button" class="btn-listing-action delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Ta bort annons</button>' : ''}
             </div>
           </div>
         `;
-        card.querySelector('.delete')?.addEventListener('click', () => {
-          removeAdForm.dataset.listingId = ad.id;
-          document.getElementById('removeAdName').textContent = ad.title;
-          showFeedback('removeAdError', '');
-          removeAdDialog.showModal();
-        });
         grid.appendChild(card);
       });
 
@@ -1682,10 +1726,17 @@
       filterInventory();
     }
 
+    const AD_BADGE_CLASSES = {
+      sold: 'badge-ad-sold',
+      expired: 'badge-ad-expired',
+      withdrawn: 'badge-ad-withdrawn',
+    };
+
     function inventoryStatusBadge(item) {
       if (item.listing_id) {
         const label = AD_STATUS_LABELS[item.listing_status] || item.listing_status || '?';
-        return `<span class="badge-status badge-for-sale"><span class="status-dot"></span>Annons (${NTIT.escapeHTML(label)})</span>`;
+        const cls = AD_BADGE_CLASSES[item.listing_status] || 'badge-for-sale';
+        return `<span class="badge-status ${cls}"><span class="status-dot"></span>Annons (${NTIT.escapeHTML(label)})</span>`;
       }
       return '<span class="badge-status badge-storage"><span class="status-dot"></span>I lager</span>';
     }
@@ -1774,9 +1825,16 @@
     function resetAdModal() {
       editingListingId = null;
       publishingProductId = null;
+      editingAdStatus = null;
       adImage = { current: null, file: null, removed: false };
       document.getElementById('newAdForm').reset();
       document.getElementById('adStock').value = '1';
+      document.getElementById('restockQuantity').value = '1';
+      document.getElementById('activateAdGroup').hidden = true;
+      document.getElementById('activateAdBtn').hidden = true;
+      document.getElementById('activateAdBtn').innerHTML = '<i class="fa-solid fa-rotate-left"></i> Aktivera annons';
+      document.getElementById('deleteAdBtn').hidden = true;
+      document.getElementById('adSubmitBtn').hidden = false;
       removeImage();
       hideAdFormError();
       setAdModalMode('new');
@@ -1832,6 +1890,13 @@
         document.getElementById('adStock').value = ad.quantity != null ? ad.quantity : 0;
         document.getElementById('adDescription').value = ad.description || '';
         adCondition.value = ad.condition_score ?? '';
+        editingAdStatus = ad.status;
+        document.getElementById('activateAdGroup').hidden = true;
+        const canActivate = isActivatableStatus(ad.status);
+        document.getElementById('activateAdBtn').hidden = !canActivate;
+        document.getElementById('activateAdBtn').innerHTML = '<i class="fa-solid fa-rotate-left"></i> Aktivera annons';
+        document.getElementById('deleteAdBtn').hidden = !['active', 'expired'].includes(ad.status);
+        document.getElementById('restockQuantity').value = '1';
         if (adImage.current) showImagePreview(adImage.current);
         showAdModal();
       } catch (error) {
@@ -1872,7 +1937,13 @@
 
     async function handleCreateAd(e) {
       e.preventDefault();
-      if (adSaving || !document.getElementById('newAdForm').reportValidity()) return;
+      if (adSaving) return;
+      // När reaktiveringen är igång bekräftar Enter aktiveringen istället för att spara formuläret
+      if (editingListingId && isActivatableStatus(editingAdStatus) && !document.getElementById('activateAdGroup').hidden) {
+        handleActivateAd();
+        return;
+      }
+      if (!document.getElementById('newAdForm').reportValidity()) return;
       hideAdFormError();
 
       const title = document.getElementById('adTitle').value.trim();
@@ -1931,6 +2002,118 @@
         document.getElementById('cancelAdModal').disabled = false;
         document.getElementById('closeAdModal').disabled = false;
       }
+    }
+
+    // Aktivera en såld ut/avaktiverad annons: sparar de övriga ändringarna i formuläret
+    // och lägger sedan till vald mängd i lager (0 om produkten redan har i lager),
+    // varpå annonsen går tillbaka i försäljning
+    async function handleActivateAd() {
+      if (adSaving || !editingListingId || !isActivatableStatus(editingAdStatus)) return;
+      const activateGroup = document.getElementById('activateAdGroup');
+      const activateBtn = document.getElementById('activateAdBtn');
+
+      // Steg 1: visa valet av mängd först, först vid klick på "Aktivera annons"
+      if (activateGroup.hidden) {
+        activateGroup.hidden = false;
+        activateBtn.innerHTML = '<i class="fa-solid fa-check"></i> Godkänn aktivering';
+        document.getElementById('adSubmitBtn').hidden = true;
+        const stock = Number(document.getElementById('adStock').value);
+        const restock = document.getElementById('restockQuantity');
+        if (Number.isSafeInteger(stock) && stock >= 1) {
+          // Produkten har redan i lager: aktivering utan nya enheter (0) är tillåten
+          restock.min = '0';
+          restock.value = '0';
+          document.getElementById('activateAdNote').textContent = `Produkten har ${stock} st i lager. Aktivera utan nya enheter, eller lägg till fler nedan (0 = inga).`;
+        } else {
+          restock.min = '1';
+          restock.value = '1';
+          document.getElementById('activateAdNote').textContent = editingAdStatus === 'sold'
+            ? 'Annonsen är såld ut. Lägg till i lager för att sätta tillbaka den i försäljning.'
+            : editingAdStatus === 'expired'
+              ? 'Annonsen har gått ut. Aktivera den för att sätta tillbaka den i försäljning.'
+              : 'Annonsen är avaktiverad. Aktivera den för att sätta tillbaka den i försäljning.';
+        }
+        restock.focus();
+        return;
+      }
+
+      // Steg 2: verifiera mängden och de övriga fälten
+      const amount = Number(document.getElementById('restockQuantity').value);
+      if (!Number.isSafeInteger(amount) || amount < 0 || amount > 2147483647) {
+        showAdFormError('Ange ett giltigt antal (heltal, minst 0).');
+        return;
+      }
+
+      const title = document.getElementById('adTitle').value.trim();
+      const category = document.getElementById('adCategory').value;
+      const quantity = Number(document.getElementById('adStock').value);
+      const priceText = document.getElementById('adPrice').value.trim();
+      const price = Number(priceText);
+      const description = document.getElementById('adDescription').value.trim();
+
+      if (!title) {
+        showAdFormError('Ange en titel.');
+        return;
+      }
+      if (!Number.isSafeInteger(quantity) || quantity < 0 || quantity > 2147483647) {
+        showAdFormError('Ange ett giltigt antal i lager (heltal, minst 0).');
+        return;
+      }
+      if (amount === 0 && quantity < 1) {
+        showAdFormError('Produkten har inga enheter i lager. Lägg till minst en enhet eller sätt "Antal i lager" till minst 1.');
+        return;
+      }
+      if (!priceText || !Number.isFinite(price) || price < 0 || price > 9999999999.99) {
+        showAdFormError('Ange ett giltigt pris (0 kr eller högre).');
+        return;
+      }
+      hideAdFormError();
+
+      const body = { title, category, quantity, description, price };
+      if (!adCondition.disabled) body.condition_score = Number.isNaN(adCondition.valueAsNumber) ? null : adCondition.valueAsNumber;
+
+      const submitBtn = document.getElementById('adSubmitBtn');
+      adSaving = true;
+      activateBtn.disabled = true;
+      submitBtn.disabled = true;
+      document.getElementById('cancelAdModal').disabled = true;
+      document.getElementById('closeAdModal').disabled = true;
+
+      try {
+        if (adImage.file) {
+          body.image_url = await NTIT.uploadImage(adImage.file);
+        } else if (adImage.removed) {
+          body.image_url = ''; // tar bort den nuvarande bilden
+        }
+        // Först sparas de övriga ändringarna, därefter läggs mängden till i lager
+        await NTIT.api(`/listings/${editingListingId}`, { method: 'PATCH', body });
+        await NTIT.api(`/listings/${editingListingId}/restock`, { method: 'POST', body: { quantity: amount } });
+        const refreshed = await Promise.allSettled([loadMyAds(), loadInventory()]);
+        adSaving = false;
+        closeNewAdModal();
+        resetAdModal();
+        showFeedback('myAdsFeedback', refreshed.some(result => result.status === 'rejected') ? 'Annonsen är tillbaka i försäljning. Ladda om sidan för att se de senaste uppgifterna.' : 'Annonsen är tillbaka i försäljning.');
+      } catch (error) {
+        showAdFormError(error.message);
+      } finally {
+        adSaving = false;
+        activateBtn.disabled = false;
+        submitBtn.disabled = false;
+        document.getElementById('cancelAdModal').disabled = false;
+        document.getElementById('closeAdModal').disabled = false;
+      }
+    }
+
+    // Ta bort den redigerade annonsen via befintlig bekräftelsedialog
+    function deleteAdFromModal() {
+      if (adSaving || !editingListingId) return;
+      const id = editingListingId;
+      const ad = myAds.find(item => item.id === id);
+      closeNewAdModal();
+      removeAdForm.dataset.listingId = id;
+      document.getElementById('removeAdName').textContent = ad ? ad.title : 'Annonsen';
+      showFeedback('removeAdError', '');
+      removeAdDialog.showModal();
     }
 
     // --- ANNONSBILD (fil vald i modalen, uppladdas först vid skicka) ---

@@ -54,6 +54,7 @@ Utloggning rensar cookien och lokalt sparad skolinfo, varukorg och senaste faktu
 | POST | `/api/school/me/listings` | ✓ (ägare) | Alternativt `{product_id, price}` för en befintlig inventarie. |
 | PATCH | `/api/listings/:id` | ✓ (ägare) | Redigera annons: `title`, `description`, `category`, `quantity`, `price`, `image_url` |
 | DELETE | `/api/listings/:id` | ✓ (ägare) | Ta ner annonsen (`withdrawn`; ordertidninget påverkas inte) |
+| POST | `/api/listings/:id/restock` | ✓ (ägare) | ”Aktivera annons”: lägg till i lager, `{quantity}` (heltal ≥ 0, standard 1; 0 kräver att produkten redan har i lager). Såld ut, avaktiverad eller utgången (`sold`/`withdrawn`/`expired`) går tillbaka i försäljning med ny 30-dagarstid. |
 | POST | `/api/uploads` | ✓ | `multipart/form-data` med fältet `image` (JPEG/PNG/WebP/GIF/SVG, max 5 MB) – fungerar både för filväljare och mobilkamera. Svar: `{url: "/uploads/..."}` |
 | POST | `/api/orders/direct` | ✓ | ”Köp direkt”: `{listing_id, quantity}` |
 | POST | `/api/orders/checkout` | ✓ | Varukorg: `{items: [{listing_id, quantity}, ...]}` – kan sträcka sig över flera säljande skolor |

@@ -1,0 +1,128 @@
+From: "NTI-T Shopp" <no-reply@ntitshopp.local>
+To: goteborg@example.test
+Subject: =?UTF-8?Q?Ordern_=C3=A4r_genomf=C3=B6rd_=E2=80=93_?=
+ =?UTF-8?Q?faktura_DEMO-2026-1C6914A8_=28NTI-T_Shop?= =?UTF-8?Q?p=29?=
+Message-ID: <dc39645f-e031-f6e9-698d-2bfc4cea9de0@ntitshopp.local>
+Date: Wed, 04 Nov 2026 12:32:22 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="--_NmP-42a6326e7bb72f3c-Part_1"
+
+----_NmP-42a6326e7bb72f3c-Part_1
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang=3D"sv">
+<head><meta charset=3D"utf-8"><title>Fak=
+tura DEMO-2026-1C6914A8</title></head>
+<body style=3D"font-family: Arial, =
+Helvetica, sans-serif; color: #1a1a1a; max-width: 640px; margin: 0 auto; =
+padding: 24px;">
+  <table style=3D"width:100%; border-collapse: collapse;">
+    <tr>
+      <td>
+        <h1 style=3D"margin:0 0 4px; =
+font-size:22px;">FAKTURA</h1>
+        <p style=3D"margin:0; color:#666; =
+font-size:12px;">Demoniv=C3=A4rde =E2=80=93 ej giltig faktura</p>
+      </td>
+      <td style=3D"text-align:right; font-size:13px;">
+        <p style=3D"margin:0;">Fakturanummer: <strong>DEMO-2026-1C6914A8</s=
+trong></p>
+        <p style=3D"margin:0;">Datum: 2026-11-04</p>
+        <p style=3D"margin:0;">Betalningsvillkor: 14 dagar</p>
+      </td>
+    </tr>
+  </table>
+  <hr style=3D"border:none; border-top:1px solid =
+#ddd;">
+  <p style=3D"font-size:13px;">
+    <strong>Till =E2=80=93 Demo NTI=
+ G=C3=B6teborg</strong><br>
+    Testgatan 2, G=C3=B6teborg<br>Fakturarefere=
+ns: DEMO-GBG
+  </p>
+ =20
+      <div class=3D"seller">
+        <h2>Fr=C3=A5n =E2=80=93 Demo NTI Stockholm</h2>
+        <p class=3D"addr">Exempelgatan 1, Stockholm<br>Fakturareferens: =
+DEMO-STH</p>
+        <table>
+          <thead><tr><th>Artikel</th><th =
+class=3D"num">Antal</th><th class=3D"num">Pris/exemplar</th><th =
+class=3D"num">Belopp</th></tr></thead>
+          <tbody>
+          <tr>
+            <td>Switch Exemple</td>
+            <td class=3D"num">11</td>
+            <td class=3D"num">1=C2=A0500,00 kr</td>
+            <td class=3D"num">16=C2=A0500,00 kr</td>
+          </tr></tbody>
+          <tfoot><tr><td colspan=3D"3" =
+class=3D"num">Summa</td><td class=3D"num">16=C2=A0500,00 =
+kr</td></tr></tfoot>
+        </table>
+      </div>
+  <hr =
+style=3D"border:none; border-top:2px solid #1a1a1a;">
+  <p style=3D"text-align:right; font-size:15px; margin-top:8px;">Totalt att=
+ betala: <strong>16=C2=A0500,00 kr</strong></p>
+  <p =
+style=3D"font-size:11px; color:#666; margin-top:24px;">
+    Detta =C3=A4r ett automatiskt skickat orderbekr=C3=A4ftelsemail =
+fr=C3=A5n NTI-T Shopp.
+    Fakturan =C3=A4r gjord i demoniv=C3=A4rde =
+utifr=C3=A4n en generell fakturamall och =C3=A4r inte juridiskt bindande.
+  </p>
+</body>
+</html>
+----_NmP-42a6326e7bb72f3c-Part_1
+Content-Type: application/pdf; name=DEMO-2026-1C6914A8.pdf
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=DEMO-2026-1C6914A8.pdf
+
+JVBERi0xLjMKJf////8KNyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDEgMCBSCi9NZWRp
+YUJveCBbMCAwIDU5NS4yOCA4NDEuODldCi9Db250ZW50cyA1IDAgUgovUmVzb3VyY2VzIDYgMCBS
+Ci9Vc2VyVW5pdCAxCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9Qcm9jU2V0IFsvUERGIC9UZXh0IC9J
+bWFnZUIgL0ltYWdlQyAvSW1hZ2VJXQovRm9udCA8PAovRjIgOCAwIFIKL0YxIDkgMCBSCj4+Ci9D
+b2xvclNwYWNlIDw8Cj4+Cj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggOTIxCi9GaWx0ZXIg
+L0ZsYXRlRGVjb2RlCj4+CnN0cmVhbQp4nM1XyYojRxC911fkD3RO7JEJQocZL+CDwW7djA+tWsDg
+NtgD9u+bqCqpJFW33MLTlhHaUlWheC+2F5ggQXrABKkI5lJT+9x8+Kr/85e2//Hbj6n93ECGKohu
+4qClECsnyBTPClgNvAgjO1n63P7W/N7gSzY/7uZzTFKSu2QFSbvn5sM3lMjTbmh+2ohtU4G0EZS9
+iqqS4DbBz2n3XfP1rvlh5RnKuQsaXqFaMXJRqAW4jt4ev02/6g2uKmTHg6cIs6e9ilTqVAiUpcig
+oHDVV1m8nLxOkI+U0kxxgnz8PP0mN7jKcXeZfMVUZ1dFVDoZCKgjMLUnAnOr1rpYNScw2yaGtDG0
+vYur0zaAbuxV8j89NpDLueueIJdT4gkjHPWUd3JJj5++byBb+quRkpAhM0h6blQ803Lwa/N4j2hb
+sSxgq3DbNtEZQ4bWTyy5WmedqRM/bZNA2hAcOe+YGJjYqGMUZuPKyCLI5d6JbaZZD1BxgSqGAdG6
+gKMjnFMQjNQxsBBMDyFTF0NrrbdqvbmzW6SXtbafaRsipR4ix06MYhixuNUN44I788GcdSl0muhQ
+maCcxtYi4gPB3ARAfDCPU5qAoqaN+d3xIGazVXxVtgnHoKizy8h9xKCPMFN7ieb+OLRixnWeKpke
+G1cUpFrvvKTXUoLiQnJ/GI6ZTC6as7kNp2QLmE6YvBha52BtnERKUR9XRtDujoU1+0mXpEOXdOrV
++mu1opFzg/HcGPZWbLDWurtDQs7FaNUN1cshx8ZoqLVnJYNRMv9XUFI5M6xAvb10lFXkfFJJSWyY
+q4X5GiObJP3Rr+DVSxkDuV4gjiM7k0A0YhveW4GqJTHLcszguRoVon1PE8tiBu4vau2fTTNC1pet
+C1o/TcobbQpoluKv+2zVmYZVZ3gDEVCye33FXxqzfXDw68r2vTM5wsUlu6wzmd2tuhhbIVgV69g6
+bwsfYS7ltb8L9XOrwSoZrhh8AlYGBmrj9dbEqJKvOWtXrL+HmhfUcQE5qvnDQaj5N8BhyVSTIGQs
+tNLgMUta51lv4zJl1kgJbP+6ovxyeLVc4J0PXtpevnAPY5HEalnrwpQuEq9MsntsNx46O0R9vC9y
+/V8w+F8stFg0GxuAJPJMelSA5aUVPEZuNCoCbxfdESuJx+6madOLk4np2R78NG27D6NkrybRSaPr
+j0TFNjPO+ek2Hyf9eBWOkx9iQY5p4Rbfz8j6G0jXssYKZW5kc3RyZWFtCmVuZG9iagoxMSAwIG9i
+agooUERGS2l0KQplbmRvYmoKMTIgMCBvYmoKKFBERktpdCkKZW5kb2JqCjEzIDAgb2JqCihEOjIw
+MjYxMTA0MTIzMjIyWikKZW5kb2JqCjE0IDAgb2JqCihGYWt0dXJhIERFTU8tMjAyNi0xQzY5MTRB
+OCkKZW5kb2JqCjE1IDAgb2JqCihOVEktVCBTaG9wcCkKZW5kb2JqCjE2IDAgb2JqCij+/wBPAHIA
+ZABlAHIAYgBlAGsAcgDkAGYAdABlAGwAcwBlACAALQAgAGQAZQBtAG8pCmVuZG9iagoxMCAwIG9i
+ago8PAovUHJvZHVjZXIgMTEgMCBSCi9DcmVhdG9yIDEyIDAgUgovQ3JlYXRpb25EYXRlIDEzIDAg
+UgovVGl0bGUgMTQgMCBSCi9BdXRob3IgMTUgMCBSCi9TdWJqZWN0IDE2IDAgUgo+PgplbmRvYmoK
+OSAwIG9iago8PAovVHlwZSAvRm9udAovQmFzZUZvbnQgL0hlbHZldGljYQovU3VidHlwZSAvVHlw
+ZTEKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjggMCBvYmoKPDwKL1R5cGUg
+L0ZvbnQKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZAovU3VidHlwZSAvVHlwZTEKL0VuY29kaW5n
+IC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjQgMCBvYmoKPDwKPj4KZW5kb2JqCjMgMCBvYmoK
+PDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDEgMCBSCi9OYW1lcyAyIDAgUgo+PgplbmRvYmoKMSAw
+IG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWzcgMCBSXQo+PgplbmRvYmoKMiAw
+IG9iago8PAovRGVzdHMgPDwKICAvTmFtZXMgWwpdCj4+Cj4+CmVuZG9iagp4cmVmCjAgMTcKMDAw
+MDAwMDAwMCA2NTUzNSBmIAowMDAwMDAxODc4IDAwMDAwIG4gCjAwMDAwMDE5MzUgMDAwMDAgbiAK
+MDAwMDAwMTgxNiAwMDAwMCBuIAowMDAwMDAxNzk1IDAwMDAwIG4gCjAwMDAwMDAyNTQgMDAwMDAg
+biAKMDAwMDAwMDEzNyAwMDAwMCBuIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDE2OTMgMDAw
+MDAgbiAKMDAwMDAwMTU5NiAwMDAwMCBuIAowMDAwMDAxNDc1IDAwMDAwIG4gCjAwMDAwMDEyNDcg
+MDAwMDAgbiAKMDAwMDAwMTI3MiAwMDAwMCBuIAowMDAwMDAxMjk3IDAwMDAwIG4gCjAwMDAwMDEz
+MzMgMDAwMDAgbiAKMDAwMDAwMTM3OCAwMDAwMCBuIAowMDAwMDAxNDA4IDAwMDAwIG4gCnRyYWls
+ZXIKPDwKL1NpemUgMTcKL1Jvb3QgMyAwIFIKL0luZm8gMTAgMCBSCi9JRCBbPGU2M2M3YTI4OWE0
+Yzk3NmY3ZDZlMjU5ODc2NGU5MTBlPiA8ZTYzYzdhMjg5YTRjOTc2ZjdkNmUyNTk4NzY0ZTkxMGU+
+XQo+PgpzdGFydHhyZWYKMTk4MgolJUVPRgo=
+----_NmP-42a6326e7bb72f3c-Part_1--
